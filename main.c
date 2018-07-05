@@ -35,7 +35,7 @@ int main() {
 /*
  * La struttura del pacchetto è del tipo:
  *
- * i numeri sono i valori decimali dell'equivalente ascii
+ * (i numeri sono i valori decimali dell'equivalente ascii)
  *
  * /---|----|-----|---|-----------|----|---\
  * | 1 | Id | Ora | 2 |   TEXT    |'\0'| 3 |
@@ -46,7 +46,7 @@ int main() {
  * -3: in ascii indica "End Of Text"
  *
  * (Opzionale)
- * -4: -2: in ascii indica "End of Trasmission"
+ * -4: in ascii indica "End of Trasmission"
  */
 
 
@@ -67,10 +67,10 @@ int main() {
  *  |--- File-User-Login-data
  *
  *
- * Name-File = Name-chat
+ * "attuale chat" = Name-chat
  * Storico-chat : Name-chat-firstMessageData
  *
- * /"NoDir-chat-Name"\
+ * /"Dir-chat-Name"\
  *  |--- File: attuale chat
  *  |---Dir-history/
  *  |   |--- File-hystory xxxx-mm-gg

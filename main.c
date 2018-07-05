@@ -17,6 +17,7 @@ int main() {
  * (Opzionale)
  * Tenere traccia anche di una password per poter accedere.
  *
+ *
  * /---|----|---|-----------|----|-----------|----|---\
  * | 1 | Id | 2 |   NAME    |'\0'| password  |'\0'| 3 |
  * \---|----|---|-----------|----|-----------|----|---/

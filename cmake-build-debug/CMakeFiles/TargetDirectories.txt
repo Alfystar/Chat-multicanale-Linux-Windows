@@ -1,0 +1,3 @@
+/home/alfylinux/CLionProjects/Chat-MultiLevel/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/home/alfylinux/CLionProjects/Chat-MultiLevel/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/alfylinux/CLionProjects/Chat-MultiLevel/cmake-build-debug/CMakeFiles/Chat_MultiLevel.dir

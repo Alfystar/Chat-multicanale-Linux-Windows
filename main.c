@@ -50,7 +50,7 @@ int main() {
  * -4: in ascii indica "End of Trasmission"
  */
 
-//TODO: File Sistem
+//TODO: File Sistem tree
 /***************************************************************/
 /*Funzioni per creare la struttura delle room nel file-sistem  */
 

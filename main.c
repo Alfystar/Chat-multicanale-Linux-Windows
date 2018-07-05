@@ -5,6 +5,7 @@ int main() {
     return 0;
 }
 
+//TODO: Id-name
 /***************************************************************/
 /*Funzioni per riconoscere/creare/rimuovere Id utenti messaggio*/
 
@@ -28,7 +29,7 @@ int main() {
  * -4: -2: in ascii indica "End of Trasmission"
  */
 
-
+//TODO: Messaggi
 /***************************************************************/
 /*Funzioni per riconoscere/creare/rimuovere pacchetti messaggio*/
 
@@ -49,7 +50,7 @@ int main() {
  * -4: in ascii indica "End of Trasmission"
  */
 
-
+//TODO: File Sistem
 /***************************************************************/
 /*Funzioni per creare la struttura delle room nel file-sistem  */
 
@@ -82,5 +83,13 @@ int main() {
  *  superata tale soglia deve essere copiato e spostato nello storico
  *  e iniziato un nuovo file, ciò a impedire una dimensione eccessiva di
  *  dati da caricare in ram
+ *
+ */
+
+/*TODO: creazione connessione tramite socket
+ * 
+ */
+
+/*TODO: creazione thread utente e funzioni di appoggio
  *
  */

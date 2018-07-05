@@ -17,9 +17,9 @@ int main() {
  * (Opzionale)
  * Tenere traccia anche di una password per poter accedere.
  *
- * /---|----|---|-----------|----|---\
- * | 1 | Id | 2 |   NAME    |'\0'| 3 |
- * \---|----|---|-----------|----|---/
+ * /---|----|---|-----------|----|-----------|----|---\
+ * | 1 | Id | 2 |   NAME    |'\0'| password  |'\0'| 3 |
+ * \---|----|---|-----------|----|-----------|----|---/
  *
  * -1: in ascii indica "Start Of Heading"
  * -2: in ascii indica "Start Of Text"

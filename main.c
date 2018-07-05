@@ -76,4 +76,11 @@ int main() {
  *  |   |--- File-hystory xxxx-mm-gg
  *  |   |--- File-hystory xxxx-mm-gg
  *  |   ...
+ *
+ *  I file in hystory sono read only,
+ *  Il file attuale ha una dimensone limite di 1 MB
+ *  superata tale soglia deve essere copiato e spostato nello storico
+ *  e iniziato un nuovo file, ciò a impedire una dimensione eccessiva di
+ *  dati da caricare in ram
+ *
  */

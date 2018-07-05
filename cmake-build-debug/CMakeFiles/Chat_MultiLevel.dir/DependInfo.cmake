@@ -4,7 +4,7 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_C
-  "/home/alfylinux/CLionProjects/Chat-MultiLevel/main.c" "/home/alfylinux/CLionProjects/Chat-MultiLevel/cmake-build-debug/CMakeFiles/Chat_MultiLevel.dir/main.c.o"
+  "/home/alfylinux/CLionProjects/Chat-MultiChannel/main.c" "/home/alfylinux/CLionProjects/Chat-MultiChannel/cmake-build-debug/CMakeFiles/Chat_MultiLevel.dir/main.c.o"
   )
 set(CMAKE_C_COMPILER_ID "GNU")
 

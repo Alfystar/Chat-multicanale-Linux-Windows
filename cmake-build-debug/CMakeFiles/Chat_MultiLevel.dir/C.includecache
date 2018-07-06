@@ -9,4 +9,20 @@
 /home/alfylinux/CLionProjects/Chat-MultiChannel/main.c
 stdio.h
 -
+stdlib.h
+-
+string.h
+-
+stdbool.h
+-
+sys/types.h
+-
+sys/stat.h
+-
+fcntl.h
+-
+unistd.h
+-
+errno.h
+-
 

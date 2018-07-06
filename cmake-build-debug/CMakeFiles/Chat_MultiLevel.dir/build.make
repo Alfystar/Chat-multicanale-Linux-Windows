@@ -81,17 +81,69 @@ CMakeFiles/Chat_MultiLevel.dir/main.c.o.provides: CMakeFiles/Chat_MultiLevel.dir
 CMakeFiles/Chat_MultiLevel.dir/main.c.o.provides.build: CMakeFiles/Chat_MultiLevel.dir/main.c.o
 
 
+CMakeFiles/Chat_MultiLevel.dir/fileSystemUtylity.c.o: CMakeFiles/Chat_MultiLevel.dir/flags.make
+CMakeFiles/Chat_MultiLevel.dir/fileSystemUtylity.c.o: ../fileSystemUtylity.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/alfylinux/CLionProjects/Chat-MultiChannel/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building C object CMakeFiles/Chat_MultiLevel.dir/fileSystemUtylity.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/Chat_MultiLevel.dir/fileSystemUtylity.c.o   -c /home/alfylinux/CLionProjects/Chat-MultiChannel/fileSystemUtylity.c
+
+CMakeFiles/Chat_MultiLevel.dir/fileSystemUtylity.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/Chat_MultiLevel.dir/fileSystemUtylity.c.i"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/alfylinux/CLionProjects/Chat-MultiChannel/fileSystemUtylity.c > CMakeFiles/Chat_MultiLevel.dir/fileSystemUtylity.c.i
+
+CMakeFiles/Chat_MultiLevel.dir/fileSystemUtylity.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/Chat_MultiLevel.dir/fileSystemUtylity.c.s"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/alfylinux/CLionProjects/Chat-MultiChannel/fileSystemUtylity.c -o CMakeFiles/Chat_MultiLevel.dir/fileSystemUtylity.c.s
+
+CMakeFiles/Chat_MultiLevel.dir/fileSystemUtylity.c.o.requires:
+
+.PHONY : CMakeFiles/Chat_MultiLevel.dir/fileSystemUtylity.c.o.requires
+
+CMakeFiles/Chat_MultiLevel.dir/fileSystemUtylity.c.o.provides: CMakeFiles/Chat_MultiLevel.dir/fileSystemUtylity.c.o.requires
+	$(MAKE) -f CMakeFiles/Chat_MultiLevel.dir/build.make CMakeFiles/Chat_MultiLevel.dir/fileSystemUtylity.c.o.provides.build
+.PHONY : CMakeFiles/Chat_MultiLevel.dir/fileSystemUtylity.c.o.provides
+
+CMakeFiles/Chat_MultiLevel.dir/fileSystemUtylity.c.o.provides.build: CMakeFiles/Chat_MultiLevel.dir/fileSystemUtylity.c.o
+
+
+CMakeFiles/Chat_MultiLevel.dir/helpFunx.c.o: CMakeFiles/Chat_MultiLevel.dir/flags.make
+CMakeFiles/Chat_MultiLevel.dir/helpFunx.c.o: ../helpFunx.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/alfylinux/CLionProjects/Chat-MultiChannel/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building C object CMakeFiles/Chat_MultiLevel.dir/helpFunx.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/Chat_MultiLevel.dir/helpFunx.c.o   -c /home/alfylinux/CLionProjects/Chat-MultiChannel/helpFunx.c
+
+CMakeFiles/Chat_MultiLevel.dir/helpFunx.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/Chat_MultiLevel.dir/helpFunx.c.i"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/alfylinux/CLionProjects/Chat-MultiChannel/helpFunx.c > CMakeFiles/Chat_MultiLevel.dir/helpFunx.c.i
+
+CMakeFiles/Chat_MultiLevel.dir/helpFunx.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/Chat_MultiLevel.dir/helpFunx.c.s"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/alfylinux/CLionProjects/Chat-MultiChannel/helpFunx.c -o CMakeFiles/Chat_MultiLevel.dir/helpFunx.c.s
+
+CMakeFiles/Chat_MultiLevel.dir/helpFunx.c.o.requires:
+
+.PHONY : CMakeFiles/Chat_MultiLevel.dir/helpFunx.c.o.requires
+
+CMakeFiles/Chat_MultiLevel.dir/helpFunx.c.o.provides: CMakeFiles/Chat_MultiLevel.dir/helpFunx.c.o.requires
+	$(MAKE) -f CMakeFiles/Chat_MultiLevel.dir/build.make CMakeFiles/Chat_MultiLevel.dir/helpFunx.c.o.provides.build
+.PHONY : CMakeFiles/Chat_MultiLevel.dir/helpFunx.c.o.provides
+
+CMakeFiles/Chat_MultiLevel.dir/helpFunx.c.o.provides.build: CMakeFiles/Chat_MultiLevel.dir/helpFunx.c.o
+
+
 # Object files for target Chat_MultiLevel
 Chat_MultiLevel_OBJECTS = \
-"CMakeFiles/Chat_MultiLevel.dir/main.c.o"
+"CMakeFiles/Chat_MultiLevel.dir/main.c.o" \
+"CMakeFiles/Chat_MultiLevel.dir/fileSystemUtylity.c.o" \
+"CMakeFiles/Chat_MultiLevel.dir/helpFunx.c.o"
 
 # External object files for target Chat_MultiLevel
 Chat_MultiLevel_EXTERNAL_OBJECTS =
 
 Chat_MultiLevel: CMakeFiles/Chat_MultiLevel.dir/main.c.o
+Chat_MultiLevel: CMakeFiles/Chat_MultiLevel.dir/fileSystemUtylity.c.o
+Chat_MultiLevel: CMakeFiles/Chat_MultiLevel.dir/helpFunx.c.o
 Chat_MultiLevel: CMakeFiles/Chat_MultiLevel.dir/build.make
 Chat_MultiLevel: CMakeFiles/Chat_MultiLevel.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/alfylinux/CLionProjects/Chat-MultiChannel/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking C executable Chat_MultiLevel"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/alfylinux/CLionProjects/Chat-MultiChannel/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Linking C executable Chat_MultiLevel"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/Chat_MultiLevel.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -100,6 +152,8 @@ CMakeFiles/Chat_MultiLevel.dir/build: Chat_MultiLevel
 .PHONY : CMakeFiles/Chat_MultiLevel.dir/build
 
 CMakeFiles/Chat_MultiLevel.dir/requires: CMakeFiles/Chat_MultiLevel.dir/main.c.o.requires
+CMakeFiles/Chat_MultiLevel.dir/requires: CMakeFiles/Chat_MultiLevel.dir/fileSystemUtylity.c.o.requires
+CMakeFiles/Chat_MultiLevel.dir/requires: CMakeFiles/Chat_MultiLevel.dir/helpFunx.c.o.requires
 
 .PHONY : CMakeFiles/Chat_MultiLevel.dir/requires
 

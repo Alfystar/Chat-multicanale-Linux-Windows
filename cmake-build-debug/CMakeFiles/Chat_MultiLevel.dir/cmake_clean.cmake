@@ -1,5 +1,7 @@
 file(REMOVE_RECURSE
   "CMakeFiles/Chat_MultiLevel.dir/main.c.o"
+  "CMakeFiles/Chat_MultiLevel.dir/fileSystemUtylity.c.o"
+  "CMakeFiles/Chat_MultiLevel.dir/helpFunx.c.o"
   "Chat_MultiLevel.pdb"
   "Chat_MultiLevel"
 )

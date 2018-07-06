@@ -3,4 +3,4 @@ project(Chat_MultiLevel C)
 
 set(CMAKE_C_STANDARD 11)
 
-add_executable(Chat_MultiLevel main.c)
+add_executable(Chat_MultiLevel main.c fileSystemUtylity.c fileSystemUtylity.h helpFunx.c helpFunx.h)

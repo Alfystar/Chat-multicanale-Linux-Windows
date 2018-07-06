@@ -6,12 +6,18 @@
 
 #IncludeRegexTransform: 
 
-/home/alfylinux/CLionProjects/Chat-MultiChannel/main.c
+/home/alfylinux/CLionProjects/Chat-MultiChannel/fileSystemUtylity.c
+fileSystemUtylity.h
+/home/alfylinux/CLionProjects/Chat-MultiChannel/fileSystemUtylity.h
+
+/home/alfylinux/CLionProjects/Chat-MultiChannel/fileSystemUtylity.h
 stdio.h
 -
 stdlib.h
 -
 string.h
+-
+unistd.h
 -
 stdbool.h
 -
@@ -21,8 +27,32 @@ sys/stat.h
 -
 fcntl.h
 -
-unistd.h
+dirent.h
 -
 errno.h
 -
+helpFunx.h
+/home/alfylinux/CLionProjects/Chat-MultiChannel/helpFunx.h
+
+/home/alfylinux/CLionProjects/Chat-MultiChannel/helpFunx.c
+helpFunx.h
+/home/alfylinux/CLionProjects/Chat-MultiChannel/helpFunx.h
+
+/home/alfylinux/CLionProjects/Chat-MultiChannel/helpFunx.h
+stdio.h
+-
+stdlib.h
+-
+string.h
+-
+
+/home/alfylinux/CLionProjects/Chat-MultiChannel/main.c
+stdio.h
+-
+stdlib.h
+-
+fileSystemUtylity.h
+/home/alfylinux/CLionProjects/Chat-MultiChannel/fileSystemUtylity.h
+helpFunx.h
+/home/alfylinux/CLionProjects/Chat-MultiChannel/helpFunx.h
 

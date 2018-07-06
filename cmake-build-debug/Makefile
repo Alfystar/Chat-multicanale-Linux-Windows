@@ -123,6 +123,60 @@ Chat_MultiLevel/fast:
 	$(MAKE) -f CMakeFiles/Chat_MultiLevel.dir/build.make CMakeFiles/Chat_MultiLevel.dir/build
 .PHONY : Chat_MultiLevel/fast
 
+fileSystemUtylity.o: fileSystemUtylity.c.o
+
+.PHONY : fileSystemUtylity.o
+
+# target to build an object file
+fileSystemUtylity.c.o:
+	$(MAKE) -f CMakeFiles/Chat_MultiLevel.dir/build.make CMakeFiles/Chat_MultiLevel.dir/fileSystemUtylity.c.o
+.PHONY : fileSystemUtylity.c.o
+
+fileSystemUtylity.i: fileSystemUtylity.c.i
+
+.PHONY : fileSystemUtylity.i
+
+# target to preprocess a source file
+fileSystemUtylity.c.i:
+	$(MAKE) -f CMakeFiles/Chat_MultiLevel.dir/build.make CMakeFiles/Chat_MultiLevel.dir/fileSystemUtylity.c.i
+.PHONY : fileSystemUtylity.c.i
+
+fileSystemUtylity.s: fileSystemUtylity.c.s
+
+.PHONY : fileSystemUtylity.s
+
+# target to generate assembly for a file
+fileSystemUtylity.c.s:
+	$(MAKE) -f CMakeFiles/Chat_MultiLevel.dir/build.make CMakeFiles/Chat_MultiLevel.dir/fileSystemUtylity.c.s
+.PHONY : fileSystemUtylity.c.s
+
+helpFunx.o: helpFunx.c.o
+
+.PHONY : helpFunx.o
+
+# target to build an object file
+helpFunx.c.o:
+	$(MAKE) -f CMakeFiles/Chat_MultiLevel.dir/build.make CMakeFiles/Chat_MultiLevel.dir/helpFunx.c.o
+.PHONY : helpFunx.c.o
+
+helpFunx.i: helpFunx.c.i
+
+.PHONY : helpFunx.i
+
+# target to preprocess a source file
+helpFunx.c.i:
+	$(MAKE) -f CMakeFiles/Chat_MultiLevel.dir/build.make CMakeFiles/Chat_MultiLevel.dir/helpFunx.c.i
+.PHONY : helpFunx.c.i
+
+helpFunx.s: helpFunx.c.s
+
+.PHONY : helpFunx.s
+
+# target to generate assembly for a file
+helpFunx.c.s:
+	$(MAKE) -f CMakeFiles/Chat_MultiLevel.dir/build.make CMakeFiles/Chat_MultiLevel.dir/helpFunx.c.s
+.PHONY : helpFunx.c.s
+
 main.o: main.c.o
 
 .PHONY : main.o
@@ -159,6 +213,12 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... edit_cache"
 	@echo "... Chat_MultiLevel"
+	@echo "... fileSystemUtylity.o"
+	@echo "... fileSystemUtylity.i"
+	@echo "... fileSystemUtylity.s"
+	@echo "... helpFunx.o"
+	@echo "... helpFunx.i"
+	@echo "... helpFunx.s"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"

@@ -78,6 +78,18 @@
 				</MakeCommands>
 			</Target>
 		</Build>
+		<Unit filename="/home/alfylinux/CLionProjects/Chat-MultiChannel/fileSystemUtylity.c">
+			<Option target="Chat_MultiLevel"/>
+		</Unit>
+		<Unit filename="/home/alfylinux/CLionProjects/Chat-MultiChannel/fileSystemUtylity.h">
+			<Option target="Chat_MultiLevel"/>
+		</Unit>
+		<Unit filename="/home/alfylinux/CLionProjects/Chat-MultiChannel/helpFunx.c">
+			<Option target="Chat_MultiLevel"/>
+		</Unit>
+		<Unit filename="/home/alfylinux/CLionProjects/Chat-MultiChannel/helpFunx.h">
+			<Option target="Chat_MultiLevel"/>
+		</Unit>
 		<Unit filename="/home/alfylinux/CLionProjects/Chat-MultiChannel/main.c">
 			<Option target="Chat_MultiLevel"/>
 		</Unit>

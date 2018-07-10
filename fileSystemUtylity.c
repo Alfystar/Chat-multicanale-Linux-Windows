@@ -21,7 +21,11 @@
  *  |---Dir-chat-Name 3
  *  |   |--- ...
  *  |
- *  |--- File-User-Login-data
+ *  |
+ *  |---Dir-USER
+ *  |   |--- File-User-Login-data 1
+ *  |   |--- File-User-Login-data 2
+ *  |   |--- ...
  *
  *
  * "attuale chat" = Name-chat
@@ -29,7 +33,6 @@
  *
  * /"Dir-chat-Name"\
  *  |--- File: attuale chat
- *  |--- File: Join pending connect
  *  |---Dir-history/
  *  |   |--- File-hystory xxxx-mm-gg
  *  |   |--- File-hystory xxxx-mm-gg
@@ -40,6 +43,14 @@
  *  superata tale soglia deve essere copiato e spostato nello storico
  *  e iniziato un nuovo file, ciò a impedire una dimensione eccessiva di
  *  dati da caricare in ram
+ *
+ * /"File-User-Login-data"\
+ *  Il nome utente è nel nome del file.
+ *  il file inizia con la pw
+ *  c'è un elenco delle white list, ovvero tutte le chat a cui sono collegato
+ *  es:
+ *  chat1:chat2:pippo:baudo:ecc:....
+ *  con strtok possiamo trovare le singole chat
  *
  */
 

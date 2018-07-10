@@ -16,7 +16,7 @@ void printErrno(char *, int);
 
 void printAllEnv();
 
-void printDublePointerList(char **);
+void printDublePointeChar(char **);
 
 void freeDublePointerArr(void **, int);
 

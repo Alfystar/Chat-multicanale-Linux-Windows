@@ -29,6 +29,7 @@
  *
  * /"Dir-chat-Name"\
  *  |--- File: attuale chat
+ *  |--- File: Join pending connect
  *  |---Dir-history/
  *  |   |--- File-hystory xxxx-mm-gg
  *  |   |--- File-hystory xxxx-mm-gg
@@ -75,7 +76,9 @@ void StartServerStorage(char *storage)  //apre o crea un nuovo storage per il da
 				exit(EXIT_FAILURE);
 		}
 	}
+
 	//todo: deve verificare che la cartella è una cartella valida se già esiste (magari con un file) o creare il file di validità se nuovo
+
 	char curDir[100];
 	errorRet = setenv("PWD", getcwd(curDir, 100), true);    //aggiorno l'env per il nuovo pwd
 	if (errorRet != 0) printErrno("setEnv('PWD')", errorRet);
@@ -88,6 +91,8 @@ void StartServerStorage(char *storage)  //apre o crea un nuovo storage per il da
 char **chatRoomExist() {
 	char **chatRoom;
 	struct dirent **namelist;
+	struct dirent a;
+	a.
 	int n;
 	n = scandir(".", &namelist, filterDir, alphasort);
 	if (n == -1) {

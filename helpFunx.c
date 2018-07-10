@@ -28,7 +28,7 @@ void freeDublePointerArr(void **argv, int size)    //l'array deve terminare NULL
 	free(argv); //l'inizio della lista manca da essere eliminato
 }
 
-void printDublePointerList(char **list)     //l'array deve terminare NULL
+void printDublePointeChar(char **list)     //l'array deve terminare NULL
 {
 	for (; *list != NULL; list++) {
 		printf("%s\n", *list);

@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "fileSystemUtylity.h"
 #include "helpFunx.h"
+
+#include "fileSystemUtylity.h"
 
 
 
@@ -16,12 +17,10 @@ int main(int argc, char *argv[]) {
     StartServerStorage(argv[1]);
 
 	char **chats = chatRoomExist();
-	printDublePointerList(chats);
+	printDublePointeChar(chats);
 	freeDublePointerArr(chats, sizeof(char **));
 
-
-	newChat("test1");
-    return 0;
+	return 0;
 }
 
 
@@ -78,6 +77,6 @@ int main(int argc, char *argv[]) {
  * 
  */
 
-/*TODO: creazione thread utente e funzioni di appoggio
+/*TODO: creazione thread utente e sue funzioni di appoggio
  *
  */

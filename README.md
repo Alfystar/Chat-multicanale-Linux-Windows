@@ -15,3 +15,4 @@ l'applicazione client che per l'applicazione server._
 
 Per progetti misti Unix/Windows e' a scelta quale delle due applicazioni
 sviluppare per uno dei due sistemi.
+

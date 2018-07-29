@@ -5,7 +5,7 @@
 
 #include "fileSystemUtylity.h"
 
-
+#include "defineSets.h"
 
 int errorRet;
 
@@ -14,11 +14,18 @@ int main(int argc, char *argv[]) {
 		printf("!#!#!#\tPrego inserire i dati mancanti:\n!#!#!#\t<Path-Server-Data>\n");
 		exit(EXIT_FAILURE);
 	}
-	StartServerStorage(argv[1]);
+	/** fase di avvio del server **/
+	if (StartServerStorage(argv[1]) == -1) //errore di qualche tipo nell'avvio del server
+	{
+		printf("\n!! Il server non è stato in grado di essere inizializato\nEXIT_FAILURE\n");
+		exit(EXIT_FAILURE);
+	}
 
+	/** Visualizzazione chat già presenti**/
 	char **chats = chatRoomExist();
+	printf("Current chatRoom created:\n");
 	printDublePointeChar(chats);
-	freeDublePointerArr(chats, sizeof(char **));
+	freeDublePointerArr(chats, sizeof(chats));
 
 	return 0;
 }

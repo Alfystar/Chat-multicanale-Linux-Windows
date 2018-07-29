@@ -17,25 +17,36 @@
 #include <fcntl.h>
 #include <dirent.h>
 #include <errno.h>
+#include <time.h>
 
 #include "helpFunx.h"
+#include "defineSets.h"
 
 extern char **environ;
 
 //all'avvio del server esso inizializza il sistema, le directory ecc..
-void StartServerStorage(char *);
+int StartServerStorage(char *);
 
+/******************* Funzioni di per operare sulle chat *******************/
+int newChat(char *);
+
+/******************* Funzioni di supporto al file conf *******************/
+int creatServerStatConf();
+
+/******************* Funzioni di scan della directory *******************/
 /*Metodi per operare sul database lato fileSystem*/
 char **chatRoomExist();
 
-int newChat(char *);
+char **freeDir();
 
-
-char *fileType(unsigned char, char *, int);
-
+/******************* Funzioni per filtrare gli elementi *******************/
 /*scandir permette di filtrare i file, mettendo nella lista solo quelli che ritornano !=0
  * Di seguito tutte le funzioni create per i vari filtri
  */
-int filterDir(const struct dirent *);
+int filterDirChat(const struct dirent *);
+
+int filterDirAndFile(const struct dirent *);
+
+char *fileType(unsigned char, char *, int);
 
 #endif //CHAT_MULTILEVEL_FILESYSTEMUTYLITY_H

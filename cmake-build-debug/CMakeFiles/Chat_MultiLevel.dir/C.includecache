@@ -6,6 +6,8 @@
 
 #IncludeRegexTransform: 
 
+/home/alfylinux/CLionProjects/Chat-MultiChannel/defineSets.h
+
 /home/alfylinux/CLionProjects/Chat-MultiChannel/fileSystemUtylity.c
 fileSystemUtylity.h
 /home/alfylinux/CLionProjects/Chat-MultiChannel/fileSystemUtylity.h
@@ -31,8 +33,12 @@ dirent.h
 -
 errno.h
 -
+time.h
+-
 helpFunx.h
 /home/alfylinux/CLionProjects/Chat-MultiChannel/helpFunx.h
+defineSets.h
+/home/alfylinux/CLionProjects/Chat-MultiChannel/defineSets.h
 
 /home/alfylinux/CLionProjects/Chat-MultiChannel/helpFunx.c
 helpFunx.h
@@ -45,14 +51,18 @@ stdlib.h
 -
 string.h
 -
+defineSets.h
+/home/alfylinux/CLionProjects/Chat-MultiChannel/defineSets.h
 
 /home/alfylinux/CLionProjects/Chat-MultiChannel/main.c
 stdio.h
 -
 stdlib.h
 -
-fileSystemUtylity.h
-/home/alfylinux/CLionProjects/Chat-MultiChannel/fileSystemUtylity.h
 helpFunx.h
 /home/alfylinux/CLionProjects/Chat-MultiChannel/helpFunx.h
+fileSystemUtylity.h
+/home/alfylinux/CLionProjects/Chat-MultiChannel/fileSystemUtylity.h
+defineSets.h
+/home/alfylinux/CLionProjects/Chat-MultiChannel/defineSets.h
 

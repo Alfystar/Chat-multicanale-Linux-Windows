@@ -55,13 +55,16 @@
  */
 
 
-void StartServerStorage(char *storage)  //apre o crea un nuovo storage per il database
+int StartServerStorage(char *storage)  //apre o crea un nuovo storage per il database
 {
 	/* modifica il path reference dell'env per "spostare" il programma nella nuova locazione
 	 * la variabile PWD contiene il path assoluto, della working directory, ed è aggiornata da una sheel
 	 * MA I PROGRAMMI SCRITTI IN C usano un altra variabile per dire il proprio percorso di esecuzione.
 	 * Di conseguenza bisogna prima modificare il path del processo e sucessivamente aggiornare l'env     *
 	 */
+
+	printf("[1]---> Fase 1, aprire lo storage\n");
+
 	int errorRet;
 	errorRet = chdir(storage);                        //modifico l'attuale directory di lavoro del processo
 	if (errorRet != 0)    //un qualche errore nel ragiungimento della cartella
@@ -72,54 +75,75 @@ void StartServerStorage(char *storage)  //apre o crea un nuovo storage per il da
 				errorRet = mkdir(storage, 0777);
 				if (errorRet == -1) {
 					printErrno("mkdir fails", errno);
-					exit(EXIT_FAILURE);
+					return -1;
 				} else {
 					printf("New directory create\n");
 					errorRet = chdir(storage);
 					if (errorRet == -1) {
 						printErrno("nonostante la creazione chdir()", errno);
-						exit(EXIT_FAILURE);
+						return -1;
 					}
 				}
 				break;
 			default:
 				printErrno("chdir", errno);
-				exit(EXIT_FAILURE);
+				return -1;
 		}
 	}
-
-	//todo: deve verificare che la cartella è una cartella valida se già esiste (magari con un file) o creare il file di validità se nuovo
-
-	char curDir[100];
-	errorRet = setenv("PWD", getcwd(curDir, 100), true);    //aggiorno l'env per il nuovo pwd
+	char curDirPath[100];
+	errorRet = setenv("PWD", getcwd(curDirPath, 100), true);    //aggiorno l'env per il nuovo pwd
 	if (errorRet != 0) printErrno("setEnv('PWD')", errorRet);
-	printf("Current Directory set:\n-->\tgetcwd()=%s\n-->\tPWD=%s\n\n", curDir, getenv("PWD"));
+	printf("Current Directory set:\n-->\tgetcwd()=%s\n-->\tPWD=%s\n\n", curDirPath, getenv("PWD"));
+	printf("[1]---> success\n\n");
+
+
+	/**** Si verifica che la cartella a cui si è arrivata sia già un server, e se non allora si inizializza ****/
+
+	printf("[2]---> Fase 2 Stabilire se la cartella è Valida/Validabile/INVALIDA\n\n");
+
+	printf("## ");
+
+	int confId = open("serverStat.conf", O_RDWR, 0666);
+	if (confId == -1)  //sono presenti errori
+	{
+		printErrno("errore in open('serverStat.conf')", errno);
+		if (errno == 2)//file non presente
+		{
+			char **dirElement = freeDir();
+
+			if (dirElement[0] ==
+			    NULL) //non sono presenti cartelle di alcun tipo,la directory è quindi valida, creo il file config
+			{
+				printf("La cartella non è valida, non sono presenti file o cartelle estrane\nProcedo alla creazione di serverStat.conf\n");
+				confId = creatServerStatConf();
+				mkdir("Users", 0777);
+
+			} else {    //è presente altro e la cartella non è valida per inizializzare il server
+				printf("La cartella non è valida e neanche validabile.\nNon si può procedere all'avvio del server\n");
+				return -1;
+			}
+			freeDublePointerArr(dirElement, sizeof(dirElement));
+		}
+	} else {
+
+		printf("La cartella era già uno storage per il server\n");
+	}
+
+	char bufread[4096];
+	lseek(confId, 0, SEEK_SET);
+	int br = read(confId, bufread, 4096);
+
+	printf("\n######### Contenuto di serverStat.conf: #########\n%s#################################################\n",
+	       bufread);
+	printf("Current setting:\n");
+	printf("-->\tFirmware Version: %s\n", firmwareVersion);
+	close(confId);
+	printf("[2]---> success\n\n");
+
+	return 0;   //avvio con successo
 }
 
-/* return **array end with NULL
- * The returned list Must be free in all entry
- */
-char **chatRoomExist() {
-	char **chatRoom;
-	struct dirent **namelist;
-	struct dirent a;
-	a.
-	int n;
-	n = scandir(".", &namelist, filterDir, alphasort);
-	if (n == -1) {
-		perror("scandir");
-		exit(EXIT_FAILURE);
-	}
-	chatRoom = malloc(sizeof(char *) * (n + 1));
-	for (int i = 0; i < n; i++) {
-		chatRoom[i] = malloc(strlen(namelist[i]->d_name) + 1);
-		strcpy(chatRoom[i], namelist[i]->d_name);
-		free(namelist[i]);
-	}
-	chatRoom[n] = NULL;
-	free(namelist);
-	return chatRoom;
-}
+/******************* Funzioni di per operare sulle chat *******************/
 
 int newChat(char *name) {
 
@@ -145,8 +169,109 @@ int newChat(char *name) {
 	return 0;
 }
 
-int filterDir(const struct dirent *entry) {
-	if ((entry->d_type == DT_DIR) && strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) {
+/******************* Funzioni di supporto al file conf *******************/
+int creatServerStatConf() {
+	int validServerId = open("serverStat.conf", O_CREAT | O_RDWR | O_TRUNC, 0666);
+
+	/*** Procedura per aggiungere ora di creazione del server ***/
+	char testo[4096] = "Server creato in data: ";
+
+	time_t current_time;
+	char *c_time_string;
+
+	/* Obtain current time. */
+	current_time = time(NULL);
+
+	if (current_time == ((time_t) -1)) {
+		fprintf(stderr, "Failure to obtain the current time.\n");
+		exit(EXIT_FAILURE);
+	}
+
+	/* Convert to local time format. */
+	c_time_string = ctime(&current_time);
+
+	if (c_time_string == NULL) {
+		fprintf(stderr, "Failure to convert the current time.\n");
+		exit(EXIT_FAILURE);
+	}
+
+	/* Print to stdout. ctime() has already added a terminating newline character. */
+	//printf("Current time is %s", c_time_string);
+	strcat(testo, c_time_string);
+	strcat(testo, "Firmware Version: ");
+	strcat(testo, firmwareVersion);
+	strcat(testo, "\n");
+
+	size_t lenWrite = strlen(testo);
+	size_t byteWrite = 0;
+	do {
+		byteWrite += write(validServerId, testo + byteWrite, lenWrite - byteWrite);
+	} while (byteWrite != lenWrite);
+
+	return validServerId;
+}
+
+
+/******************* Funzioni di scan della directory *******************/
+
+/* return **array end with NULL
+ * The returned list Must be free in all entry
+ */
+char **chatRoomExist() {
+	char **chatRoom;
+	struct dirent **namelist;
+
+	int n;
+	n = scandir(".", &namelist, filterDirChat, alphasort);
+	if (n == -1) {
+		perror("scandir");
+		exit(EXIT_FAILURE);
+	}
+	chatRoom = malloc(sizeof(char *) * (n + 1));
+	for (int i = 0; i < n; i++) {
+		chatRoom[i] = malloc(strlen(namelist[i]->d_name) + 1);
+		strcpy(chatRoom[i], namelist[i]->d_name);
+		free(namelist[i]);
+	}
+	chatRoom[n] = NULL;
+	free(namelist);
+	return chatRoom;
+}
+
+char **freeDir() {
+	char **dirs;
+	struct dirent **namelist;
+
+	int n;
+	n = scandir(".", &namelist, filterDirAndFile, alphasort);
+	if (n == -1) {
+		perror("scandir");
+		exit(EXIT_FAILURE);
+	}
+	dirs = malloc(sizeof(char *) * (n + 1));
+	for (int i = 0; i < n; i++) {
+		dirs[i] = malloc(strlen(namelist[i]->d_name) + 1);
+		strcpy(dirs[i], namelist[i]->d_name);
+		free(namelist[i]);
+	}
+	dirs[n] = NULL;
+	free(namelist);
+	return dirs;
+}
+
+
+/******************* Funzioni per filtrare gli elementi *******************/
+int filterDirChat(const struct dirent *entry) {
+	if ((entry->d_type == DT_DIR) && (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0)) {
+		return 1;
+	}
+	return 0;
+}
+
+int filterDirAndFile(const struct dirent *entry) {
+	/** visualizza se è directory o file, seclidendo . e ..**/
+	if (((entry->d_type == DT_DIR) || (entry->d_type == DT_REG)) &&
+	    (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0)) {
 		return 1;
 	}
 	return 0;

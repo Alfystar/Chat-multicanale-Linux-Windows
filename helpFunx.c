@@ -33,4 +33,5 @@ void printDublePointeChar(char **list)     //l'array deve terminare NULL
 	for (; *list != NULL; list++) {
 		printf("%s\n", *list);
 	}
+	printf("\t# End list #\n");
 }

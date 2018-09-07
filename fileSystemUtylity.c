@@ -116,7 +116,7 @@ int StartServerStorage(char *storage)  //apre o crea un nuovo storage per il dat
 			{
 				printf("La cartella non è valida, non sono presenti file o cartelle estrane\nProcedo alla creazione di serverStat.conf\n");
 				confId = creatServerStatConf();
-				mkdir("Users", 0777);
+				mkdir(userDirName, 0777);
 
 			} else {    //è presente altro e la cartella non è valida per inizializzare il server
 				printf("La cartella non è valida e neanche validabile.\nNon si può procedere all'avvio del server\n");
@@ -262,14 +262,15 @@ char **freeDir() {
 
 /******************* Funzioni per filtrare gli elementi *******************/
 int filterDirChat(const struct dirent *entry) {
-	if ((entry->d_type == DT_DIR) && (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0)) {
+	if ((entry->d_type == DT_DIR) && (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0 &&
+	                                  strcmp(entry->d_name, userDirName) != 0)) {
 		return 1;
 	}
 	return 0;
 }
 
 int filterDirAndFile(const struct dirent *entry) {
-	/** visualizza se è directory o file, seclidendo . e ..**/
+	/** visualizza se è una directory o file, ignorando . e ..**/
 	if (((entry->d_type == DT_DIR) || (entry->d_type == DT_REG)) &&
 	    (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0)) {
 		return 1;

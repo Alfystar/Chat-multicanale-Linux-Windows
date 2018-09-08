@@ -59,6 +59,12 @@ stdio.h
 -
 stdlib.h
 -
+unistd.h
+-
+pthread.h
+-
+ncurses.h
+-
 helpFunx.h
 /home/alfylinux/CLionProjects/Chat-MultiChannel/helpFunx.h
 fileSystemUtylity.h

@@ -1,1 +1,1 @@
-/usr/bin/cc -g   CMakeFiles/Chat_MultiLevel.dir/main.c.o CMakeFiles/Chat_MultiLevel.dir/fileSystemUtylity.c.o CMakeFiles/Chat_MultiLevel.dir/helpFunx.c.o  -o Chat_MultiLevel 
+/usr/bin/cc -g   CMakeFiles/Chat_MultiLevel.dir/main.c.o CMakeFiles/Chat_MultiLevel.dir/fileSystemUtylity.c.o CMakeFiles/Chat_MultiLevel.dir/helpFunx.c.o  -o Chat_MultiLevel -lpthread -lcurses /usr/lib/x86_64-linux-gnu/libform.so 

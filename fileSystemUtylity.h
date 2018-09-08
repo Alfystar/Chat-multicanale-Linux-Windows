@@ -37,6 +37,8 @@ int creatServerStatConf();
 /*Metodi per operare sul database lato fileSystem*/
 char **chatRoomExist();
 
+char **UserDefine();
+
 char **freeDir();
 
 /******************* Funzioni per filtrare gli elementi *******************/
@@ -44,6 +46,8 @@ char **freeDir();
  * Di seguito tutte le funzioni create per i vari filtri
  */
 int filterDirChat(const struct dirent *);
+
+int filterDir(const struct dirent *);
 
 int filterDirAndFile(const struct dirent *);
 

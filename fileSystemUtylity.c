@@ -238,6 +238,28 @@ char **chatRoomExist() {
 	return chatRoom;
 }
 
+char **UserDefine() {
+	char **chatRoom;
+	struct dirent **namelist;
+
+	int n;
+	char home[512] = "./";
+	n = scandir(strcat(home, userDirName), &namelist, filterDir, alphasort);
+	if (n == -1) {
+		perror("scandir");
+		exit(EXIT_FAILURE);
+	}
+	chatRoom = malloc(sizeof(char *) * (n + 1));
+	for (int i = 0; i < n; i++) {
+		chatRoom[i] = malloc(strlen(namelist[i]->d_name) + 1);
+		strcpy(chatRoom[i], namelist[i]->d_name);
+		free(namelist[i]);
+	}
+	chatRoom[n] = NULL;
+	free(namelist);
+	return chatRoom;
+}
+
 char **freeDir() {
 	char **dirs;
 	struct dirent **namelist;
@@ -262,8 +284,17 @@ char **freeDir() {
 
 /******************* Funzioni per filtrare gli elementi *******************/
 int filterDirChat(const struct dirent *entry) {
+	/** Visualizza qualsiasi directory escludendo la user**/
 	if ((entry->d_type == DT_DIR) && (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0 &&
 	                                  strcmp(entry->d_name, userDirName) != 0)) {
+		return 1;
+	}
+	return 0;
+}
+
+int filterDir(const struct dirent *entry) {
+	/** Visualizza qualsiasi directory**/
+	if ((entry->d_type == DT_DIR) && (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0)) {
 		return 1;
 	}
 	return 0;

@@ -6,7 +6,7 @@
 /******************************************************************/
 /*                 Funzioni di appoggio e debug                   */
 void printErrno(char *note, int error) {
-	printf("%s\terr:%d (%s)\n", note, error, strerror(error));
+	dprintf(2, "%s\terr:%d (%s)\n", note, error, strerror(error));
 }
 
 void printAllEnv() {

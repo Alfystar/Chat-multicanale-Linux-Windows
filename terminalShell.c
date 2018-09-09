@@ -51,7 +51,7 @@ void terminalShell(int fdStdOutPipe[], int fdStdErrPipe[]) {
 		else {
 			mvwprintw(cmdW, 2, 0, buf);
 			wclrtobot(cmdW);
-			write(fdStdOutPipe[1], buf, 4096);
+			dprintf(fdStdOutPipe[1], "%s\n", buf);
 		}
 		wrefresh(cmdW);
 		sem_post(&screewWrite);
@@ -116,19 +116,19 @@ void shellThStdErr(thShellArg *info) {
 
 
 void windowSetUp() {
-	mainWindows = initscr();
+	mainWindows = initscr();    //è lo sfondo, scrivere su di lui i commenti perpetui
 	titleW = newwin(10, 60, 1, 1);
 	cmdW = newwin(20, 60, 12, 1);
-	showPannel = newwin(41, 60, 1, 63);
-	monitor = newwin(10, 60, 32, 1);
+	showPannel = newwin(43, 60, 1, 63);
+	monitor = newwin(10, 60, 34, 1);
 	curs_set(0); //disattivo il cursore così il movimento causato dai thread non si nota
 	refresh();
 
 	start_color();
 	init_pair(Titoli, COLOR_GREEN, COLOR_BLUE);
-	init_pair(Comandi, COLOR_WHITE, COLOR_BLACK);
+	init_pair(Comandi, COLOR_BLACK, COLOR_WHITE);
 	init_pair(ViewPan, COLOR_RED, COLOR_WHITE);
-	init_pair(StdoutPrint, COLOR_GREEN, COLOR_BLACK);
+	init_pair(StdoutPrint, COLOR_GREEN, COLOR_BLUE);
 	init_pair(ErrorPrint, COLOR_RED, COLOR_BLACK);
 
 
@@ -144,7 +144,9 @@ void windowSetUp() {
 
 	/** Finestra dei comandi setUp **/
 	wbkgd(cmdW, COLOR_PAIR(Comandi));
-	box(cmdW, ' ', '#');    //sovrascrive il testo
+	//box(cmdW, ' ', '#');    //sovrascrive il testo
+	mvprintw(cmdW->_begy - 1, cmdW->_begx, "---------------------Finestra di comando--------------------");
+
 	wrefresh(cmdW);
 
 	/** Finestra di Visualizzazione setUp **/
@@ -153,11 +155,14 @@ void windowSetUp() {
 
 	/** STDOUT and STDERR windows setUp**/
 	wbkgd(monitor, COLOR_PAIR(StdoutPrint));
-	box(monitor, ' ', 0);
-	mvwprintw(monitor, 0, 20, "StdOut & StdErr Print");
+	//box(monitor, ' ', 0);
+	attron(COLOR_PAIR(StdoutPrint));
+	mvprintw(monitor->_begy - 1, monitor->_begx, "--------------------StdOut & StdErr Print-------------------");
 	mvwprintw(monitor, 1, 0, "");
+	scrollok(monitor, TRUE);
 	wrefresh(monitor);
 
+	refresh();
 }
 
 void titlePrintW(WINDOW *w, int y_start, int x_start) {
@@ -187,6 +192,7 @@ void chatShowW(WINDOW *w, int y_start, int x_start) {
 		i++;
 	}
 	freeDublePointerArr(chatStartPoint, sizeof(chatStartPoint));
+	wclrtobot(w);
 	wrefresh(w);
 }
 
@@ -200,5 +206,6 @@ void userShowW(WINDOW *w, int y_start, int x_start) {
 		i++;
 	}
 	freeDublePointerArr(userStartPoint, sizeof(userStartPoint));
+	wclrtobot(w);
 	wrefresh(w);
 }

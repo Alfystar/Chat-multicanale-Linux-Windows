@@ -44,6 +44,14 @@ void userTh(thUserlArg *);
 void titlePrintW(WINDOW *, int, int);
 
 
+/*
+ * LA libreria ncurse usa lo stdout per printare gli schermi, di conseguenza redirizzando il flusso si perde
+ * la possibilità di visualizzare a schermo le finestre.
+ * Per lo stdErr non è così, di conseguenza vengono create 2 pipe, in cui quella dello stdErr viene redirezionata
+ * a un thread per farla visualizzare quando serve, mentre se si vuole printare a schermo delle informazioni normali
+ * si deve usare la pipe Stdout la quale ha dietro un thread che si occupa di visualizzare la cosa
+ */
+
 int fdStdoutPipe[2];  // dal manuale: fdStdoutPipe[0] refers to the read end of the pipe. fdStdoutPipe[1] refers to the write end of the pipe.
 int fdStdErrPipe[2];  // dal manuale: fdStdoutPipe[0] refers to the read end of the pipe. fdStdoutPipe[1] refers to the write end of the pipe.
 
@@ -58,16 +66,21 @@ int main(int argc, char *argv[]) {
 	}
 
 	/** Creo la pipe che avrà funzione di stdout e stderr al th**/
-	errorRet = pipe2(fdStdoutPipe, 0); //crea questa pipe e comunica per pacchetti, ogni READ leggerà un solo pacchetto
+	errorRet = pipe2(fdStdoutPipe,
+	                 O_DIRECT); //crea questa pipe e comunica per pacchetti, ogni READ leggerà un solo pacchetto
 	if (errorRet != 0) {
 		printErrno("La creazione della pipe per lo stdout ha dato l'errore", errorRet);
 		exit(-1);
 	}
-	errorRet = pipe2(fdStdErrPipe, 0); //crea questa pipe e comunica per pacchetti, ogni READ leggerà un solo pacchetto
+	errorRet = pipe2(fdStdErrPipe,
+	                 O_DIRECT); //crea questa pipe e comunica per pacchetti, ogni READ leggerà un solo pacchetto
 	if (errorRet != 0) {
 		printErrno("La creazione della pipe per lo stderr ha dato l'errore", errorRet);
 		exit(-1);
 	}
+
+
+
 
 	/** fase di avvio del server **/
 	if (StartServerStorage(argv[1]) == -1) //errore di qualche tipo nell'avvio del server
@@ -98,8 +111,10 @@ int main(int argc, char *argv[]) {
 
 	/** Il Main Thread  diventa il terminale con cui interagire da qui in poi è il terminale **/
 	printf("\n\n__________________________________________________________________\n[x][x][x][x][x][x]\tAvvio Del terminale\t[x][x][x][x][x][x]\n");
+	/** Ridirezione dello stdErr, così chè gli errori vengano tutti scritti in rosso nel riquadro corrispondente **/
+	dup2(fdStdErrPipe[1], STDERR_FILENO);
+	close(fdStdErrPipe[1]);
 	usleep(500000);
-
 
 	terminalShell(fdStdoutPipe, fdStdErrPipe);
 
@@ -114,12 +129,8 @@ void menuHelp() {
 
 void acceptTh(thAcceptlArg *info) {
 	while (1) {
-
-		dprintf(info->fdStdout, " ac n°%d", info->id);
-		sleep(1);
-		dprintf(info->fdStderr, " acer n°%d", info->id);
-		sleep(1);
-
+		perror("th accept create \n");
+		pause();
 	}
 }
 

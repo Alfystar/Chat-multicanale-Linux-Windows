@@ -68,20 +68,19 @@ void shellThStdout(thShellArg *info) {
 	wprintw(monitor, "Monitor attivo\n");
 	wrefresh(monitor);
 	sem_post(&screewWrite);
-	char stdoutBuf[PIPE_BUF];
-	memset(stdoutBuf, 0, PIPE_BUF);
-	char *test = "test di scrittura costante\n";
+	char fdBuf[PIPE_BUF];
+	memset(fdBuf, 0, PIPE_BUF);
 	int byteRead;
 	while (1) {
-		byteRead = read(info->fd_Read, stdoutBuf, PIPE_BUF);
+		byteRead = read(info->fd_Read, fdBuf, PIPE_BUF);
 		sem_wait(&screewWrite);
 		if (byteRead == -1) {
 			wattron(monitor, COLOR_PAIR(ErrorPrint));
 			mvwprintw(monitor, 2, 1, "byteRead error %s\n", strerror(byteRead));
 		} else {
-			stdoutBuf[byteRead] = '\0';
+			fdBuf[byteRead] = '\0';
 			wattron(monitor, COLOR_PAIR(StdoutPrint));
-			wprintw(monitor, "%s\n", stdoutBuf);
+			wprintw(monitor, "%s", fdBuf);
 		}
 		wclrtobot(monitor);
 		wrefresh(monitor);
@@ -95,20 +94,19 @@ void shellThStdErr(thShellArg *info) {
 	wprintw(monitor, "Monitor d'errore attivo\n");
 	wrefresh(monitor);
 	sem_post(&screewWrite);
-	char stdoutBuf[PIPE_BUF];
-	memset(stdoutBuf, 0, PIPE_BUF);
-	char *test = "test di scrittura costante\n";
+	char fdBuf[PIPE_BUF];
+	memset(fdBuf, 0, PIPE_BUF);
 	int byteRead;
 	while (1) {
-		byteRead = read(info->fd_Read, stdoutBuf, PIPE_BUF);
+		byteRead = read(info->fd_Read, fdBuf, PIPE_BUF);
 		sem_wait(&screewWrite);
 		if (byteRead == -1) {
 			wattron(monitor, COLOR_PAIR(ErrorPrint));
 			mvwprintw(monitor, 2, 1, "byteRead error %s\n", strerror(byteRead));
 		} else {
-			stdoutBuf[byteRead] = '\0';
+			fdBuf[byteRead] = '\0';
 			wcolor_set(monitor, COLOR_PAIR(ErrorPrint), NULL);
-			wprintw(monitor, "%s\n", stdoutBuf);
+			wprintw(monitor, "%s", fdBuf);
 		}
 		wclrtobot(monitor);
 		wrefresh(monitor);

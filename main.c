@@ -115,9 +115,9 @@ void menuHelp() {
 void acceptTh(thAcceptlArg *info) {
 	while (1) {
 
-		dprintf(info->fdStdout, "ac n°%d", info->id);
+		dprintf(info->fdStdout, " ac n°%d", info->id);
 		sleep(1);
-		dprintf(info->fdStderr, "ac n°%d", info->id);
+		dprintf(info->fdStderr, " acer n°%d", info->id);
 		sleep(1);
 
 	}

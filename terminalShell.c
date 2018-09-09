@@ -105,7 +105,7 @@ void shellThStdErr(thShellArg *info) {
 			mvwprintw(monitor, 2, 1, "byteRead error %s\n", strerror(byteRead));
 		} else {
 			fdBuf[byteRead] = '\0';
-			wcolor_set(monitor, COLOR_PAIR(ErrorPrint), NULL);
+			wattron(monitor, COLOR_PAIR(ErrorPrint));
 			wprintw(monitor, "%s", fdBuf);
 		}
 		wclrtobot(monitor);

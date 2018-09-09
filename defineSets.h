@@ -4,7 +4,7 @@
 #ifndef CHAT_MULTILEVEL_DEFINESETS_H
 #define CHAT_MULTILEVEL_DEFINESETS_H
 
-#define firmwareVersion "0.01"
+#define firmwareVersion "0.02"
 #define userDirName "Users"
 
 #define fflush(stdin) while(getchar()!='\n');

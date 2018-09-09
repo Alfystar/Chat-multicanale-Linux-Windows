@@ -14,4 +14,11 @@ CMakeFiles/Chat_MultiLevel.dir/main.c.o: ../defineSets.h
 CMakeFiles/Chat_MultiLevel.dir/main.c.o: ../fileSystemUtylity.h
 CMakeFiles/Chat_MultiLevel.dir/main.c.o: ../helpFunx.h
 CMakeFiles/Chat_MultiLevel.dir/main.c.o: ../main.c
+CMakeFiles/Chat_MultiLevel.dir/main.c.o: ../terminalShell.h
+
+CMakeFiles/Chat_MultiLevel.dir/terminalShell.c.o: ../defineSets.h
+CMakeFiles/Chat_MultiLevel.dir/terminalShell.c.o: ../fileSystemUtylity.h
+CMakeFiles/Chat_MultiLevel.dir/terminalShell.c.o: ../helpFunx.h
+CMakeFiles/Chat_MultiLevel.dir/terminalShell.c.o: ../terminalShell.c
+CMakeFiles/Chat_MultiLevel.dir/terminalShell.c.o: ../terminalShell.h
 

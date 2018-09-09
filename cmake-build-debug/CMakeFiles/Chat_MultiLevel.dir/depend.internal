@@ -15,3 +15,10 @@ CMakeFiles/Chat_MultiLevel.dir/main.c.o
  /home/alfylinux/CLionProjects/Chat-MultiChannel/fileSystemUtylity.h
  /home/alfylinux/CLionProjects/Chat-MultiChannel/helpFunx.h
  /home/alfylinux/CLionProjects/Chat-MultiChannel/main.c
+ /home/alfylinux/CLionProjects/Chat-MultiChannel/terminalShell.h
+CMakeFiles/Chat_MultiLevel.dir/terminalShell.c.o
+ /home/alfylinux/CLionProjects/Chat-MultiChannel/defineSets.h
+ /home/alfylinux/CLionProjects/Chat-MultiChannel/fileSystemUtylity.h
+ /home/alfylinux/CLionProjects/Chat-MultiChannel/helpFunx.h
+ /home/alfylinux/CLionProjects/Chat-MultiChannel/terminalShell.c
+ /home/alfylinux/CLionProjects/Chat-MultiChannel/terminalShell.h

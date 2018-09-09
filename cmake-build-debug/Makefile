@@ -204,6 +204,33 @@ main.c.s:
 	$(MAKE) -f CMakeFiles/Chat_MultiLevel.dir/build.make CMakeFiles/Chat_MultiLevel.dir/main.c.s
 .PHONY : main.c.s
 
+terminalShell.o: terminalShell.c.o
+
+.PHONY : terminalShell.o
+
+# target to build an object file
+terminalShell.c.o:
+	$(MAKE) -f CMakeFiles/Chat_MultiLevel.dir/build.make CMakeFiles/Chat_MultiLevel.dir/terminalShell.c.o
+.PHONY : terminalShell.c.o
+
+terminalShell.i: terminalShell.c.i
+
+.PHONY : terminalShell.i
+
+# target to preprocess a source file
+terminalShell.c.i:
+	$(MAKE) -f CMakeFiles/Chat_MultiLevel.dir/build.make CMakeFiles/Chat_MultiLevel.dir/terminalShell.c.i
+.PHONY : terminalShell.c.i
+
+terminalShell.s: terminalShell.c.s
+
+.PHONY : terminalShell.s
+
+# target to generate assembly for a file
+terminalShell.c.s:
+	$(MAKE) -f CMakeFiles/Chat_MultiLevel.dir/build.make CMakeFiles/Chat_MultiLevel.dir/terminalShell.c.s
+.PHONY : terminalShell.c.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -222,6 +249,9 @@ help:
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"
+	@echo "... terminalShell.o"
+	@echo "... terminalShell.i"
+	@echo "... terminalShell.s"
 .PHONY : help
 
 

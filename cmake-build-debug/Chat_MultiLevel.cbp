@@ -93,6 +93,12 @@
 		<Unit filename="/home/alfylinux/CLionProjects/Chat-MultiChannel/main.c">
 			<Option target="Chat_MultiLevel"/>
 		</Unit>
+		<Unit filename="/home/alfylinux/CLionProjects/Chat-MultiChannel/terminalShell.c">
+			<Option target="Chat_MultiLevel"/>
+		</Unit>
+		<Unit filename="/home/alfylinux/CLionProjects/Chat-MultiChannel/terminalShell.h">
+			<Option target="Chat_MultiLevel"/>
+		</Unit>
 		<Unit filename="/home/alfylinux/CLionProjects/Chat-MultiChannel/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\"/>
 		</Unit>

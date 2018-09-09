@@ -1,3 +1,6 @@
+#define _GNU_SOURCE             /* See feature_test_macros(7) */
+
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -5,8 +8,14 @@
 #include <unistd.h>
 #include <pthread.h>
 
-/** screen write lib **/
-#include <ncurses.h>
+/** screen Shell lib **/
+#include "terminalShell.h"
+
+
+/** Librerie per creare la Pipe**/
+#include <fcntl.h>
+#include <limits.h>
+
 
 #include "helpFunx.h"
 
@@ -18,6 +27,8 @@
 /** STRUTTURE & Typedef DEL MAIN **/
 typedef struct thAcceptlArg_ {
 	int id;
+	int fdStdout;
+	int fdStderr;
 } thAcceptlArg;
 
 typedef struct thUserlArg_ {
@@ -33,6 +44,8 @@ void userTh(thUserlArg *);
 void titlePrintW(WINDOW *, int, int);
 
 
+int fdStdoutPipe[2];  // dal manuale: fdStdoutPipe[0] refers to the read end of the pipe. fdStdoutPipe[1] refers to the write end of the pipe.
+int fdStdErrPipe[2];  // dal manuale: fdStdoutPipe[0] refers to the read end of the pipe. fdStdoutPipe[1] refers to the write end of the pipe.
 
 int errorRet;
 
@@ -43,6 +56,19 @@ int main(int argc, char *argv[]) {
 		printf("!#!#!#\tPrego inserire i dati mancanti:\n!#!#!#\t<Path-Server-Data>\n");
 		exit(EXIT_FAILURE);
 	}
+
+	/** Creo la pipe che avrà funzione di stdout e stderr al th**/
+	errorRet = pipe2(fdStdoutPipe, 0); //crea questa pipe e comunica per pacchetti, ogni READ leggerà un solo pacchetto
+	if (errorRet != 0) {
+		printErrno("La creazione della pipe per lo stdout ha dato l'errore", errorRet);
+		exit(-1);
+	}
+	errorRet = pipe2(fdStdErrPipe, 0); //crea questa pipe e comunica per pacchetti, ogni READ leggerà un solo pacchetto
+	if (errorRet != 0) {
+		printErrno("La creazione della pipe per lo stderr ha dato l'errore", errorRet);
+		exit(-1);
+	}
+
 	/** fase di avvio del server **/
 	if (StartServerStorage(argv[1]) == -1) //errore di qualche tipo nell'avvio del server
 	{
@@ -55,6 +81,8 @@ int main(int argc, char *argv[]) {
 	for (int i = 0; i < nAcceptTh; i++) {
 		thAcceptlArg *arg = malloc(sizeof(thAcceptlArg));
 		arg->id = i;
+		arg->fdStdout = fdStdoutPipe[1];
+		arg->fdStderr = fdStdErrPipe[1];
 		errorRet = pthread_create(&acceptArray[i], NULL, acceptTh, arg);
 		if (errorRet != 0) {
 			printErrno("La creazione del Thread Accept ha dato il seguente errore", errorRet);
@@ -68,109 +96,14 @@ int main(int argc, char *argv[]) {
 	printDublePointeChar(chats);
 	freeDublePointerArr(chats, sizeof(chats));
 
-	printf("\nTerminale in avvio\n");
-	usleep(500000);
 	/** Il Main Thread  diventa il terminale con cui interagire da qui in poi è il terminale **/
-	//printf("\n\n__________________________________________________________________\n[x][x][x][x][x][x]\tSono il terminale \t[x][x][x][x][x][x]\n");
-	char *buf[4096];
-	char exit = 1;
-
-	WINDOW *mainWindows;
-	WINDOW *titleW;
-	WINDOW *cmdW;
-	WINDOW *showPannel;
-
-	mainWindows = initscr();
-	titleW = newwin(10, 60, 1, 1);
-	cmdW = newwin(20, 60, 15, 0);
-	showPannel = newwin(40, 60, 1, 65);
-	refresh();
-
-	start_color();
-	init_pair(Titoli, COLOR_GREEN, COLOR_BLUE);
-	init_pair(Comandi, COLOR_WHITE, COLOR_BLACK);
-	init_pair(ViewPan, COLOR_RED, COLOR_WHITE);
-
-	/** Main windows print **/
-	mvprintw(LINES - 3, 1, "Versione del server: %s", firmwareVersion);
-	refresh();
-
-	/** Finestra Titolo setUp **/
-	wbkgd(titleW, COLOR_PAIR(Titoli));
-	box(titleW, 0, 0);    //sovrascrive il testo
-	titlePrintW(titleW, 1, 3);
-	wrefresh(titleW);
-
-	/** Finestra dei comandi setUp **/
-	wbkgd(cmdW, COLOR_PAIR(Comandi));
-	box(cmdW, NULL, '#');    //sovrascrive il testo
-	wrefresh(cmdW);
-
-	/** Finestra di Visualizzazione setUp **/
-	wbkgd(showPannel, COLOR_PAIR(ViewPan));
-	wrefresh(showPannel);
-
-	while (exit) {
-		mvwprintw(cmdW, 1, 0, ">>  ");
-		wclrtoeol(cmdW); //cancella tutto quello che si trova a destra sulla linea
-		wscanw(cmdW, "%[^\n]", buf);
+	printf("\n\n__________________________________________________________________\n[x][x][x][x][x][x]\tAvvio Del terminale\t[x][x][x][x][x][x]\n");
+	usleep(500000);
 
 
-		if (strcmp(buf, "help") == 0 || strcmp(buf, "-h") == 0) menuHelpw(cmdW, 2, 1);
-		else if ((strcmp(buf, "quit") == 0 || strcmp(buf, "-q") == 0)) exit = 0;
-		else if ((strcmp(buf, "chatRoom") == 0 || strcmp(buf, "-cr") == 0)) chatShowW(showPannel, 1, 1);
-		else if ((strcmp(buf, "UserRegister") == 0 || strcmp(buf, "-ur") == 0)) userShowW(showPannel, 1, 1);
-		else {
-			mvwprintw(cmdW, 2, 1, "Comando NON riconosciuto");
-		}
+	terminalShell(fdStdoutPipe, fdStdErrPipe);
 
-		wrefresh(cmdW);
-	}
-	endwin();
 	return 0;
-}
-
-void titlePrintW(WINDOW *w, int y_start, int x_start) {
-	mvwprintw(w, y_start, x_start, " _   _                       ___  ___                 ");
-	mvwprintw(w, y_start + 1, x_start, "| | | |                      |  \\/  |                 ");
-	mvwprintw(w, y_start + 2, x_start, "| |_| | ___  _ __ ___   ___  | .  . | ___ _ __  _   _ ");
-	mvwprintw(w, y_start + 3, x_start, "|  _  |/ _ \\| '_ ` _ \\ / _ \\ | |\\/| |/ _ \\ '_ \\| | | |");
-	mvwprintw(w, y_start + 4, x_start, "| | | | (_) | | | | | |  __/ | |  | |  __/ | | | |_| |");
-	mvwprintw(w, y_start + 5, x_start, "\\_| |_/\\___/|_| |_| |_|\\___| \\_|  |_/\\___|_| |_|\\__,_|");
-}
-
-void menuHelpw(WINDOW *w, int y_start, int x_start) {
-	mvwprintw(w, y_start, x_start, "-h\thelp\t-> elenco comandi disponibili");
-	mvwprintw(w, y_start + 1, x_start, "-q\tquit\t-> termina server");
-	mvwprintw(w, y_start + 2, x_start, "-cr\tchatRoom\t-> Chat Archiviate");
-	mvwprintw(w, y_start + 3, x_start, "-ur\tUserRegister\t-> Utenti Registrati");
-
-}
-
-void chatShowW(WINDOW *w, int y_start, int x_start) {
-	mvwprintw(w, 1, 0, "Sul Server sono attualmente presenti i seguenti gruppi:");
-	char **chats = chatRoomExist();
-	char **chatStartPoint = chats;
-	int i = 1;
-	for (; *chats != NULL; chats++) {
-		mvwprintw(w, y_start + i, x_start, "[%d]\t|--%s\n", i, *chats);
-		i++;
-	}
-	freeDublePointerArr(chatStartPoint, sizeof(chatStartPoint));
-	wrefresh(w);
-}
-
-void userShowW(WINDOW *w, int y_start, int x_start) {
-	mvwprintw(w, 1, 0, "Sul Server sono attualmente Inscritti:");
-	char **user = UserDefine();
-	char **userStartPoint = user;
-	int i = 1;
-	for (; *user != NULL; user++) {
-		mvwprintw(w, y_start + i, x_start, "[%d]\t|--%s\n", i, *user);
-		i++;
-	}
-	freeDublePointerArr(userStartPoint, sizeof(userStartPoint));
-	wrefresh(w);
 }
 
 
@@ -180,8 +113,14 @@ void menuHelp() {
 }
 
 void acceptTh(thAcceptlArg *info) {
-	printf("\t###accettatore n°%d\n", info->id);
-	pause();
+	while (1) {
+
+		dprintf(info->fdStdout, "ac n°%d", info->id);
+		sleep(1);
+		dprintf(info->fdStderr, "ac n°%d", info->id);
+		sleep(1);
+
+	}
 }
 
 void userTh(thUserlArg *info) {

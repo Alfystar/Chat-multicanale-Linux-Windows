@@ -12,7 +12,7 @@
 /** Define di setup delle funx **/
 #define nAcceptTh 2
 enum colorText {
-	Titoli = 1, Comandi, ViewPan
+	Titoli = 1, Comandi, ViewPan, StdoutPrint, ErrorPrint
 };
 
 #endif //CHAT_MULTILEVEL_DEFINESETS_H

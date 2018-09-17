@@ -125,7 +125,7 @@ void windowSetUp() {
 	refresh();
 
 	start_color();
-	init_pair(Titoli, COLOR_GREEN, COLOR_BLUE);
+	init_pair(Titoli, COLOR_BLUE, COLOR_GREEN);
 	init_pair(Comandi, COLOR_BLACK, COLOR_WHITE);
 	init_pair(ViewPan, COLOR_RED, COLOR_WHITE);
 	init_pair(StdoutPrint, COLOR_GREEN, COLOR_BLUE);
@@ -197,7 +197,7 @@ void chatShowW(WINDOW *w, int y_start, int x_start) {
 }
 
 void userShowW(WINDOW *w, int y_start, int x_start) {
-	mvwprintw(w, 1, 0, "Sul Server sono attualmente Inscritti:");
+	mvwprintw(w, 1, 0, "Sul Server sono attualmente Iscritti:");
 	char **user = UserDefine();
 	char **userStartPoint = user;
 	int i = 1;

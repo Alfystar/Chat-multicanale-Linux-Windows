@@ -130,8 +130,10 @@ void menuHelp() {
 void acceptTh(thAcceptlArg *info) {
 	while (1) {
 		perror("th accept create \n");
+		dprintf(fdStdoutPipe[1], "ciao sono un th\n");
 		pause();
 	}
+	free(info);
 }
 
 void userTh(thUserlArg *info) {

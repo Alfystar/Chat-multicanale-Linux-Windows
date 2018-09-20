@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.9)
 project(Chat_MultiLevel C)
 set(CMAKE_C_STANDARD 11)
-add_executable(Chat_MultiLevel main.c fileSystemUtylity.c fileSystemUtylity.h helpFunx.c helpFunx.h terminalShell.c terminalShell.h)
+add_executable(Chat_MultiLevel main.c fileSystemUtylity.c fileSystemUtylity.h helpFunx.c helpFunx.h terminalShell.c terminalShell.h FIL-server.c FIL-server.h FIL-client.c FIL-client.h)
 find_package(Threads)
 find_package(Curses REQUIRED)
 

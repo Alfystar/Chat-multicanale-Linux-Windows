@@ -16,3 +16,15 @@ l'applicazione client che per l'applicazione server._
 Per progetti misti Unix/Windows e' a scelta quale delle due applicazioni
 sviluppare per uno dei due sistemi.
 
+
+#demo code for lib
+
+Il codice di demo per l'implementazione delle tabelle su file è ragiungibile a questo repository:
+
+    https://github.com/Alfystar/fileTab_demo
+
+Il codice di demo per l'implementazione della comunicazione su soket è ragiungibile a questo repository:
+
+    xxx
+    
+grazie

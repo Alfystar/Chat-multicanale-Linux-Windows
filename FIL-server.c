@@ -14,7 +14,7 @@
 
 #include "FIL-server.h"
 
-
+#include <errno.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/signal.h>
@@ -24,14 +24,25 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <pthread.h>
 
 #define MAX_DIM 1024
 #define CODA 3
 
+__thread int ds_sock_a;
+int ds_sock;
+
+void *chat_thread(void *p){
+    close(ds_sock);
+
+}
+
+
+
 int main() {
-    int ds_sock, ds_sock_a;
+    // int ds_sock; //, ds_sock_a; // Vedere come definire i due descrittori
     struct sockaddr_in server;
-    struct sockaddr client;
+    struct sockaddr_in client;
     char buff[MAX_DIM];
     ds_sock = socket(AF_INET, SOCK_STREAM, 0);
     memset(&server, 0, sizeof(server));
@@ -45,7 +56,16 @@ int main() {
     signal(SIGCHLD, SIG_IGN);
 
     while (1) {
-        while ((ds_sock_a = accept(ds_sock, &client, &length)) == -1);
+        while ((ds_sock_a = accept(ds_sock, (struct sockaddr *) &client, &length)) == -1);
+
+        if (pthread_create(&tid,NULL,chat_thread,&ds_sock_a) != 0){
+            perror("Errore nella creazione del thread:");
+            exit(-1);
+        }
+
+
+
+        /*
 
         if (fork() == 0) {
 
@@ -60,5 +80,7 @@ int main() {
             exit(0);
         }
         else close(ds_sock_a);
+
+        */
     }
 }

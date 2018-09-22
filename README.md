@@ -25,6 +25,6 @@ Il codice di demo per l'implementazione delle tabelle su file è ragiungibile a 
 
 Il codice di demo per l'implementazione della comunicazione su soket è ragiungibile a questo repository:
 
-    xxx
+    https://github.com/fil-bad/sock_com_demo
     
 grazie

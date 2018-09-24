@@ -17,7 +17,7 @@ Per progetti misti Unix/Windows e' a scelta quale delle due applicazioni
 sviluppare per uno dei due sistemi.
 
 
-#demo code for lib
+Demo-code for ad-hoc lib 
 
 Il codice di demo per l'implementazione delle tabelle su file è ragiungibile a questo repository:
 

@@ -21,8 +21,8 @@ sviluppare per uno dei due sistemi.
 
 Il codice di demo per l'implementazione delle tabelle su file è ragiungibile a questo repository:
 
-    https://github.com/Alfystar/fileTab_demo
+https://github.com/Alfystar/fileTab_demo
 
 Il codice di demo per l'implementazione della comunicazione su soket è ragiungibile a questo repository:
 
-    https://github.com/fil-bad/server_client_debug
+https://github.com/fil-bad/server_client_debug

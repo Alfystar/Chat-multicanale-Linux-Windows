@@ -1,8 +1,0 @@
-//
-// Created by filippo on 20/09/18.
-//
-
-#ifndef CHAT_MULTILEVEL_FIL_CLIENT_H
-#define CHAT_MULTILEVEL_FIL_CLIENT_H
-
-#endif //CHAT_MULTILEVEL_FIL_CLIENT_H

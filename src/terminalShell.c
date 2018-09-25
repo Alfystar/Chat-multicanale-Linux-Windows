@@ -2,7 +2,7 @@
 // Created by alfylinux on 09/09/18.
 //
 
-#include "terminalShell.h"
+#include "../include/terminalShell.h"
 
 
 void terminalShell(int fdStdOutPipe[], int fdStdErrPipe[]) {

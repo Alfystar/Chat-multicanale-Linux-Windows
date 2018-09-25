@@ -19,8 +19,8 @@
 #include <errno.h>
 #include <time.h>
 
-#include "helpFunx.h"
-#include "defineSets.h"
+#include "../helpFunx.h"
+#include "../defineSets.h"
 
 extern char **environ;
 

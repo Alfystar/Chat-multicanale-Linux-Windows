@@ -16,7 +16,7 @@
 #include <pthread.h>
 #include <semaphore.h>
 
-#include "helpFunx.h"
+#include "../helpFunx.h"
 #include "fileSystemUtylity.h"
 #include <unistd.h>
 #include <fcntl.h>

@@ -9,7 +9,7 @@
 #include <pthread.h>
 
 /** screen Shell lib **/
-#include "terminalShell.h"
+#include "include/terminalShell.h"
 
 
 /** Librerie per creare la Pipe**/
@@ -19,7 +19,7 @@
 
 #include "helpFunx.h"
 
-#include "fileSystemUtylity.h"
+#include "include/fileSystemUtylity.h"
 
 #include "defineSets.h"
 

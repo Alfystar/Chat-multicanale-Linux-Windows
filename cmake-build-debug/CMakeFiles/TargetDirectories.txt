@@ -1,3 +1,3 @@
-/home/filippo/CLionProjects/Chat-multicanale-Linux-Windows/cmake-build-debug/CMakeFiles/rebuild_cache.dir
-/home/filippo/CLionProjects/Chat-multicanale-Linux-Windows/cmake-build-debug/CMakeFiles/edit_cache.dir
-/home/filippo/CLionProjects/Chat-multicanale-Linux-Windows/cmake-build-debug/CMakeFiles/Chat_MultiLevel.dir
+/home/alfylinux/CLionProjects/Chat-MultiChannel/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/home/alfylinux/CLionProjects/Chat-MultiChannel/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/alfylinux/CLionProjects/Chat-MultiChannel/cmake-build-debug/CMakeFiles/Chat_MultiLevel.dir

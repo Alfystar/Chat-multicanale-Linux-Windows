@@ -4,17 +4,17 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_C
-  "/home/filippo/CLionProjects/Chat-multicanale-Linux-Windows/FIL-client.c" "/home/filippo/CLionProjects/Chat-multicanale-Linux-Windows/cmake-build-debug/CMakeFiles/Chat_MultiLevel.dir/FIL-client.c.o"
-  "/home/filippo/CLionProjects/Chat-multicanale-Linux-Windows/FIL-server.c" "/home/filippo/CLionProjects/Chat-multicanale-Linux-Windows/cmake-build-debug/CMakeFiles/Chat_MultiLevel.dir/FIL-server.c.o"
-  "/home/filippo/CLionProjects/Chat-multicanale-Linux-Windows/fileSystemUtylity.c" "/home/filippo/CLionProjects/Chat-multicanale-Linux-Windows/cmake-build-debug/CMakeFiles/Chat_MultiLevel.dir/fileSystemUtylity.c.o"
-  "/home/filippo/CLionProjects/Chat-multicanale-Linux-Windows/helpFunx.c" "/home/filippo/CLionProjects/Chat-multicanale-Linux-Windows/cmake-build-debug/CMakeFiles/Chat_MultiLevel.dir/helpFunx.c.o"
-  "/home/filippo/CLionProjects/Chat-multicanale-Linux-Windows/main.c" "/home/filippo/CLionProjects/Chat-multicanale-Linux-Windows/cmake-build-debug/CMakeFiles/Chat_MultiLevel.dir/main.c.o"
-  "/home/filippo/CLionProjects/Chat-multicanale-Linux-Windows/terminalShell.c" "/home/filippo/CLionProjects/Chat-multicanale-Linux-Windows/cmake-build-debug/CMakeFiles/Chat_MultiLevel.dir/terminalShell.c.o"
+  "/home/alfylinux/CLionProjects/Chat-MultiChannel/helpFunx.c" "/home/alfylinux/CLionProjects/Chat-MultiChannel/cmake-build-debug/CMakeFiles/Chat_MultiLevel.dir/helpFunx.c.o"
+  "/home/alfylinux/CLionProjects/Chat-MultiChannel/main.c" "/home/alfylinux/CLionProjects/Chat-MultiChannel/cmake-build-debug/CMakeFiles/Chat_MultiLevel.dir/main.c.o"
+  "/home/alfylinux/CLionProjects/Chat-MultiChannel/src/fileSystemUtylity.c" "/home/alfylinux/CLionProjects/Chat-MultiChannel/cmake-build-debug/CMakeFiles/Chat_MultiLevel.dir/src/fileSystemUtylity.c.o"
+  "/home/alfylinux/CLionProjects/Chat-MultiChannel/src/terminalShell.c" "/home/alfylinux/CLionProjects/Chat-MultiChannel/cmake-build-debug/CMakeFiles/Chat_MultiLevel.dir/src/terminalShell.c.o"
   )
 set(CMAKE_C_COMPILER_ID "GNU")
 
 # The include file search paths:
 set(CMAKE_C_TARGET_INCLUDE_PATH
+  "../src"
+  "../include"
   )
 
 # Targets to which this target links.

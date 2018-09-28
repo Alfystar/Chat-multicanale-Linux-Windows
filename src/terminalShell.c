@@ -42,7 +42,7 @@ void terminalShell(int fdStdOutPipe[], int fdStdErrPipe[]) {
 
 		if (strcmp(buf, "help") == 0 || strcmp(buf, "-h") == 0) menuHelpw(cmdW, 2, 0);
 		else if ((strcmp(buf, "quit") == 0 || strcmp(buf, "-q") == 0)) exit = 0;
-		else if ((strcmp(buf, "chatRoom") == 0 || strcmp(buf, "-cr") == 0)) chatShowW(showPannel, 1, 0);
+		else if ((strcmp(buf, "nameList") == 0 || strcmp(buf, "-cr") == 0)) chatShowW(showPannel, 1, 0);
 		else if ((strcmp(buf, "UserRegister") == 0 || strcmp(buf, "-ur") == 0)) userShowW(showPannel, 1, 0);
 		else if ((strcmp(buf, "testPipe1") == 0 || strcmp(buf, "tp1") == 0))
 			write(fdStdOutPipe[1], "Test della pipe\n", 128);
@@ -177,7 +177,7 @@ void titlePrintW(WINDOW *w, int y_start, int x_start) {
 void menuHelpw(WINDOW *w, int y_start, int x_start) {
 	mvwprintw(w, y_start, x_start, "-h\thelp\t-> elenco comandi disponibili");
 	mvwprintw(w, y_start + 1, x_start, "-q\tquit\t-> termina server");
-	mvwprintw(w, y_start + 2, x_start, "-cr\tchatRoom\t-> Chat Archiviate");
+	mvwprintw(w, y_start + 2, x_start, "-cr\tnameList\t-> Chat Archiviate");
 	mvwprintw(w, y_start + 3, x_start, "-ur\tUserRegister\t-> Utenti Registrati");
 
 }
@@ -198,14 +198,12 @@ void chatShowW(WINDOW *w, int y_start, int x_start) {
 
 void userShowW(WINDOW *w, int y_start, int x_start) {
 	mvwprintw(w, 1, 0, "Sul Server sono attualmente Iscritti:");
-	char **user = UserDefine();
-	char **userStartPoint = user;
-	int i = 1;
-	for (; *user != NULL; user++) {
-		mvwprintw(w, y_start + i, x_start, "[%d]\t|--%s\n", i, *user);
-		i++;
+	nameList *user = UserExist();
+
+	for (int i = 0; i < user->nMemb; i++) {
+		mvwprintw(w, y_start + i, x_start, "[%d]\t|--%s\n", i + 1, user->names);
 	}
-	freeDublePointerArr(userStartPoint, sizeof(userStartPoint));
+	nameListFree(user);
 	wclrtobot(w);
 	wrefresh(w);
 }

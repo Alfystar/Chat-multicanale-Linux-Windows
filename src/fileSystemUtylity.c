@@ -4,12 +4,10 @@
 
 #include "../include/fileSystemUtylity.h"
 
-//TODO: File Sistem tree
-/***************************************************************/
 /*Funzioni per creare la struttura delle room nel file-sistem  */
 
 /*
- * Dentro il server le cartelle contengono le chatRoom => una dir è una chatRoom
+ * Dentro il server le cartelle contengono le nameList => una dir è una nameList
  *
  * Dir-Server/
  *  |---Dir-chat-Name 1
@@ -109,9 +107,9 @@ int StartServerStorage(char *storage)  //apre o crea un nuovo storage per il dat
 		printErrno("errore in open('serverStat.conf')", errno);
 		if (errno == 2)//file non presente
 		{
-			char **dirElement = freeDir();
+			nameList *dir = allDir();
 
-			if (dirElement[0] ==
+			if (dir->names[0] ==
 			    NULL) //non sono presenti cartelle di alcun tipo,la directory è quindi valida, creo il file config
 			{
 				printf("La cartella non è valida, non sono presenti file o cartelle estrane\nProcedo alla creazione di serverStat.conf\n");
@@ -122,7 +120,7 @@ int StartServerStorage(char *storage)  //apre o crea un nuovo storage per il dat
 				printf("La cartella non è valida e neanche validabile.\nNon si può procedere all'avvio del server\n");
 				return -1;
 			}
-			freeDublePointerArr(dirElement, sizeof(dirElement));
+			nameListFree(dir);
 		}
 	} else {
 
@@ -143,33 +141,15 @@ int StartServerStorage(char *storage)  //apre o crea un nuovo storage per il dat
 	return 0;   //avvio con successo
 }
 
-/******************* Funzioni di per operare sulle chat *******************/
+///Funzioni di per operare sulle chat
 
-int newChat(char *name) {
+int newRoom(char *name, int adminUs) {
 
-
-
-	/*
-	int testId=open("testo",O_CREAT|O_RDWR|O_TRUNC,0666);
-	if (testId==-1)
-	{
-		printErrno("errore in open('test')",errno);
-		return -1;
-	}
-	char* testo="test\n";
-	int bw=write(testId,testo,strlen(testo));
-	printf("bw=%d\n",bw);
-	char bufread[500];
-	lseek(testId,0,SEEK_SET);
-	int br=read(testId,bufread,500);
-	printf("br=%d\n",br);
-	printf("buf=%s\n",bufread);
-	 */
 
 	return 0;
 }
 
-/******************* Funzioni di supporto al file conf *******************/
+///Funzioni di supporto al file conf
 int creatServerStatConf() {
 	int validServerId = open("serverStat.conf", O_CREAT | O_RDWR | O_TRUNC, 0666);
 
@@ -212,77 +192,82 @@ int creatServerStatConf() {
 }
 
 
-/******************* Funzioni di scan della directory *******************/
+///Funzioni di scan della directory
 
 /* return **array end with NULL
  * The returned list Must be free in all entry
  */
-char **chatRoomExist() {
-	char **chatRoom;
+nameList *chatRoomExist() {
+	nameList *chats = malloc(sizeof(nameList));
 	struct dirent **namelist;
 
-	int n;
-	n = scandir(".", &namelist, filterDirChat, alphasort);
-	if (n == -1) {
-		perror("scandir");
+	chats->nMemb = scandir(".", &namelist, filterDirChat, alphasort);
+	if (chats->nMemb == -1) {
+		perror("scan dir");
 		exit(EXIT_FAILURE);
 	}
-	chatRoom = malloc(sizeof(char *) * (n + 1));
-	for (int i = 0; i < n; i++) {
-		chatRoom[i] = malloc(strlen(namelist[i]->d_name) + 1);
-		strcpy(chatRoom[i], namelist[i]->d_name);
+	chats->names = malloc(sizeof(char *) * (chats->nMemb));
+	for (int i = 0; i < chats->nMemb; i++) {
+		chats->names[i] = malloc(strlen(namelist[i]->d_name));
+		strcpy(chats->names[i], namelist[i]->d_name);
 		free(namelist[i]);
 	}
-	chatRoom[n] = NULL;
+
 	free(namelist);
-	return chatRoom;
+	return chats;
 }
 
-char **UserDefine() {
-	char **chatRoom;
+nameList *UserExist() {
+	nameList *users = malloc(sizeof(nameList));
 	struct dirent **namelist;
 
-	int n;
 	char home[512] = "./";
-	n = scandir(strcat(home, userDirName), &namelist, filterDir, alphasort);
-	if (n == -1) {
-		perror("scandir");
+	users->nMemb = scandir(strcat(home, userDirName), &namelist, filterDir, alphasort);
+	if (users->nMemb == -1) {
+		perror("scan dir");
 		exit(EXIT_FAILURE);
 	}
-	chatRoom = malloc(sizeof(char *) * (n + 1));
-	for (int i = 0; i < n; i++) {
-		chatRoom[i] = malloc(strlen(namelist[i]->d_name) + 1);
-		strcpy(chatRoom[i], namelist[i]->d_name);
+	users->names = malloc(sizeof(char *) * (users->nMemb));
+	for (int i = 0; i < users->nMemb; i++) {
+		users->names[i] = malloc(strlen(namelist[i]->d_name));
+		strcpy(users->names[i], namelist[i]->d_name);
 		free(namelist[i]);
 	}
-	chatRoom[n] = NULL;
+
 	free(namelist);
-	return chatRoom;
+	return users;
 }
 
-char **freeDir() {
-	char **dirs;
+nameList *allDir() {
+	nameList *dir = malloc(sizeof(nameList));
 	struct dirent **namelist;
 
-	int n;
-	n = scandir(".", &namelist, filterDirAndFile, alphasort);
-	if (n == -1) {
-		perror("scandir");
+	dir->nMemb = scandir(".", &namelist, filterDirAndFile, alphasort);
+	if (dir->nMemb == -1) {
+		perror("scan dir");
 		exit(EXIT_FAILURE);
 	}
-	dirs = malloc(sizeof(char *) * (n + 1));
-	for (int i = 0; i < n; i++) {
-		dirs[i] = malloc(strlen(namelist[i]->d_name) + 1);
-		strcpy(dirs[i], namelist[i]->d_name);
+	dir->names = malloc(sizeof(char *) * (dir->nMemb));
+	for (int i = 0; i < dir->nMemb; i++) {
+		dir->names[i] = malloc(strlen(namelist[i]->d_name));
+		strcpy(dir->names[i], namelist[i]->d_name);
 		free(namelist[i]);
 	}
-	dirs[n] = NULL;
+
 	free(namelist);
-	return dirs;
+	return dir;
 }
 
+void nameListFree(nameList *nl) {
+	for (int i = 0; i < nl->nMemb; i++) {
+		free(nl->names[i]);
+	}
+	free(nl->names);
+	free(nl);
+}
 
-/******************* Funzioni per filtrare gli elementi *******************/
+///Funzioni per filtrare gli elementi
+
 int filterDirChat(const struct dirent *entry) {
 	/** Visualizza qualsiasi directory escludendo la user**/
 	if ((entry->d_type == DT_DIR) && (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0 &&
@@ -346,7 +331,10 @@ char *fileType(unsigned char d_type, char *buf, int bufLen) {
 	return buf;
 }
 
-char **findChat(char *path) {
-
-
+///show funcion
+void nameListPrint(nameList *nl) {
+	for (int i = 0; i < nl->nMemb; i++) {
+		printf("%s\n", nl->names[i]);
+	}
+	printf("\t# End list #\n");
 }

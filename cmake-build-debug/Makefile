@@ -204,6 +204,60 @@ src/fileSystemUtylity.c.s:
 	$(MAKE) -f CMakeFiles/Chat_MultiLevel.dir/build.make CMakeFiles/Chat_MultiLevel.dir/src/fileSystemUtylity.c.s
 .PHONY : src/fileSystemUtylity.c.s
 
+src/mexData.o: src/mexData.c.o
+
+.PHONY : src/mexData.o
+
+# target to build an object file
+src/mexData.c.o:
+	$(MAKE) -f CMakeFiles/Chat_MultiLevel.dir/build.make CMakeFiles/Chat_MultiLevel.dir/src/mexData.c.o
+.PHONY : src/mexData.c.o
+
+src/mexData.i: src/mexData.c.i
+
+.PHONY : src/mexData.i
+
+# target to preprocess a source file
+src/mexData.c.i:
+	$(MAKE) -f CMakeFiles/Chat_MultiLevel.dir/build.make CMakeFiles/Chat_MultiLevel.dir/src/mexData.c.i
+.PHONY : src/mexData.c.i
+
+src/mexData.s: src/mexData.c.s
+
+.PHONY : src/mexData.s
+
+# target to generate assembly for a file
+src/mexData.c.s:
+	$(MAKE) -f CMakeFiles/Chat_MultiLevel.dir/build.make CMakeFiles/Chat_MultiLevel.dir/src/mexData.c.s
+.PHONY : src/mexData.c.s
+
+src/tableFile.o: src/tableFile.c.o
+
+.PHONY : src/tableFile.o
+
+# target to build an object file
+src/tableFile.c.o:
+	$(MAKE) -f CMakeFiles/Chat_MultiLevel.dir/build.make CMakeFiles/Chat_MultiLevel.dir/src/tableFile.c.o
+.PHONY : src/tableFile.c.o
+
+src/tableFile.i: src/tableFile.c.i
+
+.PHONY : src/tableFile.i
+
+# target to preprocess a source file
+src/tableFile.c.i:
+	$(MAKE) -f CMakeFiles/Chat_MultiLevel.dir/build.make CMakeFiles/Chat_MultiLevel.dir/src/tableFile.c.i
+.PHONY : src/tableFile.c.i
+
+src/tableFile.s: src/tableFile.c.s
+
+.PHONY : src/tableFile.s
+
+# target to generate assembly for a file
+src/tableFile.c.s:
+	$(MAKE) -f CMakeFiles/Chat_MultiLevel.dir/build.make CMakeFiles/Chat_MultiLevel.dir/src/tableFile.c.s
+.PHONY : src/tableFile.c.s
+
 src/terminalShell.o: src/terminalShell.c.o
 
 .PHONY : src/terminalShell.o
@@ -249,6 +303,12 @@ help:
 	@echo "... src/fileSystemUtylity.o"
 	@echo "... src/fileSystemUtylity.i"
 	@echo "... src/fileSystemUtylity.s"
+	@echo "... src/mexData.o"
+	@echo "... src/mexData.i"
+	@echo "... src/mexData.s"
+	@echo "... src/tableFile.o"
+	@echo "... src/tableFile.i"
+	@echo "... src/tableFile.s"
 	@echo "... src/terminalShell.o"
 	@echo "... src/terminalShell.i"
 	@echo "... src/terminalShell.s"

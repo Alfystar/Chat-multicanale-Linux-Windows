@@ -91,6 +91,12 @@
 		<Unit filename="/home/alfylinux/CLionProjects/Chat-MultiChannel/include/fileSystemUtylity.h">
 			<Option target="Chat_MultiLevel"/>
 		</Unit>
+		<Unit filename="/home/alfylinux/CLionProjects/Chat-MultiChannel/include/mexData.h">
+			<Option target="Chat_MultiLevel"/>
+		</Unit>
+		<Unit filename="/home/alfylinux/CLionProjects/Chat-MultiChannel/include/tableFile.h">
+			<Option target="Chat_MultiLevel"/>
+		</Unit>
 		<Unit filename="/home/alfylinux/CLionProjects/Chat-MultiChannel/include/terminalShell.h">
 			<Option target="Chat_MultiLevel"/>
 		</Unit>
@@ -98,6 +104,12 @@
 			<Option target="Chat_MultiLevel"/>
 		</Unit>
 		<Unit filename="/home/alfylinux/CLionProjects/Chat-MultiChannel/src/fileSystemUtylity.c">
+			<Option target="Chat_MultiLevel"/>
+		</Unit>
+		<Unit filename="/home/alfylinux/CLionProjects/Chat-MultiChannel/src/mexData.c">
+			<Option target="Chat_MultiLevel"/>
+		</Unit>
+		<Unit filename="/home/alfylinux/CLionProjects/Chat-MultiChannel/src/tableFile.c">
 			<Option target="Chat_MultiLevel"/>
 		</Unit>
 		<Unit filename="/home/alfylinux/CLionProjects/Chat-MultiChannel/src/terminalShell.c">

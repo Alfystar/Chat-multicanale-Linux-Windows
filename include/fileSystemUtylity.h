@@ -24,33 +24,47 @@
 
 extern char **environ;
 
+typedef struct nameList {
+	int nMemb;
+	char **names;
+} nameList;
+
+/** PROTOTIPI   **/
+
+
 //all'avvio del server esso inizializza il sistema, le directory ecc..
-int StartServerStorage(char *);
+int StartServerStorage(char *storage_name);
 
-/******************* Funzioni di per operare sulle chat *******************/
-int newChat(char *);
+///Funzioni di per operare sulle chat
+int newRoom(char *name, int adminId);
 
-/******************* Funzioni di supporto al file conf *******************/
+///Funzioni di supporto al file conf
 int creatServerStatConf();
 
-/******************* Funzioni di scan della directory *******************/
+///Funzioni di scan della directory
 /*Metodi per operare sul database lato fileSystem*/
-char **chatRoomExist();
+nameList *chatRoomExist();
 
-char **UserDefine();
+nameList *UserExist();
 
-char **freeDir();
+nameList *allDir();
 
-/******************* Funzioni per filtrare gli elementi *******************/
+void nameListFree(nameList *nl);
+
+///Funzioni per filtrare gli elementi
 /*scandir permette di filtrare i file, mettendo nella lista solo quelli che ritornano !=0
  * Di seguito tutte le funzioni create per i vari filtri
  */
-int filterDirChat(const struct dirent *);
+int filterDirChat(const struct dirent *entry);
 
-int filterDir(const struct dirent *);
+int filterDir(const struct dirent *entry);
 
-int filterDirAndFile(const struct dirent *);
+int filterDirAndFile(const struct dirent *entry);
 
-char *fileType(unsigned char, char *, int);
+char *fileType(unsigned char d_type, char *externalBuf, int bufLen);
+
+///Funzioni per visualizzare gli elementi
+void nameListPrint(nameList *nameList);
+
 
 #endif //CHAT_MULTILEVEL_FILESYSTEMUTYLITY_H

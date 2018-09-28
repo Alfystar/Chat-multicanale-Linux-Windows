@@ -25,7 +25,7 @@ https://github.com/Alfystar/fileTab_demo
 
 Il codice di demo per l'implementazione della comunicazione su soket è ragiungibile a questo repository:
 
-https://github.com/fil-bad/server_client_debug
+https://github.com/fil-bad/socketDemo
 
 Il codice di demo per l'implementazione della gestione dei messaggi è ragiungibile a questo repository:
 

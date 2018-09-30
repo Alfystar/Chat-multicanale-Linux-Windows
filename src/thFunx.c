@@ -30,7 +30,6 @@ void *roomTh(thRoomArg *info) {
 
 void makeThRoom(int keyChat, char *roomPath, infoChat *info) {
 	if (info == NULL) {
-		//todo: se nullo capire se è perchè già presente o non esistente.
 		dprintf(STDERR_FILENO, "infoChat NULL, impossibile creare Tr-ROOM\n");
 	}
 	pthread_t roomtid;

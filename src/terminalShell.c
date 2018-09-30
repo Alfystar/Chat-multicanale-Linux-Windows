@@ -101,7 +101,6 @@ void driverCmd(int argc, char *argv[], int *exit) {
 				dprintf(STDERR_FILENO, "creazione della chat impossibile");
 				return;
 			}
-			//todo create roomTh from info
 			nameList *chats = chatRoomExist();
 			int idKey = atoi(info->myName);       //essendo myname xx:TEXT, la funzione termina ai : e ottengo la key
 			char roomDir[128];

@@ -230,52 +230,49 @@ int creatServerStatConf() {
 	strncpy(serStat.statFile.serverTimeCreate, c_time_string, 64);
 	strncpy(serStat.statFile.firmware_V, firmwareVersion, 64);
 	serStat.fd = validServerId;
-
-
-	overrideServerStatConf();
-
 	if (sem_init(&serStat.lock, 0, 1)) {
 		perror("serStat semaphore init take error: ");
 		return -1;
 	}
+	printServStat(STDOUT_FILENO);
+	overrideServerStatConf();
+
+
 
 	return validServerId;
 }
 
 int overrideServerStatConf() {
 	//sovrascrive il file con l'attuale contenuto nella variabile
-	if (serStat.fd == -2) {
+	if (serStat.fd == -2 || serStat.fd == -1) {
+		fprintf(stderr, "fd not valid\n");
 		return -1;
 	}
-	printFcntlFile(serStat.fd);
 	struct flock lockStatConf;
 
 	lockStatConf.l_type = F_WRLCK;
 	lockStatConf.l_whence = SEEK_SET;
 	lockStatConf.l_start = 0;
 	lockStatConf.l_len = 0;
-	lockStatConf.l_pid = 0;
+	lockStatConf.l_pid = getpid();
 
-	printf("sto per prendere il lock\n");
-	//todo capire perchè vai in wait perpetua di un file nuovo
-	if (fcntl(serStat.fd, F_SETLKW,
-	          &lockStatConf))  //acquisisco il lock in scrittura sul file, se è occupato allora attende
+	//acquisisco il lock in scrittura sul file, se è occupato allora attende
+	if (fcntl(serStat.fd, F_SETLK, &lockStatConf))
 	{
 		perror("waiting lock on serverStat.conf take error:");
 		return -1;
 	}
 	sem_wait(&serStat.lock);
 	lseek(serStat.fd, 0, SEEK_SET);
+
 	size_t byteWrite = 0;
 	do {
 		byteWrite += write(serStat.fd, &serStat.statFile + byteWrite, sizeof(serStat.statFile) - byteWrite);
-	} while (byteWrite != sizeof(serverStat));
+	} while (byteWrite != sizeof(serStat.statFile));
 	sem_post(&serStat.lock);
-
 	lockStatConf.l_type = F_UNLCK;
-	if (fcntl(serStat.fd, F_SETLKW,
-	          &lockStatConf))  //acquisisco il lock in scrittura sul file, se è occupato allora attende
-	{
+	if (fcntl(serStat.fd, F_SETLK, &lockStatConf)) {
+		//acquisisco il lock in scrittura sul file, se è occupato allora attende
 		perror("waiting unlock on serverStat.conf take error:");
 		return -1;
 	}
@@ -283,20 +280,25 @@ int overrideServerStatConf() {
 }
 
 void printFcntlFile(int fd) {
+	///Funzione per testare il lock kernel di un certo file
 	struct flock lockStatConf;
-
+	lockStatConf.l_type = F_WRLCK;
 	lockStatConf.l_whence = SEEK_SET;
 	lockStatConf.l_start = 0;
 	lockStatConf.l_len = 0;
 	lockStatConf.l_pid = 0;
-	//todo capire perchè dice che i parametri sono sbagliati!!!!!
-	if (fcntl(serStat.fd, F_GETLK, &lockStatConf))  //acquisisco i dati di lock del file
+	if (fcntl(fd, F_GETLK, &lockStatConf))  //acquisisco i dati di lock del file
 	{
 		perror("printFcntlFile take error:");
 		return;
 	}
-	if (lockStatConf.l_type == F_UNLCK) printf("fd lock is free to lock\n");
-	else printf("fd lock is in use\n");
+	if (lockStatConf.l_type != F_UNLCK) {
+		printf("Too bad... it's already locked... by pid=%d\n", lockStatConf.l_pid);
+		return;
+	} else {
+		printf("fd test is free from any lock\n");
+
+	}
 }
 
 void printServStat(int fdOut) {

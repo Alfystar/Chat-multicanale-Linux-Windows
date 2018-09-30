@@ -102,7 +102,7 @@ void driverCmd(int argc, char *argv[], int *exit) {
 				dprintf(STDERR_FILENO, "creazione della chat impossibile");
 				return;
 			}
-
+			//todo create roomTh from info
 			return;
 		}
 		if (strcmp(argv[0], "mkUs") == 0) {
@@ -219,14 +219,9 @@ void userShowW(WINDOW *w, int y_start, int x_start) {
 
 ///Comandi di controllo sulle chat
 
-//todo new room
-void newRoomCmd(char *name) {
+//todo print tab e conv room
 
-}
-//todo print tab e conv rom
-
-//todo new user
-//todo print tab
+//todo print tab us
 
 
 /** shell th funx**/

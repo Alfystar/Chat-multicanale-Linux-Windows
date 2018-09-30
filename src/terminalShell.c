@@ -29,40 +29,210 @@ void terminalShell(int fdStdOutPipe[], int fdStdErrPipe[]) {
 	}
 
 	/** Cmd terminal **/
-	char *buf[4096];
+	char *cmdBuf[1024];
+	char *sArgv[64];  //consento lo storage fino a 64 comandi
+	int sArgc = 0;
+	char *savePoint;
 	char exit = 1;
 	while (exit) {
 		sem_wait(&screewWrite);
 		mvwprintw(cmdW, 1, 0, ">>  ");
 		wclrtoeol(cmdW); //cancella tutto quello che si trova a destra sulla linea
 		sem_post(&screewWrite);
-		wscanw(cmdW, "%[^\n]", buf);
+		wscanw(cmdW, "%[^\n]", cmdBuf);
 
-		sem_wait(&screewWrite);
-
-		if (strcmp(buf, "help") == 0 || strcmp(buf, "-h") == 0) menuHelpw(cmdW, 2, 0);
-		else if ((strcmp(buf, "quit") == 0 || strcmp(buf, "-q") == 0)) exit = 0;
-		else if ((strcmp(buf, "nameList") == 0 || strcmp(buf, "-cr") == 0)) chatShowW(showPannel, 1, 0);
-		else if ((strcmp(buf, "UserRegister") == 0 || strcmp(buf, "-ur") == 0)) userShowW(showPannel, 1, 0);
-		else if ((strcmp(buf, "testPipe1") == 0 || strcmp(buf, "tp1") == 0))
-			write(fdStdOutPipe[1], "Test della pipe\n", 128);
-		else if ((strcmp(buf, "testPipe2") == 0 || strcmp(buf, "tp2") == 0))
-			write(fdStdOutPipe[1], "Test della pipe numero 2\n", 128);
-		else {
-			mvwprintw(cmdW, 2, 0, buf);
-			wclrtobot(cmdW);
-			dprintf(fdStdOutPipe[1], "%s\n", buf);
+		/** Tokenizzazione di cmdW per creare un effetto argv[] **/
+		sArgc = 0;
+		sArgv[sArgc] = strtok_r(cmdBuf, " ", &savePoint);
+		while (sArgv[sArgc] != NULL) {
+			sArgc++;
+			sArgv[sArgc] = strtok_r(NULL, " ", &savePoint);
 		}
+
+
+		for (int i = 0; i < sArgc; i++) {
+			dprintf(fdOutP, "sArgv[%d]=%s\n", i, sArgv[i]);
+		}
+
+		/// interpretazione sArgv[] ed esecuzione comandi
+
+		driverCmd(sArgc, sArgv, &exit);
+		sem_wait(&screewWrite);
 		wrefresh(cmdW);
 		sem_post(&screewWrite);
-		buf[0] = 0;
+
+		memset(cmdBuf, 0, 1024);
 		usleep(5000);
 
 	}
 	endwin();
 }
 
+void driverCmd(int argc, char *argv[], int *exit) {
+	if (argc >= 1) {
+		if (strcmp(argv[0], "q") == 0) {
+			*exit = 0;
+			return;
+		}
+		if (strcmp(argv[0], "chat") == 0) {
+			sem_wait(&screewWrite);
+			chatShowW(showPannel, 1, 0);
+			sem_post(&screewWrite);
+			return;
+		}
+		if (strcmp(argv[0], "user") == 0) {
+			sem_wait(&screewWrite);
+			userShowW(showPannel, 1, 0);
+			sem_post(&screewWrite);
+			return;
+		}
+		if (strcmp(argv[0], "svst") == 0) {
+			printServStat(fdOutP);
+			return;
+		}
+
+	}
+
+	if (argc >= 2) //seleziona comando
+	{
+		if (strcmp(argv[0], "mkRm") == 0) {
+			//todo make roomchat
+			infoChat *info = newRoom(argv[1], 0);
+			if (info == 0) {
+				dprintf(STDERR_FILENO, "creazione della chat impossibile");
+				return;
+			}
+
+			return;
+		}
+		if (strcmp(argv[0], "mkUs") == 0) {
+			//todo make new user
+			return;
+		}
+	}
+
+	menuHelpw(cmdW, 2, 0);
+}
+
+void menuHelpw(WINDOW *w, int y_start, int x_start) {
+	mvwprintw(w, y_start, x_start, "elenco comandi disponibili\n");
+	wprintw(w, "## <command> [argv] ...\n");
+	wprintw(w, "\t(0)arg\n");
+	wprintw(w, "->h\t-> Visualizza questa lista\n");
+	wprintw(w, "->q\t-> termina server\n");
+	wprintw(w, "->chat\t-> Chat Archiviate\n");
+	wprintw(w, "->user\t-> Utenti Registrati\n");
+	wprintw(w, "->svst\t-> Mostra servStat sul monitor\n");
+	wprintw(w, "\t(1)arg\n");
+	wprintw(w, "->mkRm [name]\t-> Crea una nuova stanza chiamata [name]\n");
+	wprintw(w, "->mkUs [name]\t-> Crea un nuovo user chiamato [name]\n");
+}
+
+
+void windowSetUp() {
+	mainWindows = initscr();    //è lo sfondo, scrivere su di lui i commenti perpetui
+	titleW = newwin(10, 80, 1, 1);
+	cmdW = newwin(20, 80, 12, 1);
+	showPannel = newwin(46, 60, 1, 83);
+	monitor = newwin(13, 80, 34, 1);
+	curs_set(0); //disattivo il cursore così il movimento causato dai thread non si nota
+	refresh();
+
+	start_color();
+	init_pair(Titoli, COLOR_BLUE, COLOR_GREEN);
+	init_pair(Comandi, COLOR_BLACK, COLOR_WHITE);
+	init_pair(ViewPan, COLOR_RED, COLOR_WHITE);
+	init_pair(StdoutPrint, COLOR_GREEN, COLOR_BLUE);
+	init_pair(ErrorPrint, COLOR_RED, COLOR_BLACK);
+
+
+	/** Main windows print **/
+	mvprintw(LINES - 1, 1, "Versione del server: %s", firmwareVersion);
+	refresh();
+
+	/** Finestra Titolo setUp **/
+	wbkgd(titleW, COLOR_PAIR(Titoli));
+	box(titleW, 0, 0);    //sovrascrive il testo
+	titlePrintW(titleW, 1, 13);
+	wrefresh(titleW);
+
+	/** Finestra dei comandi setUp **/
+	wbkgd(cmdW, COLOR_PAIR(Comandi));
+	//box(cmdW, ' ', '#');    //sovrascrive il testo
+	mvprintw(cmdW->_begy - 1, cmdW->_begx, "---------------------Finestra di comando--------------------");
+
+	wrefresh(cmdW);
+
+	/** Finestra di Visualizzazione setUp **/
+	wbkgd(showPannel, COLOR_PAIR(ViewPan));
+	wrefresh(showPannel);
+
+	/** STDOUT and STDERR windows setUp**/
+	wbkgd(monitor, COLOR_PAIR(StdoutPrint));
+	//box(monitor, ' ', 0);
+	attron(COLOR_PAIR(StdoutPrint));
+	mvprintw(monitor->_begy - 1, monitor->_begx,
+	         "------------------------------StdOut & StdErr Print-----------------------------");
+	mvwprintw(monitor, 1, 0, "");
+	scrollok(monitor, TRUE);
+	wrefresh(monitor);
+
+	refresh();
+}
+
+void titlePrintW(WINDOW *w, int y_start, int x_start) {
+	mvwprintw(w, y_start, x_start, " _   _                       ___  ___                 ");
+	mvwprintw(w, y_start + 1, x_start, "| | | |                      |  \\/  |                 ");
+	mvwprintw(w, y_start + 2, x_start, "| |_| | ___  _ __ ___   ___  | .  . | ___ _ __  _   _ ");
+	mvwprintw(w, y_start + 3, x_start, "|  _  |/ _ \\| '_ ` _ \\ / _ \\ | |\\/| |/ _ \\ '_ \\| | | |");
+	mvwprintw(w, y_start + 4, x_start, "| | | | (_) | | | | | |  __/ | |  | |  __/ | | | |_| |");
+	mvwprintw(w, y_start + 5, x_start, "\\_| |_/\\___/|_| |_| |_|\\___| \\_|  |_/\\___|_| |_|\\__,_|");
+}
+
+
+
+void chatShowW(WINDOW *w, int y_start, int x_start) {
+	mvwprintw(w, 1, 0, "Sul Server sono attualmente presenti i seguenti gruppi:\n");
+	nameList *chats = chatRoomExist();
+
+	for (int i = 0; i < chats->nMemb; i++) {
+		wprintw(w, "[%d]\t|--%s\n", i, chats->names[i]);
+	}
+	nameListFree(chats);
+	wclrtobot(w);
+	wrefresh(w);
+}
+
+//todo verificare la funzione dopo aver creato user con il metodo corretto
+void userShowW(WINDOW *w, int y_start, int x_start) {
+	mvwprintw(w, 1, 0, "Sul Server sono attualmente Iscritti:");
+	nameList *user = UserExist();
+
+	for (int i = 0; i < user->nMemb; i++) {
+		mvwprintw(w, y_start + i, x_start, "[%d]\t|--%s\n", i + 1, user->names);
+	}
+	nameListFree(user);
+	wclrtobot(w);
+	wrefresh(w);
+}
+
+
+///Comandi di controllo sulle chat
+
+//todo new room
+void newRoomCmd(char *name) {
+
+}
+//todo print tab e conv rom
+
+//todo new user
+//todo print tab
+
+
+/** shell th funx**/
+
 void shellThStdout(thShellArg *info) {
+	sleep(1);       //piccolo ritardo per permettere la sincronizzazione della main windows e dei thread
 	sem_wait(&screewWrite);
 	wattron(monitor, COLOR_PAIR(StdoutPrint));
 	wprintw(monitor, "Monitor attivo\n");
@@ -89,6 +259,7 @@ void shellThStdout(thShellArg *info) {
 }
 
 void shellThStdErr(thShellArg *info) {
+	sleep(1);       //piccolo ritardo per permettere la sincronizzazione della main windows e dei thread
 	sem_wait(&screewWrite);
 	wattron(monitor, COLOR_PAIR(ErrorPrint));
 	wprintw(monitor, "Monitor d'errore attivo\n");
@@ -112,98 +283,4 @@ void shellThStdErr(thShellArg *info) {
 		wrefresh(monitor);
 		sem_post(&screewWrite);
 	}
-}
-
-
-void windowSetUp() {
-	mainWindows = initscr();    //è lo sfondo, scrivere su di lui i commenti perpetui
-	titleW = newwin(10, 60, 1, 1);
-	cmdW = newwin(20, 60, 12, 1);
-	showPannel = newwin(43, 60, 1, 63);
-	monitor = newwin(10, 60, 34, 1);
-	curs_set(0); //disattivo il cursore così il movimento causato dai thread non si nota
-	refresh();
-
-	start_color();
-	init_pair(Titoli, COLOR_BLUE, COLOR_GREEN);
-	init_pair(Comandi, COLOR_BLACK, COLOR_WHITE);
-	init_pair(ViewPan, COLOR_RED, COLOR_WHITE);
-	init_pair(StdoutPrint, COLOR_GREEN, COLOR_BLUE);
-	init_pair(ErrorPrint, COLOR_RED, COLOR_BLACK);
-
-
-	/** Main windows print **/
-	mvprintw(LINES - 3, 1, "Versione del server: %s", firmwareVersion);
-	refresh();
-
-	/** Finestra Titolo setUp **/
-	wbkgd(titleW, COLOR_PAIR(Titoli));
-	box(titleW, 0, 0);    //sovrascrive il testo
-	titlePrintW(titleW, 1, 3);
-	wrefresh(titleW);
-
-	/** Finestra dei comandi setUp **/
-	wbkgd(cmdW, COLOR_PAIR(Comandi));
-	//box(cmdW, ' ', '#');    //sovrascrive il testo
-	mvprintw(cmdW->_begy - 1, cmdW->_begx, "---------------------Finestra di comando--------------------");
-
-	wrefresh(cmdW);
-
-	/** Finestra di Visualizzazione setUp **/
-	wbkgd(showPannel, COLOR_PAIR(ViewPan));
-	wrefresh(showPannel);
-
-	/** STDOUT and STDERR windows setUp**/
-	wbkgd(monitor, COLOR_PAIR(StdoutPrint));
-	//box(monitor, ' ', 0);
-	attron(COLOR_PAIR(StdoutPrint));
-	mvprintw(monitor->_begy - 1, monitor->_begx, "--------------------StdOut & StdErr Print-------------------");
-	mvwprintw(monitor, 1, 0, "");
-	scrollok(monitor, TRUE);
-	wrefresh(monitor);
-
-	refresh();
-}
-
-void titlePrintW(WINDOW *w, int y_start, int x_start) {
-	mvwprintw(w, y_start, x_start, " _   _                       ___  ___                 ");
-	mvwprintw(w, y_start + 1, x_start, "| | | |                      |  \\/  |                 ");
-	mvwprintw(w, y_start + 2, x_start, "| |_| | ___  _ __ ___   ___  | .  . | ___ _ __  _   _ ");
-	mvwprintw(w, y_start + 3, x_start, "|  _  |/ _ \\| '_ ` _ \\ / _ \\ | |\\/| |/ _ \\ '_ \\| | | |");
-	mvwprintw(w, y_start + 4, x_start, "| | | | (_) | | | | | |  __/ | |  | |  __/ | | | |_| |");
-	mvwprintw(w, y_start + 5, x_start, "\\_| |_/\\___/|_| |_| |_|\\___| \\_|  |_/\\___|_| |_|\\__,_|");
-}
-
-void menuHelpw(WINDOW *w, int y_start, int x_start) {
-	mvwprintw(w, y_start, x_start, "-h\thelp\t-> elenco comandi disponibili");
-	mvwprintw(w, y_start + 1, x_start, "-q\tquit\t-> termina server");
-	mvwprintw(w, y_start + 2, x_start, "-cr\tnameList\t-> Chat Archiviate");
-	mvwprintw(w, y_start + 3, x_start, "-ur\tUserRegister\t-> Utenti Registrati");
-
-}
-
-void chatShowW(WINDOW *w, int y_start, int x_start) {
-	mvwprintw(w, 1, 0, "Sul Server sono attualmente presenti i seguenti gruppi:");
-	char **chats = chatRoomExist();
-	char **chatStartPoint = chats;
-	int i = 1;
-	for (; *chats != NULL; chats++) {
-		mvwprintw(w, y_start + i, x_start, "[%d]\t|--%s\n", i, *chats);
-		i++;
-	}
-	freeDublePointerArr(chatStartPoint, sizeof(chatStartPoint));
-	wclrtobot(w);
-	wrefresh(w);
-}
-
-void userShowW(WINDOW *w, int y_start, int x_start) {
-	mvwprintw(w, 1, 0, "Sul Server sono attualmente Iscritti:");
-	nameList *user = UserExist();
-
-	for (int i = 0; i < user->nMemb; i++) {
-		mvwprintw(w, y_start + i, x_start, "[%d]\t|--%s\n", i + 1, user->names);
-	}
-	nameListFree(user);
-	wclrtobot(w);
-	wrefresh(w);
 }

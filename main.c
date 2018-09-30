@@ -38,6 +38,7 @@ typedef struct thUserArg_ {
 typedef struct thRoomArg_ {
 	int id;
 	char name[28];
+	infoChat *info;
 } thRoomArg;
 
 
@@ -50,9 +51,11 @@ void *roomTh(thRoomArg *);
 
 void titlePrintW(WINDOW *, int, int);
 
+void makeThRoom(int keyChat, char *name, infoChat *info);
+
 
 /*
- * LA libreria ncurse usa lo stdout per printare gli schermi, di conseguenza redirizzando il flusso si perde
+ * LaS libreria ncurse usa lo stdout per printare gli schermi, di conseguenza redirizzando il flusso si perde
  * la possibilità di visualizzare a schermo le finestre.
  * Per lo stdErr non è così, di conseguenza vengono create 2 pipe, in cui quella dello stdErr viene redirezionata
  * a un thread per farla visualizzare quando serve, mentre se si vuole printare a schermo delle informazioni normali
@@ -61,6 +64,8 @@ void titlePrintW(WINDOW *, int, int);
 
 int fdStdoutPipe[2];  // dal manuale: fdStdoutPipe[0] refers to the read end of the pipe. fdStdoutPipe[1] refers to the write end of the pipe.
 int fdStdErrPipe[2];  // dal manuale: fdStdoutPipe[0] refers to the read end of the pipe. fdStdoutPipe[1] refers to the write end of the pipe.
+
+int fdOutP;
 
 int errorRet;
 
@@ -79,6 +84,7 @@ int main(int argc, char *argv[]) {
 		printErrno("La creazione della pipe per lo stdout ha dato l'errore", errorRet);
 		exit(-1);
 	}
+	fdOutP = fdStdoutPipe[1];
 
 	//crea questa pipe e comunica per pacchetti, ogni READ leggerà un solo pacchetto
 	errorRet = pipe2(fdStdErrPipe, O_DIRECT);
@@ -97,16 +103,12 @@ int main(int argc, char *argv[]) {
 
 	/** Spawn dei thredh ROOM **/
 	nameList *chats = chatRoomExist();
-	pthread_t roomtid;
-	for (int i = 0; i < nAcceptTh; i++) {
-		thRoomArg *arg = malloc(sizeof(thRoomArg));
-		arg->id = i;
-		strncpy(arg->name, chats->names[i], 28);
-		errorRet = pthread_create(&roomtid, NULL, roomTh, arg);
-		if (errorRet != 0) {
-			printErrno("La creazione del Thread Accept ha dato il seguente errore", errorRet);
-			exit(-1);
-		}
+	char roomDir[128];
+	infoChat *info;
+	for (int i = 0; i < chats->nMemb; i++) {
+		sprintf(roomDir, "./%s/%s", chatDirName, chats->names[i]);
+		info = openRoom(roomDir);
+		makeThRoom(i, roomDir, info);
 	}
 	printf("ROOM th creati\n");
 
@@ -171,4 +173,20 @@ void *roomTh(thRoomArg *info) {
 	free(info);
 	return NULL;
 
+}
+
+void makeThRoom(int keyChat, char *roomPath, infoChat *info) {
+	pthread_t roomtid;
+	thRoomArg *arg = malloc(sizeof(thRoomArg));
+	arg->id = keyChat;
+	strncpy(arg->name, roomPath, 28);
+	arg->info = openRoom(roomPath);
+	if (arg->info == NULL) {
+		//todo: se nullo capire se è perchè già presente o non esistente.
+	}
+	errorRet = pthread_create(&roomtid, NULL, roomTh, arg);
+	if (errorRet != 0) {
+		printErrno("La creazione del Thread ROOM ha dato il seguente errore", errorRet);
+		exit(-1);
+	}
 }

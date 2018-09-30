@@ -4,54 +4,6 @@
 
 #include "../include/fileSystemUtylity.h"
 
-/*Funzioni per creare la struttura delle room nel file-sistem  */
-
-/*
- * Dentro il server le cartelle contengono le nameList => una dir è una nameList
- *
- * Dir-Server/
- *  |---Dir-chat-Name 1
- *  |   |--- ...
- *  |
- *  |---Dir-chat-Name 2
- *  |   |--- ...
- *  |
- *  |---Dir-chat-Name 3
- *  |   |--- ...
- *  |
- *  |
- *  |---Dir-USER
- *  |   |--- File-User-Login-data 1
- *  |   |--- File-User-Login-data 2
- *  |   |--- ...
- *
- *
- * "attuale chat" = Name-chat
- * Storico-chat : Name-chat-firstMessageData
- *
- * /"Dir-chat-Name"\
- *  |--- File: attuale chat
- *  |---Dir-history/
- *  |   |--- File-hystory xxxx-mm-gg
- *  |   |--- File-hystory xxxx-mm-gg
- *  |   ...
- *
- *  I file in hystory sono read only,
- *  Il file attuale ha una dimensone limite di 1 MB
- *  superata tale soglia deve essere copiato e spostato nello storico
- *  e iniziato un nuovo file, ciò a impedire una dimensione eccessiva di
- *  dati da caricare in ram
- *
- * /"File-User-Login-data"\
- *  Il nome utente è nel nome del file.
- *  il file inizia con la pw
- *  c'è un elenco delle white list, ovvero tutte le chat a cui sono collegato
- *  es:
- *  chat1:chat2:pippo:baudo:ecc:....
- *  con strtok possiamo trovare le singole chat
- *
- */
-
 
 int StartServerStorage(char *storage)  //apre o crea un nuovo storage per il database
 {
@@ -101,20 +53,22 @@ int StartServerStorage(char *storage)  //apre o crea un nuovo storage per il dat
 
 	printf("## ");
 
-	int confId = open("serverStat.conf", O_RDWR, 0666);
+	int confId = open(serverConfFile, O_RDWR, 0666);
 	if (confId == -1)  //sono presenti errori
 	{
 		printErrno("errore in open('serverStat.conf')", errno);
 		if (errno == 2)//file non presente
 		{
 			nameList *dir = allDir();
+			nameListPrint(dir);
 
-			if (dir->names[0] ==
-			    NULL) //non sono presenti cartelle di alcun tipo,la directory è quindi valida, creo il file config
+			if (dir->nMemb == 0)
 			{
+				//non sono presenti cartelle di alcun tipo,la directory è quindi valida, creo il file config
 				printf("La cartella non è valida, non sono presenti file o cartelle estrane\nProcedo alla creazione di serverStat.conf\n");
-				confId = creatServerStatConf();
+				creatServerStatConf(); //la funzione inizializza in ram e su hard-disc il file serverConfFile
 				mkdir(userDirName, 0777);
+				mkdir(chatDirName, 0777);
 
 			} else {    //è presente altro e la cartella non è valida per inizializzare il server
 				printf("La cartella non è valida e neanche validabile.\nNon si può procedere all'avvio del server\n");
@@ -125,17 +79,20 @@ int StartServerStorage(char *storage)  //apre o crea un nuovo storage per il dat
 	} else {
 
 		printf("La cartella era già uno storage per il server\n");
+		//procedo a caricare i dati del serverConfFile
+		lseek(confId, 0, SEEK_SET);
+		read(confId, &serStat.statFile, sizeof(serStat.statFile));
+		printf("caricamento dalla memoria eseguito\n");
+		serStat.fd = confId;
+		if (sem_init(&serStat.lock, 0, 1)) {
+			perror("serStat semaphore init take error: ");
+			return -1;
+		}
+
 	}
+	printServStat(STDOUT_FILENO);
 
-	char bufread[4096];
-	lseek(confId, 0, SEEK_SET);
-	int br = read(confId, bufread, 4096);
-
-	printf("\n######### Contenuto di serverStat.conf: #########\n%s#################################################\n",
-	       bufread);
-	printf("Current setting:\n");
-	printf("-->\tFirmware Version: %s\n", firmwareVersion);
-	close(confId);
+	//close(confId);    meglio lasciarlo aperto per permettere l'override del file durante la creazione di nuove chat e user per aggiornare l'id
 	printf("[2]---> success\n\n");
 
 	return 0;   //avvio con successo
@@ -143,18 +100,109 @@ int StartServerStorage(char *storage)  //apre o crea un nuovo storage per il dat
 
 ///Funzioni di per operare sulle chat
 
-int newRoom(char *name, int adminUs) {
+infoChat *newRoom(char *name, int adminUs) {
+	infoChat *info = malloc(sizeof(infoChat));
+	if (info == NULL) {
+		perror("infoChat malloc() take error: ");
+		return info;
+	}
 
+	serStat_addchat_lock();
+	long newId = readSerStat_idKeyChat_lock();
 
-	return 0;
+	///Creo la directory
+	char nameChat[128];
+	sprintf(nameChat, "%ld:%s", newId, name);
+	char chatPath[128];
+	sprintf(chatPath, "./%s/%s", chatDirName, nameChat);
+	if (mkdir(chatPath, 0777)) {
+		switch (errno) {
+			case EEXIST:
+				fprintf(stderr, "chatDir already exist");
+				return NULL;
+			default:
+				perror("makeDir chat take error :");
+				return NULL;
+				break;
+		}
+	}
+	///se arrivo qui sicuramente la cartella non esisteva e posso procedere tranquillamente
+
+	strncpy(info->myName, nameChat, 128);
+
+	char tempFile[128];
+	sprintf(tempFile, "%s%s", chatPath, "/temp");
+	info->fdTemp = lockDirFile(tempFile);
+	if (info->fdTemp == -2) {
+		//se ritorna null la creazione del thread è da annullare!!
+		return NULL;
+	}
+	///Creo tabella e conversazione
+	char tabNamePath[128];
+	sprintf(tabNamePath, "%s/%s", chatPath, chatTable);
+	info->tab = init_Tab(tabNamePath, nameChat);
+	char convNamePath[128];
+	sprintf(convNamePath, "%s/%s", chatPath, chatConv);
+	info->conv = initConv(convNamePath, adminUs);
+
+	return info;
 }
+
+infoChat *openRoom(char *pathDir) {
+	//pathDir = ./NAME_DIR_CHAT/CHAT_NAME
+	infoChat *info = malloc(sizeof(infoChat));
+	if (info == NULL) {
+		perror("infoChat malloc() take error: ");
+		return info;
+	}
+	char tempFile[128];
+	sprintf(tempFile, "%s%s", pathDir, "/temp");
+	info->fdTemp = lockDirFile(tempFile);
+	if (info->fdTemp == -1) {
+		return -1;
+	}
+
+
+	///Creo tabella e conversazione
+	char tabNamePath[128];
+	sprintf(tabNamePath, "%s/%s", pathDir, chatTable);
+	info->tab = open_Tab(tabNamePath);
+	char convNamePath[128];
+	sprintf(convNamePath, "%s/%s", pathDir, chatConv);
+	info->conv = openConf(convNamePath);
+
+	return info;
+}
+
+int lockDirFile(char *pathDir) {
+	///creo un file temporaneo nella cartella, se presente un thread chat è già in funzione O_TMPFILE
+	int lkFd = creat(pathDir, O_EXCL | __O_TMPFILE);
+	if (lkFd == -1) {
+		switch (errno) {
+			case EEXIST:
+				fprintf(stderr, "Thread chat just online\n");
+				return -1;
+				break;
+			default:
+				fprintf(stderr, "pathDir=%s\n", pathDir);
+				perror("errore in creazione del file lock temporaneo :");
+				return -1;
+		}
+
+	}
+	return lkFd;
+}
+
 
 ///Funzioni di supporto al file conf
 int creatServerStatConf() {
+	/**
+	 * LA funzione si occupa di aprire e inizializzare il serverStatConf
+	 * **/
 	int validServerId = open("serverStat.conf", O_CREAT | O_RDWR | O_TRUNC, 0666);
 
 	/*** Procedura per aggiungere ora di creazione del server ***/
-	char testo[4096] = "Server creato in data: ";
+	char testo[4096];
 
 	time_t current_time;
 	char *c_time_string;
@@ -177,18 +225,148 @@ int creatServerStatConf() {
 
 	/* Print to stdout. ctime() has already added a terminating newline character. */
 	//printf("Current time is %s", c_time_string);
-	strcat(testo, c_time_string);
-	strcat(testo, "Firmware Version: ");
-	strcat(testo, firmwareVersion);
-	strcat(testo, "\n");
+	serStat.statFile.idKeyChat = 0;
+	serStat.statFile.idKeyUser = 0;
+	strncpy(serStat.statFile.serverTimeCreate, c_time_string, 64);
+	strncpy(serStat.statFile.firmware_V, firmwareVersion, 64);
+	serStat.fd = validServerId;
 
-	size_t lenWrite = strlen(testo);
-	size_t byteWrite = 0;
-	do {
-		byteWrite += write(validServerId, testo + byteWrite, lenWrite - byteWrite);
-	} while (byteWrite != lenWrite);
+
+	overrideServerStatConf();
+
+	if (sem_init(&serStat.lock, 0, 1)) {
+		perror("serStat semaphore init take error: ");
+		return -1;
+	}
 
 	return validServerId;
+}
+
+int overrideServerStatConf() {
+	//sovrascrive il file con l'attuale contenuto nella variabile
+	if (serStat.fd == -2) {
+		return -1;
+	}
+	printFcntlFile(serStat.fd);
+	struct flock lockStatConf;
+
+	lockStatConf.l_type = F_WRLCK;
+	lockStatConf.l_whence = SEEK_SET;
+	lockStatConf.l_start = 0;
+	lockStatConf.l_len = 0;
+	lockStatConf.l_pid = 0;
+
+	printf("sto per prendere il lock\n");
+	//todo capire perchè vai in wait perpetua di un file nuovo
+	if (fcntl(serStat.fd, F_SETLKW,
+	          &lockStatConf))  //acquisisco il lock in scrittura sul file, se è occupato allora attende
+	{
+		perror("waiting lock on serverStat.conf take error:");
+		return -1;
+	}
+	sem_wait(&serStat.lock);
+	lseek(serStat.fd, 0, SEEK_SET);
+	size_t byteWrite = 0;
+	do {
+		byteWrite += write(serStat.fd, &serStat.statFile + byteWrite, sizeof(serStat.statFile) - byteWrite);
+	} while (byteWrite != sizeof(serverStat));
+	sem_post(&serStat.lock);
+
+	lockStatConf.l_type = F_UNLCK;
+	if (fcntl(serStat.fd, F_SETLKW,
+	          &lockStatConf))  //acquisisco il lock in scrittura sul file, se è occupato allora attende
+	{
+		perror("waiting unlock on serverStat.conf take error:");
+		return -1;
+	}
+	return 0;
+}
+
+void printFcntlFile(int fd) {
+	struct flock lockStatConf;
+
+	lockStatConf.l_whence = SEEK_SET;
+	lockStatConf.l_start = 0;
+	lockStatConf.l_len = 0;
+	lockStatConf.l_pid = 0;
+	//todo capire perchè dice che i parametri sono sbagliati!!!!!
+	if (fcntl(serStat.fd, F_GETLK, &lockStatConf))  //acquisisco i dati di lock del file
+	{
+		perror("printFcntlFile take error:");
+		return;
+	}
+	if (lockStatConf.l_type == F_UNLCK) printf("fd lock is free to lock\n");
+	else printf("fd lock is in use\n");
+}
+
+void printServStat(int fdOut) {
+	dprintf(fdOut, "######### Contenuto di serverStat.conf: #########\n");
+	dprintf(fdOut, "idKeyUser univoche number:\t--> %ld\n", serStat.statFile.idKeyUser);
+	dprintf(fdOut, "idKeyChat univoche number:\t--> %ld\n", serStat.statFile.idKeyChat);
+	dprintf(fdOut, "Time server Create: \t\t--> %s\n", serStat.statFile.serverTimeCreate);
+	dprintf(fdOut, "Server Firmware version:\t--> %s\n", serStat.statFile.firmware_V);
+	dprintf(fdOut, "file Descriptor position\t--> %d\n", serStat.fd);
+	int semVal;
+	sem_getvalue(&serStat.lock, &semVal);
+	dprintf(fdOut, "lock state\t\t\t--> %d\n", semVal);
+
+}
+
+int serStat_addUs_lock() {
+	if (sem_wait(&serStat.lock)) {
+		perror("serStat sem_wait take error: ");
+		return -1;
+	}
+	serStat.statFile.idKeyUser++;
+	if (sem_post(&serStat.lock)) {
+		perror("serStat sem_post take error: ");
+		return -1;
+	}
+	overrideServerStatConf();
+	return 0;
+}
+
+long readSerStat_idKeyUser_lock() {
+	long read;
+	if (sem_wait(&serStat.lock)) {
+		perror("serStat sem_wait take error: ");
+		return -1;
+	}
+	read = serStat.statFile.idKeyUser;
+	if (sem_post(&serStat.lock)) {
+		perror("serStat sem_post take error: ");
+		return -1;
+	}
+	return read;
+}
+
+int serStat_addchat_lock() {
+	if (sem_wait(&serStat.lock)) {
+		perror("serStat sem_wait take error: ");
+		return -1;
+	}
+	serStat.statFile.idKeyChat++;
+	if (sem_post(&serStat.lock)) {
+		perror("serStat sem_post take error: ");
+		return -1;
+	}
+	printServStat(fdOutP);
+	overrideServerStatConf();
+	return 0;
+}
+
+long readSerStat_idKeyChat_lock() {
+	long read;
+	if (sem_wait(&serStat.lock)) {
+		perror("serStat sem_wait take error: ");
+		return -1;
+	}
+	read = serStat.statFile.idKeyChat;
+	if (sem_post(&serStat.lock)) {
+		perror("serStat sem_post take error: ");
+		return -1;
+	}
+	return read;
 }
 
 
@@ -201,7 +379,9 @@ nameList *chatRoomExist() {
 	nameList *chats = malloc(sizeof(nameList));
 	struct dirent **namelist;
 
-	chats->nMemb = scandir(".", &namelist, filterDirChat, alphasort);
+	char home[128] = "./";
+
+	chats->nMemb = scandir(strncat(home, chatDirName, 128), &namelist, filterDirChat, alphasort);
 	if (chats->nMemb == -1) {
 		perror("scan dir");
 		exit(EXIT_FAILURE);
@@ -221,8 +401,8 @@ nameList *UserExist() {
 	nameList *users = malloc(sizeof(nameList));
 	struct dirent **namelist;
 
-	char home[512] = "./";
-	users->nMemb = scandir(strcat(home, userDirName), &namelist, filterDir, alphasort);
+	char home[128] = "./";
+	users->nMemb = scandir(strncat(home, userDirName, 128), &namelist, filterDir, alphasort);
 	if (users->nMemb == -1) {
 		perror("scan dir");
 		exit(EXIT_FAILURE);
@@ -333,6 +513,7 @@ char *fileType(unsigned char d_type, char *buf, int bufLen) {
 
 ///show funcion
 void nameListPrint(nameList *nl) {
+	printf("N° elem: %d\n", nl->nMemb);
 	for (int i = 0; i < nl->nMemb; i++) {
 		printf("%s\n", nl->names[i]);
 	}

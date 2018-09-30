@@ -23,6 +23,9 @@
 #define nameFirstFreeSize 50
 #define nameEntrySize 28
 
+extern int fdOutP;  //pipe di uscita per lo stdOut
+
+
 typedef struct firstFree_ {
 	char name[nameFirstFreeSize];      //nomi da 19 caratteri per il nome della tabella
 	int counter;        //numero di caselle libere nel file

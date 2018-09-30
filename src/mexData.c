@@ -158,7 +158,7 @@ conversation *loadConvF(FILE *stream) {
 	dataPoint = buf + sizeof(conv->head);
 	if (streamInfo.st_size == sizeof(conv->head)) {
 		//non sono presenti messaggi e ho una conversazione vuota
-		printf("File con solo testa\n");
+		dprintf(fdOutP, "File con solo testa\n");
 		return conv;
 	}
 	conv->mexList = calloc(conv->head.nMex, sizeof(mex *));   //creo un array di puntatori a mex
@@ -179,7 +179,7 @@ conversation *loadConvF(FILE *stream) {
 
 		conv->mexList[i] = mexNode;   //salvo il puntatore nell'array
 		/*
-		printf("\nil nuovo messaggio creato è:\n");
+		dprintf(fdOutP,"\nil nuovo messaggio creato è:\n");
 		printMex(mexNode);
 		*/
 	}
@@ -198,7 +198,7 @@ int fWriteF(FILE *f, size_t sizeElem, int nelem, void *dat) {
 			errno = EBADFD;   //file descriptor in bad state
 			return -1;
 		}
-		//printf("prima fwrite; dat=%p\n",dat);
+		//dprintf(fdOutP,"prima fwrite; dat=%p\n",dat);
 		cont += fwrite(dat + cont, 1, sizeElem * nelem - cont, f);
 	}
 	return 0;
@@ -240,23 +240,23 @@ time_t currTimeSys() {
 ///Funzioni di visualizzazione
 
 void printConv(conversation *c) {
-	printf("-------------------------------------------------------------\n");
-	printf("\tLa Conversazione ha salvati i seguenti messaggi:\n");
-	printf("\tsizeof(mex)=%d\tsizeof(mexInfo)=%d\tsizeof(convInfo)=%d\n", sizeof(mex), sizeof(mexInfo),
+	dprintf(fdOutP, "-------------------------------------------------------------\n");
+	dprintf(fdOutP, "\tLa Conversazione ha salvati i seguenti messaggi:\n");
+	dprintf(fdOutP, "\tsizeof(mex)=%d\tsizeof(mexInfo)=%d\tsizeof(convInfo)=%d\n", sizeof(mex), sizeof(mexInfo),
 	       sizeof(convInfo));
-	printf("FILE stream pointer\t-> %p\n", c->stream);
-	printf("\n\t[][]La Conversazione è:[][]\n\n");
+	dprintf(fdOutP, "FILE stream pointer\t-> %p\n", c->stream);
+	dprintf(fdOutP, "\n\t[][]La Conversazione è:[][]\n\n");
 	printConvInfo(&c->head);
 
 	//mex *currMex=c->mexList;
-	printf("##########\n\n");
+	dprintf(fdOutP, "##########\n\n");
 
 	for (int i = 0; i < c->head.nMex; i++) {
-		printf("--->Mex[%d]:\n", i);
+		dprintf(fdOutP, "--->Mex[%d]:\n", i);
 		printMex(c->mexList[i]);
-		printf("**********\n");
+		dprintf(fdOutP, "**********\n");
 	}
-	printf("-------------------------------------------------------------\n");
+	dprintf(fdOutP, "-------------------------------------------------------------\n");
 	return;
 }
 
@@ -267,13 +267,13 @@ void printMex(mex *m) {
 	m->info.timeM
 	m->next
 	 */
-	printf("Mex data Store locate in=%p:\n", m);
-	printf("info.usId\t-> %d\n", m->info.usId);
-	printf("time Message\t-> %s", timeString(m->info.timeM));
+	dprintf(fdOutP, "Mex data Store locate in=%p:\n", m);
+	dprintf(fdOutP, "info.usId\t-> %d\n", m->info.usId);
+	dprintf(fdOutP, "time Message\t-> %s", timeString(m->info.timeM));
 	if (m->text != NULL) {
-		printf("Text:\n-->  %s\n", m->text);
+		dprintf(fdOutP, "Text:\n-->  %s\n", m->text);
 	} else {
-		printf("Text: ##Non Presente##\n");
+		dprintf(fdOutP, "Text: ##Non Presente##\n");
 	}
 }
 
@@ -283,19 +283,19 @@ void printConvInfo(convInfo *cI) {
 	cI->adminId
 	cI->timeCreate
 	*/
-	printf("#1\tConversation info data Store:\n");
-	printf("nMess\t\t-> %d\n", cI->nMex);
-	printf("adminId\t\t-> %d\n", cI->adminId);
-	printf("Time Creat\t-> %s\n", timeString(cI->timeCreate));
+	dprintf(fdOutP, "#1\tConversation info data Store:\n");
+	dprintf(fdOutP, "nMess\t\t-> %d\n", cI->nMex);
+	dprintf(fdOutP, "adminId\t\t-> %d\n", cI->adminId);
+	dprintf(fdOutP, "Time Creat\t-> %s\n", timeString(cI->timeCreate));
 }
 
 
 char *timeString(time_t t) {
 	char *c_time_string;
 /* Convert to local time format. */
-	//printf("ctime before\n");
+	//dprintf(fdOutP,"ctime before\n");
 	c_time_string = ctime(&t);   /// è thread safe, ha una memoria interna
-	//printf("ctime after\n");
+	//dprintf(fdOutP,"ctime after\n");
 	if (c_time_string == NULL) {
 		fprintf(stderr, "Failure to convert the current time.\n");
 	}

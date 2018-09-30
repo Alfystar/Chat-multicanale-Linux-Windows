@@ -78,7 +78,7 @@ int delEntry(table *t, int index) {
 	entry *delData = &t->data[index];
 	if (isEmptyEntry(delData)) {
 		// è già una cella cancellata, e non devo modificare nulla
-		printf("la casella è vuota\n");
+		dprintf(fdOutP, "la casella è vuota\n");
 		return 0;
 	}
 	delData->name[0] = 0;  //metto la stringa a ""
@@ -197,12 +197,12 @@ int setUpTabF(FILE *tab, char *name) {
 		perror("Write FirstFree setup take error:");
 		return -1;
 	}
-	printf("first-free setup\n");
+	dprintf(fdOutP, "first-free setup\n");
 	if (fileWrite(tab, sizeof(entry), 1, &last)) {
 		perror("Write last-entry setup take error:");
 		return -1;
 	}
-	printf("last-entry setup\n");
+	dprintf(fdOutP, "last-entry setup\n");
 	funlockfile(tab);
 	return 0; //all ok
 }
@@ -221,7 +221,7 @@ int addEntryTabF(FILE *tab, char *name, int data) {
 	int enSeek = entrySeekF(tab, first.nf_id);
 	if (enSeek == -1) {
 		perror("in addEntryTabF entrySeekF take error:");
-		printf("index richiesto:%d\n", first.nf_id);
+		dprintf(fdOutP, "index richiesto:%d\n", first.nf_id);
 		exit(-1);
 	}
 
@@ -294,7 +294,7 @@ int delEntryTabF(FILE *tab, int index) {
 	int enDelSeek = entrySeekF(tab, index);
 	if (enDelSeek == -1) {
 		perror("in delEntryTabF entrySeekF take error:");
-		printf("index richiesto:%d\n", index);
+		dprintf(fdOutP, "index richiesto:%d\n", index);
 		exit(-1);
 	}
 	/** L'operazione è eseguita in modo atomico rispetto ai Tread del processo **/
@@ -342,7 +342,7 @@ int entrySeekF(FILE *tab, int i) {
 		return -1;
 	}
 #ifdef DEB_STR
-	printf("Entry seek:\nsize=%d\nindex=%d\nseek=%d\n",tabInfo.st_size,i,seek);
+	dprintf(fdOutP,"Entry seek:\nsize=%d\nindex=%d\nseek=%d\n",tabInfo.st_size,i,seek);
 #endif
 	return seek;
 }
@@ -371,14 +371,15 @@ int fileWrite(FILE *f, size_t sizeElem, int nelem, void *dat) {
 
 ///Show funciton
 void firstPrint(firstFree *f) {
-	printf("#1\tfirstFree data Store:\nname\t\t-> %s\ncouterFree\t-> %d\nLen\t\t-> %d\nnextFree\t-> %d\n", f->name,
-	       f->counter, f->len, f->nf_id);
+	dprintf(fdOutP, "#1\tfirstFree data Store:\nname\t\t-> %s\ncouterFree\t-> %d\nLen\t\t-> %d\nnextFree\t-> %d\n",
+	        f->name,
+	        f->counter, f->len, f->nf_id);
 	return;
 }
 
 void entryPrint(entry *e) {
-	printf("Entry data Store:\n??-Last-Free -> %s\tempty  -> %s\nname\t\t-> %s\npoint\t\t-> %d\n",
-	       booleanPrint(isLastEntry(e)), booleanPrint(isEmptyEntry(e)), e->name, e->point);
+	dprintf(fdOutP, "Entry data Store:\n??-Last-Free -> %s\tempty  -> %s\nname\t\t-> %s\npoint\t\t-> %d\n",
+	        booleanPrint(isLastEntry(e)), booleanPrint(isEmptyEntry(e)), e->name, e->point);
 	return;
 }
 
@@ -386,31 +387,32 @@ void tabPrint(table *tab) {
 	struct stat tabInfo;
 	fstat(fileno(tab->stream), &tabInfo);
 	if (tabInfo.st_size == 0) {
-		printf("File Vuoto, o Inesistente\n");
+		dprintf(fdOutP, "File Vuoto, o Inesistente\n");
 		return;
 	}
 
 	size_t lenFile = lenTabF(tab->stream);
 
-	printf("-------------------------------------------------------------\n");
-	printf("\tLa tabella ha le seguenti caratteristiche:\n\tsize=%d\n\tlenFile=%d\tlenFirst=%d\n", tabInfo.st_size,
+	dprintf(fdOutP, "-------------------------------------------------------------\n");
+	dprintf(fdOutP, "\tLa tabella ha le seguenti caratteristiche:\n\tsize=%d\n\tlenFile=%d\tlenFirst=%d\n",
+	        tabInfo.st_size,
 	       lenFile, tab->head.len);
-	printf("\tsizeof(entry)=%d\tsizeof(firstFree)=%d\n", sizeof(entry), sizeof(firstFree));
-	printf("\n\t[][]La tabella contenuta nel file contiene:[][]\n\n");
+	dprintf(fdOutP, "\tsizeof(entry)=%d\tsizeof(firstFree)=%d\n", sizeof(entry), sizeof(firstFree));
+	dprintf(fdOutP, "\n\t[][]La tabella contenuta nel file contiene:[][]\n\n");
 	firstPrint(&tab->head);
-	printf("##########\n\n");
+	dprintf(fdOutP, "##########\n\n");
 	for (int i = 0; i < tab->head.len; i++) {
-		printf("--->entry[%d]:", i);
+		dprintf(fdOutP, "--->entry[%d]:", i);
 		entryPrint((&tab->data[i]));
-		printf("**********\n");
+		dprintf(fdOutP, "**********\n");
 	}
-	printf("-------------------------------------------------------------\n");
+	dprintf(fdOutP, "-------------------------------------------------------------\n");
 	return;
 }
 
 void tabPrintFile(FILE *tab) {
 	table *t = makeTable(tab);
-	printf("\t#@#@#@[] Print da File System []@#@#@#\n");
+	dprintf(fdOutP, "\t#@#@#@[] Print da File System []@#@#@#\n");
 	tabPrint(t);
 	freeTable(t);
 	return;
@@ -439,7 +441,7 @@ table *makeTable(FILE *tab) {
 	struct stat tabInfo;
 	fstat(fileno(tab), &tabInfo);
 	if (tabInfo.st_size == 0) {
-		printf("File Vuoto, o Inesistente\n");
+		dprintf(fdOutP, "File Vuoto, o Inesistente\n");
 		return NULL;
 	}
 

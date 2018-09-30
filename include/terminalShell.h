@@ -30,15 +30,22 @@ typedef struct thShellArg_ {
 /** Funzioni generali e mainTh **/
 void terminalShell(int [], int []);
 
+void driverCmd(int argc, char *argv[], int *exit);
+
+void menuHelpw(WINDOW *, int, int);
+
+
 void windowSetUp();
 
 void titlePrintW(WINDOW *, int, int);
 
-void menuHelpw(WINDOW *, int, int);
-
 void chatShowW(WINDOW *, int, int);
 
 void userShowW(WINDOW *, int, int);
+
+///Comandi di controllo sulle chat
+void newRoomCmd(char *name);
+
 
 /** shell th funx**/
 void shellThStdout(thShellArg *);
@@ -54,6 +61,8 @@ WINDOW *showPannel;
 WINDOW *monitor; //schermo autonomo che si occupa di visualizzare i printf generati dai thread per notifica
 
 sem_t screewWrite;
+
+extern int fdOutP;  //pipe di uscita per lo stdOut
 
 
 #endif //CHAT_MULTILEVEL_TERMINALSHELL_H

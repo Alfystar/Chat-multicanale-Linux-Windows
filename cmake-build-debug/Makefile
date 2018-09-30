@@ -285,6 +285,33 @@ src/terminalShell.c.s:
 	$(MAKE) -f CMakeFiles/Chat_MultiLevel.dir/build.make CMakeFiles/Chat_MultiLevel.dir/src/terminalShell.c.s
 .PHONY : src/terminalShell.c.s
 
+src/thFunx.o: src/thFunx.c.o
+
+.PHONY : src/thFunx.o
+
+# target to build an object file
+src/thFunx.c.o:
+	$(MAKE) -f CMakeFiles/Chat_MultiLevel.dir/build.make CMakeFiles/Chat_MultiLevel.dir/src/thFunx.c.o
+.PHONY : src/thFunx.c.o
+
+src/thFunx.i: src/thFunx.c.i
+
+.PHONY : src/thFunx.i
+
+# target to preprocess a source file
+src/thFunx.c.i:
+	$(MAKE) -f CMakeFiles/Chat_MultiLevel.dir/build.make CMakeFiles/Chat_MultiLevel.dir/src/thFunx.c.i
+.PHONY : src/thFunx.c.i
+
+src/thFunx.s: src/thFunx.c.s
+
+.PHONY : src/thFunx.s
+
+# target to generate assembly for a file
+src/thFunx.c.s:
+	$(MAKE) -f CMakeFiles/Chat_MultiLevel.dir/build.make CMakeFiles/Chat_MultiLevel.dir/src/thFunx.c.s
+.PHONY : src/thFunx.c.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -312,6 +339,9 @@ help:
 	@echo "... src/terminalShell.o"
 	@echo "... src/terminalShell.i"
 	@echo "... src/terminalShell.s"
+	@echo "... src/thFunx.o"
+	@echo "... src/thFunx.i"
+	@echo "... src/thFunx.s"
 .PHONY : help
 
 

@@ -15,11 +15,12 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <semaphore.h>
+#include <unistd.h>
+#include <fcntl.h>
 
 #include "../helpFunx.h"
 #include "fileSystemUtylity.h"
-#include <unistd.h>
-#include <fcntl.h>
+#include "thFunx.h"
 
 /** Strutture utili alla shell **/
 typedef struct thShellArg_ {

@@ -10,6 +10,7 @@ set(CMAKE_DEPENDS_CHECK_C
   "/home/alfylinux/CLionProjects/Chat-MultiChannel/src/mexData.c" "/home/alfylinux/CLionProjects/Chat-MultiChannel/cmake-build-debug/CMakeFiles/Chat_MultiLevel.dir/src/mexData.c.o"
   "/home/alfylinux/CLionProjects/Chat-MultiChannel/src/tableFile.c" "/home/alfylinux/CLionProjects/Chat-MultiChannel/cmake-build-debug/CMakeFiles/Chat_MultiLevel.dir/src/tableFile.c.o"
   "/home/alfylinux/CLionProjects/Chat-MultiChannel/src/terminalShell.c" "/home/alfylinux/CLionProjects/Chat-MultiChannel/cmake-build-debug/CMakeFiles/Chat_MultiLevel.dir/src/terminalShell.c.o"
+  "/home/alfylinux/CLionProjects/Chat-MultiChannel/src/thFunx.c" "/home/alfylinux/CLionProjects/Chat-MultiChannel/cmake-build-debug/CMakeFiles/Chat_MultiLevel.dir/src/thFunx.c.o"
   )
 set(CMAKE_C_COMPILER_ID "GNU")
 

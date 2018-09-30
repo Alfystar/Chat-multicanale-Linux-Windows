@@ -100,6 +100,9 @@
 		<Unit filename="/home/alfylinux/CLionProjects/Chat-MultiChannel/include/terminalShell.h">
 			<Option target="Chat_MultiLevel"/>
 		</Unit>
+		<Unit filename="/home/alfylinux/CLionProjects/Chat-MultiChannel/include/thFunx.h">
+			<Option target="Chat_MultiLevel"/>
+		</Unit>
 		<Unit filename="/home/alfylinux/CLionProjects/Chat-MultiChannel/main.c">
 			<Option target="Chat_MultiLevel"/>
 		</Unit>
@@ -113,6 +116,9 @@
 			<Option target="Chat_MultiLevel"/>
 		</Unit>
 		<Unit filename="/home/alfylinux/CLionProjects/Chat-MultiChannel/src/terminalShell.c">
+			<Option target="Chat_MultiLevel"/>
+		</Unit>
+		<Unit filename="/home/alfylinux/CLionProjects/Chat-MultiChannel/src/thFunx.c">
 			<Option target="Chat_MultiLevel"/>
 		</Unit>
 		<Unit filename="/home/alfylinux/CLionProjects/Chat-MultiChannel/CMakeLists.txt">

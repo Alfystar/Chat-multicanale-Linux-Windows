@@ -52,6 +52,7 @@ typedef struct infoChat_ {
 	int fdTemp;
 } infoChat;
 
+///GLOBAL VARIABLE
 extern char **environ;
 extern int fdOutP;  //pipe di uscita per lo stdOut
 
@@ -109,6 +110,8 @@ char *fileType(unsigned char d_type, char *externalBuf, int bufLen);
 
 ///Funzioni per visualizzare gli elementi
 void nameListPrint(nameList *nameList);
+
+void infoChatPrint(infoChat *info);
 
 
 #endif //CHAT_MULTILEVEL_FILESYSTEMUTYLITY_H

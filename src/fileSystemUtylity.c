@@ -521,3 +521,18 @@ void nameListPrint(nameList *nl) {
 	}
 	printf("\t# End list #\n");
 }
+
+void infoChatPrint(infoChat *info) {
+
+	/*
+	 info->tab
+	 info->conv
+	 info->myName
+	 */
+	printf("########[[]][[]] infoChat contenent [[]][[]]########\n");
+	tabPrint(info->tab);
+	printConv(info->conv);
+	printf("info->myName= %s\n", info->myName);
+	printf("----------------------------------------------------\n");
+
+}

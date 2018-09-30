@@ -4,9 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-/** Thread lib **/
-#include <unistd.h>
-#include <pthread.h>
+
 
 /** Librerie per creare la Pipe**/
 #include <fcntl.h>
@@ -21,37 +19,15 @@
 #include "include/mexData.h"
 #include "include/tableFile.h"
 #include "include/terminalShell.h"  /** screen Shell lib **/
+#include "thFunx.h"
 
 
 
 /** STRUTTURE & Typedef DEL MAIN **/
-typedef struct thAcceptArg_ {
-	int id;
-	int fdStdout;
-	int fdStderr;
-} thAcceptArg;
-
-typedef struct thUserArg_ {
-	int id;
-} thUserArg;
-
-typedef struct thRoomArg_ {
-	int id;
-	char name[28];
-	infoChat *info;
-} thRoomArg;
 
 
 /** PROTOTIPI DEL MAIN **/
-void *acceptTh(thAcceptArg *);
 
-void *userTh(thUserArg *);
-
-void *roomTh(thRoomArg *);
-
-void titlePrintW(WINDOW *, int, int);
-
-void makeThRoom(int keyChat, char *name, infoChat *info);
 
 
 /*
@@ -144,49 +120,4 @@ int main(int argc, char *argv[]) {
 	terminalShell(fdStdoutPipe, fdStdErrPipe);
 
 	return 0;
-}
-
-
-void menuHelp() {
-	printf("-h\thelp\t-> elenco comandi disponibili\n");
-	printf("-q\tquit\t-> termina server\n");
-}
-
-void *acceptTh(thAcceptArg *info) {
-	while (1) {
-		dprintf(fdStdoutPipe[1], "ciao sono un th Accept\n");
-		pause();
-	}
-	free(info);
-	return NULL;
-}
-
-void *userTh(thUserArg *info) {
-	pause();
-	free(info);
-	return NULL;
-}
-
-void *roomTh(thRoomArg *info) {
-	dprintf(fdStdoutPipe[1], "Ciao sono Un TH-ROOM\n\tsono la %d\n\tmi chiamo %s\n", info->id, info->name);
-	pause();
-	free(info);
-	return NULL;
-
-}
-
-void makeThRoom(int keyChat, char *roomPath, infoChat *info) {
-	pthread_t roomtid;
-	thRoomArg *arg = malloc(sizeof(thRoomArg));
-	arg->id = keyChat;
-	strncpy(arg->name, roomPath, 28);
-	arg->info = openRoom(roomPath);
-	if (arg->info == NULL) {
-		//todo: se nullo capire se è perchè già presente o non esistente.
-	}
-	errorRet = pthread_create(&roomtid, NULL, roomTh, arg);
-	if (errorRet != 0) {
-		printErrno("La creazione del Thread ROOM ha dato il seguente errore", errorRet);
-		exit(-1);
-	}
 }

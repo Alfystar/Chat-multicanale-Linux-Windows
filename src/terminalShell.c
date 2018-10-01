@@ -96,13 +96,13 @@ void driverCmd(int argc, char *argv[], int *exit) {
 	if (argc >= 2) //seleziona comando
 	{
 		if (strcmp(argv[0], "mkRm") == 0) {
+			//todo l'admin us è da richiedere e da verificare se è valido. da spostare da argc=2 a -> argc=3
 			infoChat *info = newRoom(argv[1], 0);
 			if (info == 0) {
 				dprintf(STDERR_FILENO, "creazione della chat impossibile");
 				return;
 			}
-			nameList *chats = chatRoomExist();
-			int idKey = atoi(info->myName);       //essendo myname xx:TEXT, la funzione termina ai : e ottengo la key
+			long idKey = atoi(info->myName);       //essendo myname xx:TEXT, la funzione termina ai : e ottengo la key
 			char roomDir[128];
 			sprintf(roomDir, "./%s/%ld:%s", chatDirName, idKey, argv[1]);
 			makeThRoom(idKey, roomDir, info);
@@ -111,6 +111,16 @@ void driverCmd(int argc, char *argv[], int *exit) {
 		}
 		if (strcmp(argv[0], "mkUs") == 0) {
 			//todo make new user
+			infoUser *info = newUser(argv[1]);
+			if (info == 0) {
+				dprintf(STDERR_FILENO, "creazione della chat impossibile");
+				return;
+			}
+			long idKey = atoi(info->myName);       //essendo myname xx:TEXT, la funzione termina ai : e ottengo la key
+			char userDir[128];
+			sprintf(userDir, "./%s/%ld:%s", userDirName, idKey, argv[1]);
+			makeThUser(idKey, userDir, info);
+			dprintf(fdOutP, "USER th creato, idKey=%d\n", idKey);
 			return;
 		}
 	}
@@ -128,8 +138,8 @@ void menuHelpw(WINDOW *w, int y_start, int x_start) {
 	wprintw(w, "->user\t-> Utenti Registrati\n");
 	wprintw(w, "->svst\t-> Mostra servStat sul monitor\n");
 	wprintw(w, "\t(1)arg\n");
-	wprintw(w, "->mkRm [name]\t-> Crea una nuova stanza chiamata [name]\n");
-	wprintw(w, "->mkUs [name]\t-> Crea un nuovo user chiamato [name]\n");
+	wprintw(w, "->mkRm [roomPath]\t-> Crea una nuova stanza chiamata [roomPath]\n");
+	wprintw(w, "->mkUs [roomPath]\t-> Crea un nuovo user chiamato [roomPath]\n");
 	//todo print infoChat of specific chat
 }
 

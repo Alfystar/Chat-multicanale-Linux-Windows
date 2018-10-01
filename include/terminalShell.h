@@ -28,32 +28,6 @@ typedef struct thShellArg_ {
 } thShellArg;
 
 
-/** Funzioni generali e mainTh **/
-void terminalShell(int [], int []);
-
-void driverCmd(int argc, char *argv[], int *exit);
-
-void menuHelpw(WINDOW *, int, int);
-
-
-void windowSetUp();
-
-void titlePrintW(WINDOW *, int, int);
-
-void chatShowW(WINDOW *, int, int);
-
-void userShowW(WINDOW *, int, int);
-
-///Comandi di controllo sulle chat
-void newRoomCmd(char *name);
-
-
-/** shell th funx**/
-void shellThStdout(thShellArg *);
-
-void shellThStdErr(thShellArg *);
-
-
 /** Global Variable **/
 WINDOW *mainWindows;
 WINDOW *titleW;
@@ -64,6 +38,35 @@ WINDOW *monitor; //schermo autonomo che si occupa di visualizzare i printf gener
 sem_t screewWrite;
 
 extern int fdOutP;  //pipe di uscita per lo stdOut
+
+
+/** Funzioni generali e mainTh **/
+void terminalShell(int [], int []);
+
+void driverCmd(int argc, char *argv[], int *exit);
+
+void menuHelpw(WINDOW *, int, int);
+
+
+///Funzioni specifiche di comando
+void windowSetUp();
+
+void titlePrintW(WINDOW *, int, int);
+
+void chatShowW(WINDOW *, int, int);
+
+void userShowW(WINDOW *, int, int);
+
+///Comandi di controllo sulle chat
+
+
+/** shell th funx**/
+void shellThStdout(thShellArg *);
+
+void shellThStdErr(thShellArg *);
+
+
+
 
 
 #endif //CHAT_MULTILEVEL_TERMINALSHELL_H

@@ -8,6 +8,7 @@
 #define userDirName "Users"
 #define chatDirName "Chats_ROOM"
 #define serverConfFile "serverStat.conf"
+
 #define chatTable "chatTableList.tab"
 #define userTable "userTableList.tab"
 #define chatConv "chatConversation.conv"

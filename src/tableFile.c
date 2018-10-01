@@ -8,6 +8,8 @@
 
 /** La funzione ha lo scopo di creare una tabella completamente nuova in memoria **/
 table *init_Tab(char *path, char *name) {
+	//path è l'indirizzo della cartella/NOME_FILE sulla quale creare la tabella
+	//roomPath è il nome scritto in first-Free
 	table *t;
 	FILE *f;
 	f = openTabF(path);

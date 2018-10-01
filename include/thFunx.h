@@ -21,11 +21,13 @@ typedef struct thAcceptArg_ {
 
 typedef struct thUserArg_ {
 	int id;
+	char userPath[50];
+	infoUser *info;
 } thUserArg;
 
 typedef struct thRoomArg_ {
 	int id;
-	char name[28];
+	char roomPath[50];
 	infoChat *info;
 } thRoomArg;
 
@@ -42,5 +44,8 @@ void *userTh(thUserArg *);
 void *roomTh(thRoomArg *);
 
 void makeThRoom(int keyChat, char *roomPath, infoChat *info);
+
+void makeThUser(int keyId, char *userPath, infoUser *info);
+
 
 #endif //CHAT_MULTILEVEL_THFUNX_H

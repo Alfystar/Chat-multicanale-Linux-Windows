@@ -86,7 +86,7 @@ int main(int argc, char *argv[]) {
 		info = openRoom(roomDir);
 		makeThRoom(i, roomDir, info);
 	}
-	printf("ROOM th creati\n");
+	printf("ROOM-th sturt-Up creati\n");
 
 
 

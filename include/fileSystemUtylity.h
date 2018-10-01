@@ -52,6 +52,11 @@ typedef struct infoChat_ {
 	int fdTemp;
 } infoChat;
 
+typedef struct infoUser_ {
+	table *tab;
+	char myName[128];
+} infoUser;
+
 ///GLOBAL VARIABLE
 extern char **environ;
 extern int fdOutP;  //pipe di uscita per lo stdOut
@@ -67,6 +72,10 @@ int StartServerStorage(char *storage_name);
 infoChat *newRoom(char *name, int adminId);
 
 infoChat *openRoom(char *pathDir);
+
+infoUser *newUser(char *name);
+
+infoUser *openUser(char *pathDir);
 
 int lockDirFile(char *pathDir);
 

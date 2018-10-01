@@ -21,7 +21,7 @@ void *userTh(thUserArg *info) {
 }
 
 void *roomTh(thRoomArg *info) {
-	dprintf(fdOutP, "Ciao sono Un Tr-ROOM\n\tsono la %d\tmi chiamo %s\n", info->id, info->name);
+	dprintf(fdOutP, "Ciao sono Un Tr-ROOM\n\tsono la %d\tmi chiamo %s\n", info->id, info->roomPath);
 	pause();
 	free(info);
 	return NULL;
@@ -36,13 +36,32 @@ void makeThRoom(int keyChat, char *roomPath, infoChat *info) {
 	thRoomArg *arg = malloc(sizeof(thRoomArg));
 	arg->id = keyChat;
 
-	strncpy(arg->name, roomPath, 28);
+	strncpy(arg->roomPath, roomPath, 50);
 	arg->info = info;
 
 	int errorRet;
 	errorRet = pthread_create(&roomtid, NULL, roomTh, arg);
 	if (errorRet != 0) {
 		printErrno("La creazione del Thread ROOM ha dato il seguente errore", errorRet);
+		exit(-1);
+	}
+}
+
+void makeThUser(int keyId, char *userPath, infoUser *info) {
+	if (info == NULL) {
+		dprintf(STDERR_FILENO, "infoUser NULL, impossibile creare Tr-ROOM\n");
+	}
+	pthread_t usertid;
+	thUserArg *arg = malloc(sizeof(thUserArg));
+	arg->id = keyId;
+
+	strncpy(arg->userPath, userPath, 50);
+	arg->info = info;
+
+	int errorRet;
+	errorRet = pthread_create(&usertid, NULL, userTh, arg);
+	if (errorRet != 0) {
+		printErrno("La creazione del Thread USER ha dato il seguente errore", errorRet);
 		exit(-1);
 	}
 }

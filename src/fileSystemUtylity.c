@@ -110,7 +110,7 @@ infoChat *newRoom(char *name, int adminUs) {
 	serStat_addchat_lock();
 	long newId = readSerStat_idKeyChat_lock();
 
-	///Creo la directory
+	///Creo la directory Chat
 	char nameChat[128];
 	sprintf(nameChat, "%ld:%s", newId, name);
 	char chatPath[128];
@@ -155,6 +155,7 @@ infoChat *openRoom(char *pathDir) {
 		perror("infoChat malloc() take error: ");
 		return info;
 	}
+	//todo verificare creazione del file temporaneo
 	char tempFile[128];
 	sprintf(tempFile, "%s%s", pathDir, "/temp");
 	info->fdTemp = lockDirFile(tempFile);
@@ -170,6 +171,63 @@ infoChat *openRoom(char *pathDir) {
 	char convNamePath[128];
 	sprintf(convNamePath, "%s/%s", pathDir, chatConv);
 	info->conv = openConf(convNamePath);
+
+	return info;
+}
+
+//todo da testare
+infoUser *newUser(char *name) {
+	infoUser *info = malloc(sizeof(infoUser));
+	if (info == NULL) {
+		perror("infoUser malloc() take error: ");
+		return info;
+	}
+
+	serStat_addUs_lock();
+	long newId = readSerStat_idKeyUser_lock();
+
+	///Creo la directory User
+	char nameUser[128];
+	sprintf(nameUser, "%ld:%s", newId, name);
+	char userPath[128];
+	sprintf(userPath, "./%s/%s", userDirName, nameUser);
+	if (mkdir(userPath, 0777)) {
+		switch (errno) {
+			case EEXIST:
+				fprintf(stderr, "userPath already exist");
+				return NULL;
+			default:
+				perror("makeDir chat take error :");
+				return NULL;
+				break;
+		}
+	}
+	///se arrivo qui sicuramente la cartella non esisteva e posso procedere tranquillamente
+
+	strncpy(info->myName, nameUser, 128);
+
+	///Creo tabella
+	char tabNamePath[128];
+	sprintf(tabNamePath, "%s/%s", userPath, userTable);
+	info->tab = init_Tab(tabNamePath, nameUser);
+
+
+	return info;
+}
+
+//todo da ridefinire
+infoUser *openUser(char *pathDir) {
+	//pathDir = ./NAME_DIR_USER/USER_DIR
+	infoUser *info = malloc(sizeof(infoUser));
+	if (info == NULL) {
+		perror("infoUser malloc() take error: ");
+		return info;
+	}
+
+	///Creo tabella
+	char tabNamePath[128];
+	sprintf(tabNamePath, "%s/%s", pathDir, chatTable);
+	info->tab = open_Tab(tabNamePath);
 
 	return info;
 }

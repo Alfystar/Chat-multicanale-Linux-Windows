@@ -5,6 +5,7 @@ CMakeFiles/Chat_MultiLevel.dir/helpFunx.c.o: ../defineSets.h
 CMakeFiles/Chat_MultiLevel.dir/helpFunx.c.o: ../helpFunx.c
 CMakeFiles/Chat_MultiLevel.dir/helpFunx.c.o: ../helpFunx.h
 
+CMakeFiles/Chat_MultiLevel.dir/main.c.o: ../include/thFunx.h
 CMakeFiles/Chat_MultiLevel.dir/main.c.o: ../defineSets.h
 CMakeFiles/Chat_MultiLevel.dir/main.c.o: ../helpFunx.h
 CMakeFiles/Chat_MultiLevel.dir/main.c.o: ../include/fileSystemUtylity.h
@@ -32,5 +33,14 @@ CMakeFiles/Chat_MultiLevel.dir/src/terminalShell.c.o: ../include/fileSystemUtyli
 CMakeFiles/Chat_MultiLevel.dir/src/terminalShell.c.o: ../include/mexData.h
 CMakeFiles/Chat_MultiLevel.dir/src/terminalShell.c.o: ../include/tableFile.h
 CMakeFiles/Chat_MultiLevel.dir/src/terminalShell.c.o: ../include/terminalShell.h
+CMakeFiles/Chat_MultiLevel.dir/src/terminalShell.c.o: ../include/thFunx.h
 CMakeFiles/Chat_MultiLevel.dir/src/terminalShell.c.o: ../src/terminalShell.c
+
+CMakeFiles/Chat_MultiLevel.dir/src/thFunx.c.o: ../defineSets.h
+CMakeFiles/Chat_MultiLevel.dir/src/thFunx.c.o: ../helpFunx.h
+CMakeFiles/Chat_MultiLevel.dir/src/thFunx.c.o: ../include/fileSystemUtylity.h
+CMakeFiles/Chat_MultiLevel.dir/src/thFunx.c.o: ../include/mexData.h
+CMakeFiles/Chat_MultiLevel.dir/src/thFunx.c.o: ../include/tableFile.h
+CMakeFiles/Chat_MultiLevel.dir/src/thFunx.c.o: ../include/thFunx.h
+CMakeFiles/Chat_MultiLevel.dir/src/thFunx.c.o: ../src/thFunx.c
 

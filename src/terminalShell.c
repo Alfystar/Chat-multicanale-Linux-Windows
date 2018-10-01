@@ -55,9 +55,8 @@ void terminalShell(int fdStdOutPipe[], int fdStdErrPipe[]) {
 		}
 
 		/// interpretazione sArgv[] ed esecuzione comandi
-
-		driverCmd(sArgc, sArgv, &exit);
 		sem_wait(&screewWrite);
+		driverCmd(sArgc, sArgv, &exit);
 		wrefresh(cmdW);
 		sem_post(&screewWrite);
 
@@ -69,21 +68,18 @@ void terminalShell(int fdStdOutPipe[], int fdStdErrPipe[]) {
 }
 
 void driverCmd(int argc, char *argv[], int *exit) {
+	//la funzione deve avere il controllo esclusivo dello schermo
 	if (argc >= 1) {
 		if (strcmp(argv[0], "q") == 0) {
 			*exit = 0;
 			return;
 		}
 		if (strcmp(argv[0], "chat") == 0) {
-			sem_wait(&screewWrite);
 			chatShowW(showPannel, 1, 0);
-			sem_post(&screewWrite);
 			return;
 		}
 		if (strcmp(argv[0], "user") == 0) {
-			sem_wait(&screewWrite);
 			userShowW(showPannel, 1, 0);
-			sem_post(&screewWrite);
 			return;
 		}
 		if (strcmp(argv[0], "svst") == 0) {
@@ -95,9 +91,121 @@ void driverCmd(int argc, char *argv[], int *exit) {
 
 	if (argc >= 2) //seleziona comando
 	{
+
+		if (strcmp(argv[0], "mkUs") == 0) {
+			infoUser *info = newUser(argv[1]);
+			if (info == 0) {
+				dprintf(STDERR_FILENO, "creazione della chat impossibile");
+				return;
+			}
+			return;
+		}
+		if (strcmp(argv[0], "startUs") == 0) {
+			nameList *user = userExist();
+			int idSearch = atoi(argv[1]);
+			int want = -1;
+			for (int i = 0; i < user->nMemb; i++) {
+				if (idSearch == atoi(user->names[i])) {
+					want = i;
+					break;
+				}
+
+			}
+			if (want == -1) {
+				dprintf(STDERR_FILENO, "Id richiesto inesistente\n");
+				return;
+			}
+
+			///Inizio la creazione del thread
+			char userDir[128];
+			sprintf(userDir, "./%s/%s", userDirName, user->names[want]);
+			nameListFree(user);
+			infoUser *info = openUser(userDir);
+			if (info == 0) {
+				dprintf(STDERR_FILENO, "creazione dell'User impossibile\n");
+				return;
+			}
+			makeThUser(idSearch, userDir, info);
+			dprintf(fdOutP, "USER th creato, idKey=%d\n", idSearch);
+
+			return;
+		}
+		if (strcmp(argv[0], "usTab") == 0) {
+
+
+			nameList *user = userExist();
+			int want = idSearch(user, atoi(argv[1]));
+			if (want == -1) {
+				dprintf(STDERR_FILENO, "Id richiesto inesistente\n");
+				return;
+			}
+
+			///Inizio la creazione del thread
+			char userDir[128];
+			sprintf(userDir, "./%s/%s", userDirName, user->names[want]);
+			nameListFree(user);
+			infoUser *info = openUser(userDir);
+			if (info == 0) {
+				dprintf(STDERR_FILENO, "Visualizzazione tabella impossibile\n");
+				nameListFree(user);
+
+				return;
+			}
+			dprintf(fdOutP, "path=%s\n", userDir);
+			//tabPrint(info->tab);
+			wtabPrint(showPannel, info->tab, 0);
+			return;
+		}
+		if (strcmp(argv[0], "roomTab") == 0) {
+			nameList *chat = chatRoomExist();
+			int want = idSearch(chat, atoi(argv[1]));
+			if (want == -1) {
+				dprintf(STDERR_FILENO, "Id richiesto inesistente\n");
+				return;
+			}
+
+			///carico dati da visualizzare
+			char chatDir[128];
+			sprintf(chatDir, "./%s/%s", chatDirName, chat->names[want]);
+			nameListFree(chat);
+			infoChat *info = openRoom(chatDir);
+			if (info == 0) {
+				dprintf(STDERR_FILENO, "Visualizzazione tabella impossibile\n");
+				return;
+			}
+			dprintf(fdOutP, "path=%s\n", chatDir);
+			//tabPrint(info->tab);
+			wtabPrint(showPannel, info->tab, 0);
+			return;
+		}
+		if (strcmp(argv[0], "roomConv") == 0) {
+			nameList *chat = chatRoomExist();
+			int want = idSearch(chat, atoi(argv[1]));
+			if (want == -1) {
+				dprintf(STDERR_FILENO, "Id richiesto inesistente\n");
+				return;
+			}
+
+			///carico dati da visualizzare
+			char chatDir[128];
+			sprintf(chatDir, "./%s/%s", chatDirName, chat->names[want]);
+			nameListFree(chat);
+			infoChat *info = openRoom(chatDir);
+			if (info == 0) {
+				dprintf(STDERR_FILENO, "Visualizzazione tabella impossibile\n");
+				return;
+			}
+			dprintf(fdOutP, "path=%s\n", chatDir);
+
+
+			wprintConv(showPannel, info->conv, 0);
+			return;
+		}
+	}
+	if (argc >= 3) {
 		if (strcmp(argv[0], "mkRm") == 0) {
 			//todo l'admin us è da richiedere e da verificare se è valido. da spostare da argc=2 a -> argc=3
-			infoChat *info = newRoom(argv[1], 0);
+			infoChat *info = newRoom(argv[1], atoi(argv[2]));
 			if (info == 0) {
 				dprintf(STDERR_FILENO, "creazione della chat impossibile");
 				return;
@@ -109,22 +217,7 @@ void driverCmd(int argc, char *argv[], int *exit) {
 			dprintf(fdOutP, "ROOM th creato, idKey=%d\n", idKey);
 			return;
 		}
-		if (strcmp(argv[0], "mkUs") == 0) {
-			//todo make new user
-			infoUser *info = newUser(argv[1]);
-			if (info == 0) {
-				dprintf(STDERR_FILENO, "creazione della chat impossibile");
-				return;
-			}
-			long idKey = atoi(info->myName);       //essendo myname xx:TEXT, la funzione termina ai : e ottengo la key
-			char userDir[128];
-			sprintf(userDir, "./%s/%ld:%s", userDirName, idKey, argv[1]);
-			makeThUser(idKey, userDir, info);
-			dprintf(fdOutP, "USER th creato, idKey=%d\n", idKey);
-			return;
-		}
 	}
-
 	menuHelpw(cmdW, 2, 0);
 }
 
@@ -138,8 +231,15 @@ void menuHelpw(WINDOW *w, int y_start, int x_start) {
 	wprintw(w, "->user\t-> Utenti Registrati\n");
 	wprintw(w, "->svst\t-> Mostra servStat sul monitor\n");
 	wprintw(w, "\t(1)arg\n");
-	wprintw(w, "->mkRm [roomPath]\t-> Crea una nuova stanza chiamata [roomPath]\n");
-	wprintw(w, "->mkUs [roomPath]\t-> Crea un nuovo user chiamato [roomPath]\n");
+	wprintw(w, "->mkUs [Us Name]\t-> Crea un user nel file system\n");
+	wprintw(w, "->startUs [Us id]\t-> Tenta di avviare un thread user\n");
+	wprintw(w, "->usTab [Us id]\t-> Visualizza tabella user\n");
+	wprintw(w, "->roomTab [Rm id]\t-> Visualizza tabella Room\n");
+	wprintw(w, "->roomConv [Rm id]\t-> Visualizza conversazione Room\n");
+	wprintw(w, "\t(2)arg\n");
+	wprintw(w, "->mkRm [Room Name] [id Admin]\t-> Crea una nuova Room\n");
+
+
 	//todo print infoChat of specific chat
 }
 
@@ -218,13 +318,12 @@ void chatShowW(WINDOW *w, int y_start, int x_start) {
 	wrefresh(w);
 }
 
-//todo verificare la funzione dopo aver creato user con il metodo corretto
 void userShowW(WINDOW *w, int y_start, int x_start) {
-	mvwprintw(w, 1, 0, "Sul Server sono attualmente Iscritti:");
-	nameList *user = UserExist();
+	mvwprintw(w, 1, 0, "Sul Server sono attualmente Iscritti gli utenti:\n");
+	nameList *user = userExist();
 
 	for (int i = 0; i < user->nMemb; i++) {
-		mvwprintw(w, y_start + i, x_start, "[%d]\t|--%s\n", i + 1, user->names);
+		wprintw(w, "[%d]\t|--%s\n", i, user->names[i]);
 	}
 	nameListFree(user);
 	wclrtobot(w);
@@ -232,11 +331,128 @@ void userShowW(WINDOW *w, int y_start, int x_start) {
 }
 
 
-///Comandi di controllo sulle chat
+///Comandi di visualizzazione chat e user
 
-//todo print tab e conv room
+void wtabPrint(WINDOW *w, table *t, int y_start) {
+	struct stat tabInfo;
+	fstat(fileno(t->stream), &tabInfo);
+	if (tabInfo.st_size == 0) {
+		dprintf(STDERR_FILENO, "File Vuoto, o Inesistente\n");
+		return;
+	}
 
-//todo print tab us
+	size_t lenFile = lenTabF(t->stream);
+
+	mvwprintw(w, y_start, 0, "");
+	wclrtobot(w);
+
+	wprintw(w, "La tabella ha le seguenti caratteristiche:\n");
+	wprintw(w, "size=%d\n", tabInfo.st_size);
+	wprintw(w, "lenFile=%d\tlenFirst=%d\n", lenFile, t->head.len);
+	wprintw(w, "sizeof(entry)=%d\tsizeof(firstFree)=%d\n", sizeof(entry), sizeof(firstFree));
+	wprintw(w, "\n[][]La tabella contenuta nel file contiene:[][]\n\n");
+	wfirstPrint(w, &t->head);
+	wprintw(w, "##########\n\n");
+	for (int i = 0; i < t->head.len; i++) {
+		wprintw(w, "--->entry[%d]:", i);
+		wentryPrint(w, (&t->data[i]));
+		wprintw(w, "**********\n");
+	}
+	wrefresh(w);
+}
+
+void wfirstPrint(WINDOW *w, firstFree *f) {
+
+	wprintw(w, "#1\tfirstFree data Store:\n");
+	wprintw(w, "name\t\t-> %s\n", f->name);
+	wprintw(w, " couterFree\t-> %d\n", f->counter);
+	wprintw(w, "Len\t\t-> %d\n", f->len);
+	wprintw(w, "nextFree\t-> %d\n", f->nf_id);
+	return;
+}
+
+void wentryPrint(WINDOW *w, entry *e) {
+	wprintw(w, "Entry data Store:\n??-Last-Free -> %s\tempty  -> %s\nname\t\t-> %s\npoint\t\t-> %d\n",
+	        booleanPrint(isLastEntry(e)), booleanPrint(isEmptyEntry(e)), e->name, e->point);
+	return;
+}
+
+
+void wprintConv(WINDOW *w, conversation *c, int y_start) {
+	mvwprintw(w, y_start, 0, "");
+	wclrtobot(w);
+	wprintw(w, "La Conversazione ha salvati i seguenti messaggi:\n");
+	wprintw(w, "sizeof(mex)=%d\tsizeof(mexInfo)=%d\tsizeof(convInfo)=%d\n", sizeof(mex), sizeof(mexInfo),
+	        sizeof(convInfo));
+	wprintw(w, "FILE stream pointer\t-> %p\n", c->stream);
+	wprintw(w, "\n\t[][]La Conversazione è:[][]\n\n");
+	wprintConvInfo(w, &c->head);
+
+	wprintw(w, "##########\n\n");
+
+	for (int i = 0; i < c->head.nMex; i++) {
+		wprintw(w, "--->Mex[%d]:\n", i);
+		wprintMex(w, c->mexList[i]);
+		wprintw(w, "**********\n");
+	}
+	wrefresh(w);
+	return;
+}
+
+void wprintMex(WINDOW *w, mex *m) {
+	/*
+	m->text
+	m->info.usId
+	m->info.timeM
+	m->next
+	 */
+	wprintw(w, "Mex data Store locate in=%p:\n", m);
+	wprintw(w, "info.usId\t-> %d\n", m->info.usId);
+	wprintw(w, "time Message\t-> %s", timeString(m->info.timeM));
+	if (m->text != NULL) {
+		wprintw(w, "Text:\n-->  %s\n", m->text);
+	} else {
+		wprintw(w, "Text: ##Non Presente##\n");
+	}
+}
+
+void wprintConvInfo(WINDOW *w, convInfo *cI) {
+	/*
+	cI->nMex
+	cI->adminId
+	cI->timeCreate
+	*/
+	wprintw(w, "#1\tConversation info data Store:\n");
+	wprintw(w, "nMess\t\t-> %d\n", cI->nMex);
+
+	nameList *user = userExist();
+	char *who;
+	int want = idSearch(user, cI->adminId);
+	if (want == -1) {
+		who = "Non più presente";
+	} else {
+		who = user->names[want];
+	}
+	wprintw(w, "adminId\t\t-> %d [%s]\n", cI->adminId, who);
+	wprintw(w, "Time Creat\t-> %s\n", timeString(cI->timeCreate));
+	nameListFree(user);
+}
+
+///id funx shortcut
+
+int idSearch(nameList *nl, int idSearch) {
+	//sfruttando che i nomi sono ID:NAME posso cercare con questo stratagemma
+	int want = -1;
+	for (int i = 0; i < nl->nMemb; i++) {
+		if (idSearch == atoi(nl->names[i])) {
+			want = i;
+			break;
+		}
+	}
+	return want;
+}
+
+
 
 
 /** shell th funx**/

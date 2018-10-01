@@ -51,13 +51,27 @@ void menuHelpw(WINDOW *, int, int);
 ///Funzioni specifiche di comando
 void windowSetUp();
 
-void titlePrintW(WINDOW *, int, int);
+void titlePrintW(WINDOW *window, int y_start, int x_start);
 
-void chatShowW(WINDOW *, int, int);
+void chatShowW(WINDOW *window, int y_start, int x_start);
 
-void userShowW(WINDOW *, int, int);
+void userShowW(WINDOW *window, int y_start, int x_start);
 
-///Comandi di controllo sulle chat
+///Comandi di visualizzazione chat e user
+
+void wtabPrint(WINDOW *window, table *t, int y_start);
+
+void wfirstPrint(WINDOW *window, firstFree *f);
+
+void wentryPrint(WINDOW *window, entry *e);
+
+void wprintConv(WINDOW *window, conversation *c, int y_start);
+
+void wprintMex(WINDOW *window, mex *m);
+
+void wprintConvInfo(WINDOW *window, convInfo *cI);
+
+int idSearch(nameList *nl, int idSearch);
 
 
 /** shell th funx**/

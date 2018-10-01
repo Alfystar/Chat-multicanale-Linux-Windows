@@ -101,7 +101,8 @@ long readSerStat_idKeyChat_lock();
 ///Funzioni di scan della directory
 /*Metodi per operare sul database lato fileSystem*/
 nameList *chatRoomExist();
-nameList *UserExist();
+
+nameList *userExist();
 nameList *allDir();
 void nameListFree(nameList *nl);
 

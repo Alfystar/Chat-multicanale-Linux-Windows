@@ -72,7 +72,7 @@ int main(int argc, char *argv[]) {
 	/** fase di avvio del server **/
 	if (StartServerStorage(argv[1]) == -1) //errore di qualche tipo nell'avvio del server
 	{
-		printf("\n!! Il server non è stato in grado di essere inizializato\nEXIT_FAILURE\n");
+		perror("\n!! Il server non è stato in grado di essere inizializato\nEXIT_FAILURE :");
 		exit(EXIT_FAILURE);
 	}
 	printf("SERVER AVVIATO\n");
@@ -86,7 +86,7 @@ int main(int argc, char *argv[]) {
 		info = openRoom(roomDir);
 		makeThRoom(i, roomDir, info);
 	}
-	printf("ROOM-th sturt-Up creati\n");
+	printf("ROOM-th start-Up creati\n");
 
 
 

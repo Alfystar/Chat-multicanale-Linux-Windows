@@ -11,10 +11,21 @@ void *acceptTh(thAcceptArg *info) {
 		pause();
 	}
 	free(info);
+
+	///Codice funzionante per la creazione di un thread user passandogli correttamente il parametro info
+	/*
+	infoUser *info;
+	long idKey = atoi(info->myName);       //essendo myname xx:TEXT, la funzione termina ai : e ottengo la key
+	char userDir[128];
+	sprintf(userDir, "./%s/%ld:%s", userDirName, idKey, argv[1]);
+	makeThUser(idKey, userDir, info);
+	dprintf(fdOutP, "USER th creato, idKey=%d\n", idKey);
+	*/
 	return NULL;
 }
 
 void *userTh(thUserArg *info) {
+	dprintf(fdOutP, "Ciao sono Un Tr-USER\n\tsono la %d\tmi chiamo %s\n", info->id, info->userPath);
 	pause();
 	free(info);
 	return NULL;
@@ -31,6 +42,7 @@ void *roomTh(thRoomArg *info) {
 void makeThRoom(int keyChat, char *roomPath, infoChat *info) {
 	if (info == NULL) {
 		dprintf(STDERR_FILENO, "infoChat NULL, impossibile creare Tr-ROOM\n");
+		return;
 	}
 	pthread_t roomtid;
 	thRoomArg *arg = malloc(sizeof(thRoomArg));
@@ -45,6 +57,8 @@ void makeThRoom(int keyChat, char *roomPath, infoChat *info) {
 		printErrno("La creazione del Thread ROOM ha dato il seguente errore", errorRet);
 		exit(-1);
 	}
+	return;
+
 }
 
 void makeThUser(int keyId, char *userPath, infoUser *info) {

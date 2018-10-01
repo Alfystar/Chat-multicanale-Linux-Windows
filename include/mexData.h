@@ -50,7 +50,9 @@ typedef struct conversation_ {
 
 conversation *initConv(char *path, int adminId);
 
-FILE *openConf(char *path);
+FILE *openConfStream(char *path);
+
+conversation *openConf(char *convPath);
 
 int addMex(conversation *conversation, mex *message);
 
@@ -78,11 +80,11 @@ int freeMex(mex *m);
 time_t currTimeSys();
 
 ///Funzioni di visualizzazione
-void printConv(conversation *c);
+void printConv(conversation *c, int fdOutP);
 
-void printMex(mex *m);
+void printMex(mex *m, int fdOutP);
 
-void printConvInfo(convInfo *cI);
+void printConvInfo(convInfo *cI, int fdOutP);
 
 char *timeString(time_t t);
 

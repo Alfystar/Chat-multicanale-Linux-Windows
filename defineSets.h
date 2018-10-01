@@ -4,7 +4,7 @@
 #ifndef CHAT_MULTILEVEL_DEFINESETS_H
 #define CHAT_MULTILEVEL_DEFINESETS_H
 
-#define firmwareVersion "0.03"
+#define firmwareVersion "0.04"
 #define userDirName "Users"
 #define chatDirName "Chats_ROOM"
 #define serverConfFile "serverStat.conf"

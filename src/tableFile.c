@@ -389,7 +389,7 @@ void tabPrint(table *tab) {
 	struct stat tabInfo;
 	fstat(fileno(tab->stream), &tabInfo);
 	if (tabInfo.st_size == 0) {
-		dprintf(fdOutP, "File Vuoto, o Inesistente\n");
+		dprintf(STDERR_FILENO, "File Vuoto, o Inesistente\n");
 		return;
 	}
 

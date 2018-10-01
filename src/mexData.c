@@ -8,7 +8,7 @@
 
 conversation *initConv(char *path, int adminId) {
 	conversation c;
-	c.stream = openConf(path);
+	c.stream = openConfStream(path);
 	if (setUpConvF(adminId, c.stream)) {
 		char buf[128]; // buff per creare la tringa di errore dinamicamente
 		switch (errno) {
@@ -27,7 +27,7 @@ conversation *initConv(char *path, int adminId) {
 	return loadConvF(c.stream);
 }
 
-FILE *openConf(char *path) {
+FILE *openConfStream(char *path) {
 	int confFd = open(path, O_RDWR | O_CREAT, 0666);
 	if (confFd == -1) {
 		perror("open FD for Tab take error:");
@@ -39,7 +39,15 @@ FILE *openConf(char *path) {
 		return NULL;
 	}
 	return f;
+}
 
+conversation *openConf(char *convPath) {
+	FILE *f = openConfStream(convPath);
+	if (f == NULL) {
+		perror("tab open error:");
+		return NULL;
+	}
+	return loadConvF(f);
 }
 
 int addMex(conversation *c, mex *m) {
@@ -239,28 +247,28 @@ time_t currTimeSys() {
 
 ///Funzioni di visualizzazione
 
-void printConv(conversation *c) {
+void printConv(conversation *c, int fdOutP) {
 	dprintf(fdOutP, "-------------------------------------------------------------\n");
 	dprintf(fdOutP, "\tLa Conversazione ha salvati i seguenti messaggi:\n");
 	dprintf(fdOutP, "\tsizeof(mex)=%d\tsizeof(mexInfo)=%d\tsizeof(convInfo)=%d\n", sizeof(mex), sizeof(mexInfo),
 	       sizeof(convInfo));
 	dprintf(fdOutP, "FILE stream pointer\t-> %p\n", c->stream);
 	dprintf(fdOutP, "\n\t[][]La Conversazione è:[][]\n\n");
-	printConvInfo(&c->head);
+	printConvInfo(&c->head, fdOutP);
 
 	//mex *currMex=c->mexList;
 	dprintf(fdOutP, "##########\n\n");
 
 	for (int i = 0; i < c->head.nMex; i++) {
 		dprintf(fdOutP, "--->Mex[%d]:\n", i);
-		printMex(c->mexList[i]);
+		printMex(c->mexList[i], fdOutP);
 		dprintf(fdOutP, "**********\n");
 	}
 	dprintf(fdOutP, "-------------------------------------------------------------\n");
 	return;
 }
 
-void printMex(mex *m) {
+void printMex(mex *m, int fdOutP) {
 	/*
 	m->text
 	m->info.usId
@@ -277,7 +285,7 @@ void printMex(mex *m) {
 	}
 }
 
-void printConvInfo(convInfo *cI) {
+void printConvInfo(convInfo *cI, int fdOutP) {
 	/*
 	cI->nMex
 	cI->adminId

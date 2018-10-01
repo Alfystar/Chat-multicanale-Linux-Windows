@@ -72,6 +72,7 @@ int StartServerStorage(char *storage)  //apre o crea un nuovo storage per il dat
 
 			} else {    //è presente altro e la cartella non è valida per inizializzare il server
 				printf("La cartella non è valida e neanche validabile.\nNon si può procedere all'avvio del server\n");
+				errno = EACCES;
 				return -1;
 			}
 			nameListFree(dir);
@@ -91,6 +92,10 @@ int StartServerStorage(char *storage)  //apre o crea un nuovo storage per il dat
 
 	}
 	printServStat(STDOUT_FILENO);
+	if (strcmp(firmwareVersion, serStat.statFile.firmware_V) != 0) {
+		errno = ENOTTY;
+		return -1;
+	}
 
 	//close(confId);    meglio lasciarlo aperto per permettere l'override del file durante la creazione di nuove chat e user per aggiornare l'id
 	printf("[2]---> success\n\n");
@@ -175,7 +180,6 @@ infoChat *openRoom(char *pathDir) {
 	return info;
 }
 
-//todo da testare
 infoUser *newUser(char *name) {
 	infoUser *info = malloc(sizeof(infoUser));
 	if (info == NULL) {
@@ -215,7 +219,6 @@ infoUser *newUser(char *name) {
 	return info;
 }
 
-//todo da ridefinire
 infoUser *openUser(char *pathDir) {
 	//pathDir = ./NAME_DIR_USER/USER_DIR
 	infoUser *info = malloc(sizeof(infoUser));
@@ -226,7 +229,7 @@ infoUser *openUser(char *pathDir) {
 
 	///Creo tabella
 	char tabNamePath[128];
-	sprintf(tabNamePath, "%s/%s", pathDir, chatTable);
+	sprintf(tabNamePath, "%s/%s", pathDir, userTable);
 	info->tab = open_Tab(tabNamePath);
 
 	return info;
@@ -457,7 +460,7 @@ nameList *chatRoomExist() {
 	return chats;
 }
 
-nameList *UserExist() {
+nameList *userExist() {
 	nameList *users = malloc(sizeof(nameList));
 	struct dirent **namelist;
 
@@ -589,7 +592,7 @@ void infoChatPrint(infoChat *info) {
 	 */
 	printf("########[[]][[]] infoChat contenent [[]][[]]########\n");
 	tabPrint(info->tab);
-	printConv(info->conv);
+	printConv(info->conv, STDOUT_FILENO);
 	printf("info->myName= %s\n", info->myName);
 	printf("----------------------------------------------------\n");
 

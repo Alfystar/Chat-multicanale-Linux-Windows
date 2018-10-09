@@ -19,7 +19,7 @@
 #include "include/mexData.h"
 #include "include/tableFile.h"
 #include "include/terminalShell.h"  /** screen Shell lib **/
-#include "thFunx.h"
+#include "include/thFunx.h"
 
 /** LIBRERIE Connessione **/
 

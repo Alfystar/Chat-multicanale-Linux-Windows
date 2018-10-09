@@ -12,6 +12,7 @@
 #include "fileSystemUtylity.h"
 #include "mexData.h"
 #include "tableFile.h"
+#include "socketConnect.h"
 
 typedef struct thAcceptArg_ {
 	int id;
@@ -42,6 +43,9 @@ void *acceptTh(thAcceptArg *);
 void *userTh(thUserArg *);
 
 void *roomTh(thRoomArg *);
+
+void *thUserServer(thConnArg *argTh);
+
 
 void makeThRoom(int keyChat, char *roomPath, infoChat *info);
 

@@ -57,7 +57,6 @@ void makeThRoom(int keyChat, char *roomPath, infoChat *info) {
 		printErrno("La creazione del Thread ROOM ha dato il seguente errore", errorRet);
 		exit(-1);
 	}
-	return;
 
 }
 

@@ -28,6 +28,10 @@
 
 /** STRUTTURE & Typedef DEL MAIN **/
 
+typedef struct thUserServ_ {
+	int id;
+	char name[128];
+} thUserServ;
 
 /** PROTOTIPI DEL MAIN **/
 
@@ -114,8 +118,22 @@ int main(int argc, char *argv[]) {
 	}
 	printf("Server CONNESSIONE avviato\n");
 
+	/** Spawn dei thread accetta user **/
+	thUserServ *arg;
+	int i = 0;
 
-    /** Spawn dei thread accetta user **/
+	while (1) {
+		arg = malloc(sizeof(thUserServ));
+		printf("arg = %p creato.\n", arg);
+		arg->id = i;
+		if (acceptCreate(con, thUserServer, arg) == -1) {
+			exit(-1);
+		}
+		i++;
+	}
+
+
+	// precedente implementazione, todo: farle convergere
 	acceptArray = malloc(nAcceptTh * sizeof(pthread_t));
 	for (int i = 0; i < nAcceptTh; i++) {
 		thAcceptArg *arg = malloc(sizeof(thAcceptArg));

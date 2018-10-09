@@ -21,6 +21,9 @@
 #include "include/terminalShell.h"  /** screen Shell lib **/
 #include "thFunx.h"
 
+/** LIBRERIE Connessione **/
+
+#include "include/socketConnect.h"
 
 
 /** STRUTTURE & Typedef DEL MAIN **/
@@ -47,9 +50,15 @@ int errorRet;
 
 pthread_t *acceptArray;
 
+void helpProject(void) {
+    printf("I parametri inseribili sono:\n");
+    printf("\tServer command:\n");
+    printf("\t[storage] [port] [coda]\t\tcreo il server nella cartella, porta, e per {coda} persone specificate\n");
+}
+
 int main(int argc, char *argv[]) {
-	if (argc < 2) {
-		printf("!#!#!#\tPrego inserire i dati mancanti:\n!#!#!#\t<Path-Server-Data>\n");
+    if (argc != 4) {
+        helpProject();
 		exit(EXIT_FAILURE);
 	}
 
@@ -69,15 +78,31 @@ int main(int argc, char *argv[]) {
 		exit(-1);
 	}
 
-	/** fase di avvio del server **/
-	if (StartServerStorage(argv[1]) == -1) //errore di qualche tipo nell'avvio del server
+    /** fase di avvio STORAGE del server **/
+    if (StartServerStorage(argv[1]) == -1)
 	{
 		perror("\n!! Il server non è stato in grado di essere inizializato\nEXIT_FAILURE :");
 		exit(EXIT_FAILURE);
 	}
-	printf("SERVER AVVIATO\n");
+    printf("SERVER STORAGE AVVIATO\n");
 
-	/** Spawn dei thredh ROOM **/
+    /** fase di avvio CONNESSIONE del server **/
+
+    connection *con = initSocket((u_int16_t) strtol(argv[2], NULL, 10), "INADDR_ANY");
+    if (con == NULL) {
+        exit(-1);
+    }
+
+    printf("Socket inizializzato\n");
+    if (initServer(con, (int) strtol(argv[3], NULL, 10)) == -1) {
+        exit(-1);
+    }
+    printf("Server CONNESSIONE avviato\n");
+
+
+
+
+    /** Spawn dei thread ROOM **/
 	nameList *chats = chatRoomExist();
 	char roomDir[128];
 	infoChat *info;
@@ -90,7 +115,7 @@ int main(int argc, char *argv[]) {
 
 
 
-	/** Spawn dei thredh accetta user **/
+    /** Spawn dei thread accetta user **/
 	acceptArray = malloc(nAcceptTh * sizeof(pthread_t));
 	for (int i = 0; i < nAcceptTh; i++) {
 		thAcceptArg *arg = malloc(sizeof(thAcceptArg));

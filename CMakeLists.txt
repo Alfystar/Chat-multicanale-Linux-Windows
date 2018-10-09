@@ -14,8 +14,8 @@ include_directories(src include)
 #file(GLOB HEADER "*.h")
 #file(GLOB SOURCES "*.c")
 
-set(SOURCES src/fileSystemUtylity.c src/terminalShell.c src/mexData.c src/tableFile.c helpFunx.c src/thFunx.c)
-set(HEADER include/fileSystemUtylity.h include/terminalShell.h include/mexData.h include/tableFile.h helpFunx.h include/thFunx.h)
+set(SOURCES src/fileSystemUtylity.c src/terminalShell.c src/mexData.c src/tableFile.c helpFunx.c src/thFunx.c src/socketConnect.c)
+set(HEADER include/fileSystemUtylity.h include/terminalShell.h include/mexData.h include/tableFile.h helpFunx.h include/thFunx.h include/socketConnect.h)
 
 #add_executable(Chat_MultiLevel main.c src/fileSystemUtylity.c include/fileSystemUtylity.h src/terminalShell.c include/terminalShell.h src/mexData.c include/mexData.h src/tableFile.c include/tableFile.h helpFunx.c helpFunx.h )
 add_executable(Chat_MultiLevel main.c ${HEADER} ${SOURCES})

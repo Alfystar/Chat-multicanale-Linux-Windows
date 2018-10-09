@@ -39,6 +39,10 @@ void *roomTh(thRoomArg *info) {
 
 }
 
+void *thUserServer(thConnArg *argTh) {
+	return NULL;
+}
+
 void makeThRoom(int keyChat, char *roomPath, infoChat *info) {
 	if (info == NULL) {
 		dprintf(STDERR_FILENO, "infoChat NULL, impossibile creare Tr-ROOM\n");

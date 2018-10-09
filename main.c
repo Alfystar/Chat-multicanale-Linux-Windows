@@ -121,7 +121,6 @@ int main(int argc, char *argv[]) {
 	/** Spawn dei thread accetta user **/
 	thUserServ *arg;
 	int i = 0;
-
 	while (1) {
 		arg = malloc(sizeof(thUserServ));
 		printf("arg = %p creato.\n", arg);

@@ -100,7 +100,7 @@ int StartServerStorage(char *storage)  //apre o crea un nuovo storage per il dat
 	//close(confId);    meglio lasciarlo aperto per permettere l'override del file durante la creazione di nuove chat e user per aggiornare l'id
 	printf("[2]---> success\n\n");
 
-	return 0;   //avvio con successo
+	return 0;   //avvio conInfo successo
 }
 
 ///Funzioni di per operare sulle chat
@@ -304,7 +304,7 @@ int creatServerStatConf() {
 }
 
 int overrideServerStatConf() {
-	//sovrascrive il file con l'attuale contenuto nella variabile
+	//sovrascrive il file conInfo l'attuale contenuto nella variabile
 	if (serStat.fd == -2 || serStat.fd == -1) {
 		fprintf(stderr, "fd not valid\n");
 		return -1;

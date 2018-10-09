@@ -39,7 +39,7 @@ table *open_Tab(char *path) {
 
 int addEntry(table *t, char *name, int data) {
 	if (addEntryTabF(t->stream, name, data)) {
-		//Aggiunta non avvenuta con successo
+        //Aggiunta non avvenuta conInfo successo
 		return -1;
 	}
 	firstFree *first = &t->head;
@@ -73,7 +73,7 @@ int addEntry(table *t, char *name, int data) {
 
 int delEntry(table *t, int index) {
 	if (delEntryTabF(t->stream, index)) {
-		//Eliminazione non avvenuta con successo
+        //Eliminazione non avvenuta conInfo successo
 		return -1;
 	}
 	firstFree *first = &t->head;

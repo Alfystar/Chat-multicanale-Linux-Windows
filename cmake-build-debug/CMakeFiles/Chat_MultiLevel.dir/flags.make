@@ -6,5 +6,5 @@ C_FLAGS = -g   -std=gnu11
 
 C_DEFINES = 
 
-C_INCLUDES = 
+C_INCLUDES = -I/home/filippo/CLionProjects/Chat-MultiChannel/src -I/home/filippo/CLionProjects/Chat-MultiChannel/include 
 

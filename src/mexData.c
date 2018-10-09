@@ -166,7 +166,7 @@ conversation *loadConvF(FILE *stream) {
 	dataPoint = buf + sizeof(conv->head);
 	if (streamInfo.st_size == sizeof(conv->head)) {
 		//non sono presenti messaggi e ho una conversazione vuota
-		dprintf(fdOutP, "File con solo testa\n");
+        dprintf(fdOutP, "File conInfo solo testa\n");
 		return conv;
 	}
 	conv->mexList = calloc(conv->head.nMex, sizeof(mex *));   //creo un array di puntatori a mex

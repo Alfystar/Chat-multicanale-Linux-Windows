@@ -29,14 +29,7 @@
 
 /** STRUTTURE & Typedef DEL MAIN **/
 
-typedef struct thUserServ_ {
-	int id;
-	char name[128];
-} thUserServ;
-
 /** PROTOTIPI DEL MAIN **/
-
-void *thUserServer(thConnArg *argTh);
 
 /*
  * LaS libreria ncurse usa lo stdout per printare gli schermi, di conseguenza redirizzando il flusso si perde
@@ -108,39 +101,29 @@ int main(int argc, char *argv[]) {
 
 	/** fase di avvio CONNESSIONE del server **/
 
-	connection *con = initSocket((u_int16_t) strtol(argv[2], NULL, 10), "INADDR_ANY");
-	if (con == NULL) {
+	connection *servCon = initSocket((u_int16_t) strtol(argv[2], NULL, 10), "INADDR_ANY");
+	if (servCon == NULL) {
 		exit(-1);
 	}
 
 	printf("Socket inizializzato\n");
-	if (initServer(con, (int) strtol(argv[3], NULL, 10)) == -1) {
+	if (initServer(servCon, (int) strtol(argv[3], NULL, 10)) == -1) {
 		exit(-1);
 	}
 	printf("Server CONNESSIONE avviato\n");
 
 	/** Spawn dei thread accetta user **/
-	thUserServ *arg;
-	int i = 0;
-	while (1) {
-		arg = malloc(sizeof(thUserServ));
-		printf("arg = %p creato.\n", arg);
-		arg->id = i;
-		if (acceptCreate(con, thUserServer, arg) == -1) {
-			exit(-1);
-		}
-		i++;
-	}
-
 
 	// precedente implementazione, todo: farle convergere
 	acceptArray = malloc(nAcceptTh * sizeof(pthread_t));
+	thAcceptArg *acceptArg;
 	for (int i = 0; i < nAcceptTh; i++) {
-		thAcceptArg *arg = malloc(sizeof(thAcceptArg));
-		arg->id = i;
-		arg->fdStdout = fdStdoutPipe[1];
-		arg->fdStderr = fdStdErrPipe[1];
-		errorRet = pthread_create(&acceptArray[i], NULL, acceptTh, arg);
+		acceptArg = malloc(sizeof(thAcceptArg));
+		acceptArg->id = i;
+		acceptArg->conInfo.con = *servCon;
+		acceptArg->conInfo.arg = NULL;
+
+		errorRet = pthread_create(&acceptArray[i], NULL, acceptTh, acceptArg);
 		if (errorRet != 0) {
 			printErrno("La creazione del Thread Accept ha dato il seguente errore", errorRet);
 			exit(-1);

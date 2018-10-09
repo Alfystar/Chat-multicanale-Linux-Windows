@@ -141,9 +141,9 @@ void freeConnection(connection *con) {
 int fillPack(mail *pack, int type, char *sender, char *whoOrWhy, void *mex, int len) {
     pack->md.dim = len;
     pack->md.type = type;
-    memcpy(pack->md.whoOrWhy, whoOrWhy, strlen(whoOrWhy));
-    memcpy(pack->md.sender, sender, strlen(sender));
-    memcpy(pack->mex, mex, len);
+    strncpy(pack->md.whoOrWhy, whoOrWhy, 24);
+    strncpy(pack->md.sender, sender, 28);
+    pack->mex = mex;
     return 0;
 }
 

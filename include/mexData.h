@@ -120,7 +120,7 @@ char *timeString(time_t t);
  *
  * essendo noi al lavoro su file, quindi siamo sicuri della struttura
  * ogni nuovo 1 è un nuovo messaggio dal quale scopriamo Id e time_t
- * mentre dopo un 2 andiamo a copiare la stringa con strcpy
+ * mentre dopo un 2 andiamo a copiare la stringa conInfo strcpy
  *
  *
  * In testa al file è presente un piccolo spazio in memoria dove sono presenti i metadati

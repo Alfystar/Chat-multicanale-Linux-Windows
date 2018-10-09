@@ -103,7 +103,7 @@ void freeTable(table *table);
 
 /** Struttura delle entry di una tabella **/
 /*
- * queste tabelle sono usate dalle chat e dagli utenti, ogniuno con la sua.
+ * queste tabelle sono usate dalle chat e dagli utenti, ogniuno conInfo la sua.
  * [1]  Le chat tengono traccia di chi è iscritto alla chat
  * [2]  Gli utenti le usano per ricordare a quali chat sono iscritti
  *

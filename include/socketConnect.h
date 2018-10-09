@@ -41,8 +41,8 @@ typedef struct connection_ {
 } connection;
 
 typedef struct thConnArg_ {
-    connection con;
-    void *arg;
+    connection con;     //connessioni soket attuale
+    void *arg;          //possibili parametri extra
 } thConnArg;
 
 // PROTOTIPI DI FUNZIONE:
@@ -56,7 +56,7 @@ int keepAlive(int *ds_sock);
 void freeConnection(connection *con);
 
 int readPack(int ds_sock, mail *pack);  // queste due funzioni prendono il pacchetto thread-specifico
-int writePack(int ds_sock, mail *pack); // ma all'interno contengono la struct mail con i dati
+int writePack(int ds_sock, mail *pack); // ma all'interno contengono la struct mail conInfo i dati
 
 int fillPack(mail *pack, int type, char *sender, char *whoOrWhy, void *mex, int len);
 

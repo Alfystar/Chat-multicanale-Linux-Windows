@@ -167,10 +167,10 @@ void infoChatPrint(infoChat *info);
  *
  * /"File-User-Login-data"\
  *  Il nome utente è nel nome del file.
- *  il file inizia con la pw
+ *  il file inizia conInfo la pw
  *  c'è un elenco delle white list, ovvero tutte le chat a cui sono collegato
  *  es:
  *  chat1:chat2:pippo:baudo:ecc:....
- *  con strtok possiamo trovare le singole chat
+ *  conInfo strtok possiamo trovare le singole chat
  *
  */

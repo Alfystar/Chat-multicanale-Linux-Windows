@@ -16,14 +16,14 @@
 
 typedef struct thAcceptArg_ {
 	int id;
-	int fdStdout;
-	int fdStderr;
+    thConnArg conInfo;
 } thAcceptArg;
 
 typedef struct thUserArg_ {
-	int id;
-	char userPath[50];
-	infoUser *info;
+    int id;             //idKey dell'user definito in fase di login
+    char userPath[50];  // path relativo a home dell'user in questione, login
+    infoUser *info;     // contiene tabella e nome per esteso, fase login
+    thConnArg *conUs;
 } thUserArg;
 
 typedef struct thRoomArg_ {
@@ -31,7 +31,6 @@ typedef struct thRoomArg_ {
 	char roomPath[50];
 	infoChat *info;
 } thRoomArg;
-
 
 ///GLOBAL VARIABLE
 extern int fdOutP;  //pipe di uscita per lo stdOut
@@ -41,6 +40,10 @@ extern int fdOutP;  //pipe di uscita per lo stdOut
 void *acceptTh(thAcceptArg *);
 
 void *userTh(thUserArg *);
+
+void *thrServRX(thUserArg *);
+
+void *thrServTX(thUserArg *);
 
 void *roomTh(thRoomArg *);
 

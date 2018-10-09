@@ -441,7 +441,7 @@ void wprintConvInfo(WINDOW *w, convInfo *cI) {
 ///id funx shortcut
 
 int idSearch(nameList *nl, int idSearch) {
-	//sfruttando che i nomi sono ID:NAME posso cercare con questo stratagemma
+    //sfruttando che i nomi sono ID:NAME posso cercare conInfo questo stratagemma
 	int want = -1;
 	for (int i = 0; i < nl->nMemb; i++) {
 		if (idSearch == atoi(nl->names[i])) {

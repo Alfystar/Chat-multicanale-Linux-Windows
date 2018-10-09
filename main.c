@@ -86,23 +86,10 @@ int main(int argc, char *argv[]) {
 	}
     printf("SERVER STORAGE AVVIATO\n");
 
-    /** fase di avvio CONNESSIONE del server **/
-
-    connection *con = initSocket((u_int16_t) strtol(argv[2], NULL, 10), "INADDR_ANY");
-    if (con == NULL) {
-        exit(-1);
-    }
-
-    printf("Socket inizializzato\n");
-    if (initServer(con, (int) strtol(argv[3], NULL, 10)) == -1) {
-        exit(-1);
-    }
-    printf("Server CONNESSIONE avviato\n");
-
-
-
-
     /** Spawn dei thread ROOM **/
+	// Necessario prima delle connessioni perche' le room sono intrinseche al server
+	// I thread user sono invece instanziati ad-hoc
+
 	nameList *chats = chatRoomExist();
 	char roomDir[128];
 	infoChat *info;
@@ -113,6 +100,19 @@ int main(int argc, char *argv[]) {
 	}
 	printf("ROOM-th start-Up creati\n");
 
+
+	/** fase di avvio CONNESSIONE del server **/
+
+	connection *con = initSocket((u_int16_t) strtol(argv[2], NULL, 10), "INADDR_ANY");
+	if (con == NULL) {
+		exit(-1);
+	}
+
+	printf("Socket inizializzato\n");
+	if (initServer(con, (int) strtol(argv[3], NULL, 10)) == -1) {
+		exit(-1);
+	}
+	printf("Server CONNESSIONE avviato\n");
 
 
     /** Spawn dei thread accetta user **/

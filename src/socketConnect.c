@@ -118,6 +118,9 @@ int readPack(int ds_sock, mail *pack) //todo: implementare controllo sulle read
         bRead += read(ds_sock, &pack->md + bRead, sizeof(metadata) - bRead);
         dprintf(STDERR_FILENO, "readPack metadata\n");
         //todo read in caso di sick pipe entra in while perpetuo qui
+        // SOLUZIONE STUPIDA: vedere se i byte letti dopo un certo numero di cicli (es: 10)
+        //                    sono sempre 0; in tal caso interrompiamo la read
+
     } while (sizeof(metadata) - bRead != 0);
 
     size_t dimMex = pack->md.dim;

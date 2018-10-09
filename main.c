@@ -51,7 +51,7 @@ pthread_t *acceptArray;
 void helpProject(void) {
     printf("I parametri inseribili sono:\n");
     printf("\tServer command:\n");
-    printf("\t[storage] [port] [coda]\t\tcreo il server nella cartella, porta, e per {coda} persone specificate\n");
+    printf("\t[storage] [port] [coda]\nCreo il server nella cartella, porta, e per {coda} persone specificate\n");
 }
 
 int main(int argc, char *argv[]) {

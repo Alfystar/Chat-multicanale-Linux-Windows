@@ -10,6 +10,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include "defineSets.h"
+#include <zconf.h>
+
 
 extern char **environ;
 

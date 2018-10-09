@@ -23,7 +23,7 @@ typedef struct thUserArg_ {
     int id;             //idKey dell'user definito in fase di login
     char userPath[50];  // path relativo a home dell'user in questione, login
     infoUser *info;     // contiene tabella e nome per esteso, fase login
-    thConnArg *conUs;
+	thConnArg conUs;
 } thUserArg;
 
 typedef struct thRoomArg_ {
@@ -39,7 +39,7 @@ extern int fdOutP;  //pipe di uscita per lo stdOut
 /** PROTOTIPI   **/
 void *acceptTh(thAcceptArg *);
 
-void *userTh(thUserArg *);
+void *userTh(thConnArg *);
 
 void *thrServRX(thUserArg *);
 

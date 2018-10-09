@@ -12,15 +12,15 @@ void *acceptTh(thAcceptArg *info) {
 
 	while (1) {
         arg = malloc(sizeof(thUserArg));
-        printf("arg = %p creato.\n", arg);
-        //definisco gli argomenti da passare al th user
+		dprintf(fdOutP, "acceptTh Creato, arg = %p creato.\n", arg);
+		//definisco gli argomenti da passare al th user come puntati da arg di thConnArg.arg
         arg->id = -1;
-        arg->conUs = &info->conInfo;
+		arg->conUs = info->conInfo; //copia negli argomenti del th una copia totale della connessione del server
         arg->info = NULL;
         arg->userPath[0] = 0;
 
         if (acceptCreate(&info->conInfo.con, userTh, arg) == -1) {
-            dprintf(fdOutP, "errore in accept\n");
+	        dprintf(STDERR_FILENO, "errore in accept\n");
         }
 	}
 	free(info);
@@ -37,8 +37,10 @@ void *acceptTh(thAcceptArg *info) {
 	return NULL;
 }
 
-void *userTh(thUserArg *info) {
-    printf("TH creato\nId = %d\n", info->id);
+void *userTh(thConnArg *info) {
+	thUserArg *arg = info->arg;
+	arg->conUs.con = info->con;
+	dprintf(fdOutP, "TH-User creato\nId = %d\n", arg->id);
 
     //mail *packRecive= malloc(sizeof(mail));
 
@@ -50,19 +52,16 @@ void *userTh(thUserArg *info) {
     */
 
 
-    printf("mi metto in ascolto\n");
+	dprintf(fdOutP, "mi metto in ascolto\n");
     pthread_t tidRX, tidTX;
 
-    pthread_create(&tidRX, NULL, thrServRX, info);
+	pthread_create(&tidRX, NULL, thrServRX, arg);
     //pthread_create(&tidTX,NULL, thrServTX,info);
 
-    pause();
-    pthread_exit(NULL);
-    /*
-	dprintf(fdOutP, "Ciao sono Un Tr-USER\n\tsono la %d\tmi chiamo %s\n", info->id, info->userPath);
-	pause();
-     */
+	while (1) pause();
 	free(info);
+	pthread_exit(NULL);
+
 	return NULL;
 }
 
@@ -71,12 +70,12 @@ void *thrServRX(thUserArg *argTh) {
     mail packRecive;
 
     while (1) {
-
-        readPack(argTh->conUs->con.ds_sock, &packRecive);
+	    dprintf(fdOutP, "thrServRx %d in attesa di messaggio da %d sock\n", argTh->id, argTh->conUs.con.ds_sock);
+	    readPack(argTh->conUs.con.ds_sock, &packRecive);
         dprintf(fdOutP, "Numero byte pacchetto: %d\n", packRecive.md.dim);
         dprintf(fdOutP, "Stringa da client: %s\n\n", packRecive.mex);
 
-        writePack(argTh->conUs->con.ds_sock, &packRecive);
+	    writePack(argTh->conUs.con.ds_sock, &packRecive);
 
         if (strcmp(packRecive.mex, "quit") == 0) {
             break;
@@ -85,7 +84,7 @@ void *thrServRX(thUserArg *argTh) {
 
         //writePack(); da aggiungere il selettore chat
     }
-    close(argTh->conUs->con.ds_sock);
+	close(argTh->conUs.con.ds_sock);
     //free(argTh); //todo creare i free per ogni tipo di dato !!!!
     pthread_exit(0);
 }
@@ -99,7 +98,7 @@ void *thrServTX(thUserArg *argTh) {
         //readPack() da aggiungere il selettore in ingresso di chat
 
 
-        writePack(argTh->conUs->con.ds_sock, &packWrite);
+	    writePack(argTh->conUs.con.ds_sock, &packWrite);
         if (errno) {
             exit(-1);
         }

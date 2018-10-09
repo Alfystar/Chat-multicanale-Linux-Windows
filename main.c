@@ -101,13 +101,13 @@ int main(int argc, char *argv[]) {
 
 	/** fase di avvio CONNESSIONE del server **/
 
-	connection *servCon = initSocket((u_int16_t) strtol(argv[2], NULL, 10), "INADDR_ANY");
-	if (servCon == NULL) {
+	connection *serverCon = initSocket((u_int16_t) strtol(argv[2], NULL, 10), "INADDR_ANY");
+	if (serverCon == NULL) {
 		exit(-1);
 	}
 
 	printf("Socket inizializzato\n");
-	if (initServer(servCon, (int) strtol(argv[3], NULL, 10)) == -1) {
+	if (initServer(serverCon, (int) strtol(argv[3], NULL, 10)) == -1) {
 		exit(-1);
 	}
 	printf("Server CONNESSIONE avviato\n");
@@ -120,7 +120,7 @@ int main(int argc, char *argv[]) {
 	for (int i = 0; i < nAcceptTh; i++) {
 		acceptArg = malloc(sizeof(thAcceptArg));
 		acceptArg->id = i;
-		acceptArg->conInfo.con = *servCon;
+		acceptArg->conInfo.con = *serverCon;
 		acceptArg->conInfo.arg = NULL;
 
 		errorRet = pthread_create(&acceptArray[i], NULL, acceptTh, acceptArg);

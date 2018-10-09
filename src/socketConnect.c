@@ -83,6 +83,8 @@ int writePack(int ds_sock, mail *pack) //dentro il thArg deve essere puntato un 
         ret = send(ds_sock, pack + bWrite, sizeof(metadata) - bWrite, MSG_NOSIGNAL);
         if (ret == -1) {
             if (errno == EPIPE) {
+                dprintf(STDERR_FILENO, "write pack pipe break 1\n");
+
                 //GESTIRE LA CHIUSURA DEL SOCKET (LA CONNESSIONE E' STATA INTERROTTA IMPROVVISAMENTE)
             }
         }
@@ -96,6 +98,8 @@ int writePack(int ds_sock, mail *pack) //dentro il thArg deve essere puntato un 
         ret = send(ds_sock, pack->mex + bWrite, pack->md.dim - bWrite, MSG_NOSIGNAL);
         if (ret == -1) {
             if (errno == EPIPE) {
+                dprintf(STDERR_FILENO, "write pack pipe break 2\n");
+
                 //GESTIRE LA CHIUSURA DEL SOCKET (LA CONNESSIONE E' STATA INTERROTTA IMPROVVISAMENTE)
             }
         }
@@ -109,9 +113,11 @@ int writePack(int ds_sock, mail *pack) //dentro il thArg deve essere puntato un 
 int readPack(int ds_sock, mail *pack) //todo: implementare controllo sulle read
 {
     ssize_t bRead = 0;
-
+    dprintf(STDERR_FILENO, "readPack\n");
     do {
         bRead += read(ds_sock, &pack->md + bRead, sizeof(metadata) - bRead);
+        dprintf(STDERR_FILENO, "readPack metadata\n");
+        //todo read in caso di sick pipe entra in while perpetuo qui
     } while (sizeof(metadata) - bRead != 0);
 
     size_t dimMex = pack->md.dim;
@@ -126,9 +132,9 @@ int readPack(int ds_sock, mail *pack) //todo: implementare controllo sulle read
     bRead = 0; //rimetto a zero per la nuova lettura
     do {
         bRead += read(ds_sock, pack->mex + bRead, dimMex - bRead);
-    } while (dimMex - bRead != 0);
+        dprintf(STDERR_FILENO, "readPack mex\n");
 
-    printPack(pack);
+    } while (dimMex - bRead != 0);
 
     return 0;
 }
@@ -148,13 +154,13 @@ int fillPack(mail *pack, int type, char *sender, char *whoOrWhy, void *mex, int 
 }
 
 void printPack(mail *pack) {
-    printf("######[][]I METADATI SONO[][]######\n");
-    printf("Dim pack = %ld\n", pack->md.dim);
-    printf("Type = %d\n", pack->md.type);
-    printf("Sender = %s\n", pack->md.sender);
-    printf("whoOrWhy = %s\n", pack->md.whoOrWhy);
-    printf("------[][]IL MESSAGGIO[][]------\n");
-    printf("TEXT :\n--> %s\n\n", pack->mex); //non sempre stringa
+    dprintf(fdOutP, "######[][]I METADATI SONO[][]######\n");
+    dprintf(fdOutP, "Dim pack = %ld\n", pack->md.dim);
+    dprintf(fdOutP, "Type = %d\n", pack->md.type);
+    dprintf(fdOutP, "Sender = %s\n", pack->md.sender);
+    dprintf(fdOutP, "whoOrWhy = %s\n", pack->md.whoOrWhy);
+    dprintf(fdOutP, "------[][]IL MESSAGGIO[][]------\n");
+    dprintf(fdOutP, "TEXT :\n--> %s\n\n", pack->mex); //non sempre stringa
 }
 ///Server FUNCTION
 
@@ -171,7 +177,8 @@ int initServer(connection *c, int coda) {
 }
 
 int acceptCreate(connection *c, void *(*thUserServer)(void *), void *arg) {
-    printf("Dentro accept\n");
+    //in caso arrivi una connessione crea un th di tipo void* NAME (thConnArg*) in thConnArg.arg si trovano i parametri per il th
+    dprintf(fdOutP, "Dentro acceptCreate-funx\n");
     // Si suppone che arg sia stata precedentemente malloccata
     connection *conNew;
     conNew = malloc(sizeof(connection));
@@ -184,14 +191,15 @@ int acceptCreate(connection *c, void *(*thUserServer)(void *), void *arg) {
         return -1;
     }
     pthread_t tid;
+
     thConnArg *argTh = malloc(sizeof(thConnArg));
 
-    printf("arg prima e': %p\n", argTh->arg);
+    dprintf(fdOutP, "arg prima e': %p\n", argTh->arg);
 
     argTh->arg = arg;
     argTh->con = *conNew;
 
-    printf("arg adesso e': %p\n", argTh->arg);
+    dprintf(fdOutP, "arg adesso e': %p\n", argTh->arg);
 
     pthread_create(&tid, NULL, thUserServer, argTh);
     return 0;
@@ -199,12 +207,12 @@ int acceptCreate(connection *c, void *(*thUserServer)(void *), void *arg) {
 
 int loginServerSide(int ds_sock, mail *pack) {
     // vedere sendfile() su man, potrebbe servire per il login
-    printf("Utente in fase di collegamento; socket univoco:%d\n", ds_sock);
+    dprintf(fdOutP, "Utente in fase di collegamento; socket univoco:%d\n", ds_sock);
 
     readPack(ds_sock, pack);
 
-    printf("Utente = %s\n", (char *) pack->mex);
-    printf("Cerco corrispondenza utente e chat associate.\n");
+    dprintf(fdOutP, "Utente = %s\n", (char *) pack->mex);
+    dprintf(fdOutP, "Cerco corrispondenza utente e chat associate.\n");
 
     /// DEFINIRE DOVE TROVARE GLI UTENTI
 

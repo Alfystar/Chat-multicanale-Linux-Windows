@@ -21,9 +21,10 @@
 #include "include/terminalShell.h"  /** screen Shell lib **/
 #include "include/thFunx.h"
 
+
 /** LIBRERIE Connessione **/
 
-#include "include/socketConnect.h"
+//#include "include/socketConnect.h"
 
 
 /** STRUTTURE & Typedef DEL MAIN **/
@@ -35,7 +36,7 @@ typedef struct thUserServ_ {
 
 /** PROTOTIPI DEL MAIN **/
 
-
+void *thUserServer(thConnArg *argTh);
 
 /*
  * LaS libreria ncurse usa lo stdout per printare gli schermi, di conseguenza redirizzando il flusso si perde

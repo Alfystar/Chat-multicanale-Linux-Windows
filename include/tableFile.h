@@ -23,7 +23,7 @@
 #define nameFirstFreeSize 50
 #define nameEntrySize 28
 
-extern int fdOutP;  //pipe di uscita per lo stdOut
+extern int fdOut;  //pipe di uscita per lo stdOut
 
 
 typedef struct firstFree_ {

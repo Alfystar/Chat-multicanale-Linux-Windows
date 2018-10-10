@@ -160,6 +160,7 @@ infoChat *openRoom(char *pathDir) {
 		perror("infoChat malloc() take error: ");
 		return info;
 	}
+
 	//todo verificare creazione del file temporaneo
 	char tempFile[128];
 	sprintf(tempFile, "%s%s", pathDir, "/temp");
@@ -413,7 +414,7 @@ int serStat_addchat_lock() {
 		perror("serStat sem_post take error: ");
 		return -1;
 	}
-	printServStat(fdOutP);
+	printServStat(fdOut);
 	overrideServerStatConf();
 	return 0;
 }

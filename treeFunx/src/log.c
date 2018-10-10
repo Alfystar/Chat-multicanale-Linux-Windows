@@ -23,12 +23,16 @@
 extern int current_log_level;
 char *logarr[] = {"ERROR", "INFO", "DEBUG"};
 
+
+///FUNZIONE DEPRECATA
 void debug_log(const char *file,
                const char *func,
                int line,
                int level,
                const char *format,
                ...) {
+	return;
+	/*
 	va_list ap;
 
 	va_start(ap, format);
@@ -43,4 +47,5 @@ void debug_log(const char *file,
 	}
 
 	va_end(ap);
+	 */
 }

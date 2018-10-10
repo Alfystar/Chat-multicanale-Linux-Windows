@@ -8,42 +8,44 @@
 		<Option virtualFolders="CMake Files\;"/>
 		<Build>
 			<Target title="all">
-				<Option working_dir="/home/filippo/CLionProjects/Chat-MultiChannel/cmake-build-debug"/>
+				<Option working_dir="/home/alfylinux/CLionProjects/Chat-MultiChannel/cmake-build-debug"/>
 				<Option type="4"/>
 				<MakeCommands>
-					<Build command="/usr/bin/make -j4 -f &quot;/home/filippo/CLionProjects/Chat-MultiChannel/cmake-build-debug/Makefile&quot;  VERBOSE=1 all"/>
-					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/filippo/CLionProjects/Chat-MultiChannel/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -j4 -f &quot;/home/filippo/CLionProjects/Chat-MultiChannel/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -j4 -f &quot;/home/filippo/CLionProjects/Chat-MultiChannel/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/alfylinux/CLionProjects/Chat-MultiChannel/cmake-build-debug/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/alfylinux/CLionProjects/Chat-MultiChannel/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/alfylinux/CLionProjects/Chat-MultiChannel/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/alfylinux/CLionProjects/Chat-MultiChannel/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="rebuild_cache">
-				<Option working_dir="/home/filippo/CLionProjects/Chat-MultiChannel/cmake-build-debug"/>
+				<Option working_dir="/home/alfylinux/CLionProjects/Chat-MultiChannel/cmake-build-debug"/>
 				<Option type="4"/>
 				<MakeCommands>
-					<Build command="/usr/bin/make -j4 -f &quot;/home/filippo/CLionProjects/Chat-MultiChannel/cmake-build-debug/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
-					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/filippo/CLionProjects/Chat-MultiChannel/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -j4 -f &quot;/home/filippo/CLionProjects/Chat-MultiChannel/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -j4 -f &quot;/home/filippo/CLionProjects/Chat-MultiChannel/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/alfylinux/CLionProjects/Chat-MultiChannel/cmake-build-debug/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/alfylinux/CLionProjects/Chat-MultiChannel/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/alfylinux/CLionProjects/Chat-MultiChannel/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/alfylinux/CLionProjects/Chat-MultiChannel/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="edit_cache">
-				<Option working_dir="/home/filippo/CLionProjects/Chat-MultiChannel/cmake-build-debug"/>
+				<Option working_dir="/home/alfylinux/CLionProjects/Chat-MultiChannel/cmake-build-debug"/>
 				<Option type="4"/>
 				<MakeCommands>
-					<Build command="/usr/bin/make -j4 -f &quot;/home/filippo/CLionProjects/Chat-MultiChannel/cmake-build-debug/Makefile&quot;  VERBOSE=1 edit_cache"/>
-					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/filippo/CLionProjects/Chat-MultiChannel/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -j4 -f &quot;/home/filippo/CLionProjects/Chat-MultiChannel/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -j4 -f &quot;/home/filippo/CLionProjects/Chat-MultiChannel/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/alfylinux/CLionProjects/Chat-MultiChannel/cmake-build-debug/Makefile&quot;  VERBOSE=1 edit_cache"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/alfylinux/CLionProjects/Chat-MultiChannel/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/alfylinux/CLionProjects/Chat-MultiChannel/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/alfylinux/CLionProjects/Chat-MultiChannel/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="Chat_MultiLevel">
-				<Option output="/home/filippo/CLionProjects/Chat-MultiChannel/cmake-build-debug/Chat_MultiLevel" prefix_auto="0" extension_auto="0"/>
-				<Option working_dir="/home/filippo/CLionProjects/Chat-MultiChannel/cmake-build-debug"/>
+				<Option output="/home/alfylinux/CLionProjects/Chat-MultiChannel/cmake-build-debug/Chat_MultiLevel" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/alfylinux/CLionProjects/Chat-MultiChannel/cmake-build-debug"/>
 				<Option object_output="./"/>
 				<Option type="1"/>
 				<Option compiler="gcc"/>
 				<Compiler>
+					<Add directory="/home/alfylinux/CLionProjects/Chat-MultiChannel/src"/>
+					<Add directory="/home/alfylinux/CLionProjects/Chat-MultiChannel/include"/>
 					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include"/>
 					<Add directory="/usr/local/include"/>
 					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed"/>
@@ -51,19 +53,21 @@
 					<Add directory="/usr/include"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="/usr/bin/make -j4 -f &quot;/home/filippo/CLionProjects/Chat-MultiChannel/cmake-build-debug/Makefile&quot;  VERBOSE=1 Chat_MultiLevel"/>
-					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/filippo/CLionProjects/Chat-MultiChannel/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -j4 -f &quot;/home/filippo/CLionProjects/Chat-MultiChannel/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -j4 -f &quot;/home/filippo/CLionProjects/Chat-MultiChannel/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/alfylinux/CLionProjects/Chat-MultiChannel/cmake-build-debug/Makefile&quot;  VERBOSE=1 Chat_MultiLevel"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/alfylinux/CLionProjects/Chat-MultiChannel/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/alfylinux/CLionProjects/Chat-MultiChannel/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/alfylinux/CLionProjects/Chat-MultiChannel/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="Chat_MultiLevel/fast">
-				<Option output="/home/filippo/CLionProjects/Chat-MultiChannel/cmake-build-debug/Chat_MultiLevel" prefix_auto="0" extension_auto="0"/>
-				<Option working_dir="/home/filippo/CLionProjects/Chat-MultiChannel/cmake-build-debug"/>
+				<Option output="/home/alfylinux/CLionProjects/Chat-MultiChannel/cmake-build-debug/Chat_MultiLevel" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/alfylinux/CLionProjects/Chat-MultiChannel/cmake-build-debug"/>
 				<Option object_output="./"/>
 				<Option type="1"/>
 				<Option compiler="gcc"/>
 				<Compiler>
+					<Add directory="/home/alfylinux/CLionProjects/Chat-MultiChannel/src"/>
+					<Add directory="/home/alfylinux/CLionProjects/Chat-MultiChannel/include"/>
 					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include"/>
 					<Add directory="/usr/local/include"/>
 					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed"/>
@@ -71,59 +75,101 @@
 					<Add directory="/usr/include"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="/usr/bin/make -j4 -f &quot;/home/filippo/CLionProjects/Chat-MultiChannel/cmake-build-debug/Makefile&quot;  VERBOSE=1 Chat_MultiLevel/fast"/>
-					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/filippo/CLionProjects/Chat-MultiChannel/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -j4 -f &quot;/home/filippo/CLionProjects/Chat-MultiChannel/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -j4 -f &quot;/home/filippo/CLionProjects/Chat-MultiChannel/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/alfylinux/CLionProjects/Chat-MultiChannel/cmake-build-debug/Makefile&quot;  VERBOSE=1 Chat_MultiLevel/fast"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/alfylinux/CLionProjects/Chat-MultiChannel/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/alfylinux/CLionProjects/Chat-MultiChannel/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/alfylinux/CLionProjects/Chat-MultiChannel/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 		</Build>
-		<Unit filename="/home/filippo/CLionProjects/Chat-MultiChannel/helpFunx.c">
+		<Unit filename="/home/alfylinux/CLionProjects/Chat-MultiChannel/globalSet.h">
 			<Option target="Chat_MultiLevel"/>
 		</Unit>
-		<Unit filename="/home/filippo/CLionProjects/Chat-MultiChannel/helpFunx.h">
+		<Unit filename="/home/alfylinux/CLionProjects/Chat-MultiChannel/helpFunx.c">
 			<Option target="Chat_MultiLevel"/>
 		</Unit>
-		<Unit filename="/home/filippo/CLionProjects/Chat-MultiChannel/include/fileSystemUtylity.h">
+		<Unit filename="/home/alfylinux/CLionProjects/Chat-MultiChannel/helpFunx.h">
 			<Option target="Chat_MultiLevel"/>
 		</Unit>
-		<Unit filename="/home/filippo/CLionProjects/Chat-MultiChannel/include/mexData.h">
+		<Unit filename="/home/alfylinux/CLionProjects/Chat-MultiChannel/include/fileSystemUtylity.h">
 			<Option target="Chat_MultiLevel"/>
 		</Unit>
-		<Unit filename="/home/filippo/CLionProjects/Chat-MultiChannel/include/socketConnect.h">
+		<Unit filename="/home/alfylinux/CLionProjects/Chat-MultiChannel/include/mexData.h">
 			<Option target="Chat_MultiLevel"/>
 		</Unit>
-		<Unit filename="/home/filippo/CLionProjects/Chat-MultiChannel/include/tableFile.h">
+		<Unit filename="/home/alfylinux/CLionProjects/Chat-MultiChannel/include/socketConnect.h">
 			<Option target="Chat_MultiLevel"/>
 		</Unit>
-		<Unit filename="/home/filippo/CLionProjects/Chat-MultiChannel/include/terminalShell.h">
+		<Unit filename="/home/alfylinux/CLionProjects/Chat-MultiChannel/include/tableFile.h">
 			<Option target="Chat_MultiLevel"/>
 		</Unit>
-		<Unit filename="/home/filippo/CLionProjects/Chat-MultiChannel/include/thFunx.h">
+		<Unit filename="/home/alfylinux/CLionProjects/Chat-MultiChannel/include/terminalShell.h">
 			<Option target="Chat_MultiLevel"/>
 		</Unit>
-		<Unit filename="/home/filippo/CLionProjects/Chat-MultiChannel/main.c">
+		<Unit filename="/home/alfylinux/CLionProjects/Chat-MultiChannel/include/thFunx.h">
 			<Option target="Chat_MultiLevel"/>
 		</Unit>
-		<Unit filename="/home/filippo/CLionProjects/Chat-MultiChannel/src/fileSystemUtylity.c">
+		<Unit filename="/home/alfylinux/CLionProjects/Chat-MultiChannel/main.c">
 			<Option target="Chat_MultiLevel"/>
 		</Unit>
-		<Unit filename="/home/filippo/CLionProjects/Chat-MultiChannel/src/mexData.c">
+		<Unit filename="/home/alfylinux/CLionProjects/Chat-MultiChannel/src/fileSystemUtylity.c">
 			<Option target="Chat_MultiLevel"/>
 		</Unit>
-		<Unit filename="/home/filippo/CLionProjects/Chat-MultiChannel/src/socketConnect.c">
+		<Unit filename="/home/alfylinux/CLionProjects/Chat-MultiChannel/src/mexData.c">
 			<Option target="Chat_MultiLevel"/>
 		</Unit>
-		<Unit filename="/home/filippo/CLionProjects/Chat-MultiChannel/src/tableFile.c">
+		<Unit filename="/home/alfylinux/CLionProjects/Chat-MultiChannel/src/socketConnect.c">
 			<Option target="Chat_MultiLevel"/>
 		</Unit>
-		<Unit filename="/home/filippo/CLionProjects/Chat-MultiChannel/src/terminalShell.c">
+		<Unit filename="/home/alfylinux/CLionProjects/Chat-MultiChannel/src/tableFile.c">
 			<Option target="Chat_MultiLevel"/>
 		</Unit>
-		<Unit filename="/home/filippo/CLionProjects/Chat-MultiChannel/src/thFunx.c">
+		<Unit filename="/home/alfylinux/CLionProjects/Chat-MultiChannel/src/terminalShell.c">
 			<Option target="Chat_MultiLevel"/>
 		</Unit>
-		<Unit filename="/home/filippo/CLionProjects/Chat-MultiChannel/CMakeLists.txt">
+		<Unit filename="/home/alfylinux/CLionProjects/Chat-MultiChannel/src/thFunx.c">
+			<Option target="Chat_MultiLevel"/>
+		</Unit>
+		<Unit filename="/home/alfylinux/CLionProjects/Chat-MultiChannel/treeFunx/include/avl.h">
+			<Option target="Chat_MultiLevel"/>
+		</Unit>
+		<Unit filename="/home/alfylinux/CLionProjects/Chat-MultiChannel/treeFunx/include/common.h">
+			<Option target="Chat_MultiLevel"/>
+		</Unit>
+		<Unit filename="/home/alfylinux/CLionProjects/Chat-MultiChannel/treeFunx/include/dlist.h">
+			<Option target="Chat_MultiLevel"/>
+		</Unit>
+		<Unit filename="/home/alfylinux/CLionProjects/Chat-MultiChannel/treeFunx/include/log.h">
+			<Option target="Chat_MultiLevel"/>
+		</Unit>
+		<Unit filename="/home/alfylinux/CLionProjects/Chat-MultiChannel/treeFunx/include/queue.h">
+			<Option target="Chat_MultiLevel"/>
+		</Unit>
+		<Unit filename="/home/alfylinux/CLionProjects/Chat-MultiChannel/treeFunx/include/stack.h">
+			<Option target="Chat_MultiLevel"/>
+		</Unit>
+		<Unit filename="/home/alfylinux/CLionProjects/Chat-MultiChannel/treeFunx/include/tree.h">
+			<Option target="Chat_MultiLevel"/>
+		</Unit>
+		<Unit filename="/home/alfylinux/CLionProjects/Chat-MultiChannel/treeFunx/src/avl.c">
+			<Option target="Chat_MultiLevel"/>
+		</Unit>
+		<Unit filename="/home/alfylinux/CLionProjects/Chat-MultiChannel/treeFunx/src/dlist.c">
+			<Option target="Chat_MultiLevel"/>
+		</Unit>
+		<Unit filename="/home/alfylinux/CLionProjects/Chat-MultiChannel/treeFunx/src/log.c">
+			<Option target="Chat_MultiLevel"/>
+		</Unit>
+		<Unit filename="/home/alfylinux/CLionProjects/Chat-MultiChannel/treeFunx/src/queue.c">
+			<Option target="Chat_MultiLevel"/>
+		</Unit>
+		<Unit filename="/home/alfylinux/CLionProjects/Chat-MultiChannel/treeFunx/src/stack.c">
+			<Option target="Chat_MultiLevel"/>
+		</Unit>
+		<Unit filename="/home/alfylinux/CLionProjects/Chat-MultiChannel/treeFunx/src/tree.c">
+			<Option target="Chat_MultiLevel"/>
+		</Unit>
+		<Unit filename="/home/alfylinux/CLionProjects/Chat-MultiChannel/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\"/>
 		</Unit>
 	</Project>

@@ -1,10 +1,7 @@
 #define _GNU_SOURCE             /* See feature_test_macros(7) */
 
-
 #include <stdio.h>
 #include <stdlib.h>
-
-
 
 /** Librerie per creare la Pipe**/
 #include <fcntl.h>
@@ -12,7 +9,7 @@
 
 
 #include "helpFunx.h"
-#include "defineSets.h"
+#include "globalSet.h"
 
 /** LIBRERIE Ad Hoc **/
 #include "include/fileSystemUtylity.h"
@@ -20,6 +17,7 @@
 #include "include/tableFile.h"
 #include "include/terminalShell.h"  /** screen Shell lib **/
 #include "include/thFunx.h"
+#include "treeFunx/include/avl.h"
 
 
 /** LIBRERIE Connessione **/
@@ -31,21 +29,10 @@
 
 /** PROTOTIPI DEL MAIN **/
 
-/*
- * LaS libreria ncurse usa lo stdout per printare gli schermi, di conseguenza redirizzando il flusso si perde
- * la possibilità di visualizzare a schermo le finestre.
- * Per lo stdErr non è così, di conseguenza vengono create 2 pipe, in cui quella dello stdErr viene redirezionata
- * a un thread per farla visualizzare quando serve, mentre se si vuole printare a schermo delle informazioni normali
- * si deve usare la pipe Stdout la quale ha dietro un thread che si occupa di visualizzare la cosa
- */
 
-int fdStdoutPipe[2];  // dal manuale: fdStdoutPipe[0] refers to the read end of the pipe. fdStdoutPipe[1] refers to the write end of the pipe.
-int fdStdErrPipe[2];  // dal manuale: fdStdoutPipe[0] refers to the read end of the pipe. fdStdoutPipe[1] refers to the write end of the pipe.
 
-int fdOutP;
 
-int errorRet;
-
+/** TIDs Of acceptTh **/
 pthread_t *acceptArray;
 
 void helpProject(void) {
@@ -54,27 +41,40 @@ void helpProject(void) {
     printf("\t[storage] [port] [coda]\t\tcreo il server nella cartella, porta, e per {coda} persone specificate\n");
 }
 
+void pipeInit() {
+	int errorRet;
+
+	/** Creo le pipe per scrivere instdout,stderr e debug sul monitori**/
+	//crea questa pipe e comunica per pacchetti, ogni READ leggerà un solo pacchetto
+	errorRet = pipe2(FdStdOutPipe, O_DIRECT);
+	if (errorRet != 0) {
+		printErrno("La creazione della pipe per lo stdout ha dato l'errore", errorRet);
+		exit(-1);
+	}
+	fdOut = FdStdOutPipe[1];
+
+	//crea questa pipe e comunica per pacchetti, ogni READ leggerà un solo pacchetto
+	errorRet = pipe2(FdStdErrPipe, O_DIRECT);
+	if (errorRet != 0) {
+		printErrno("La creazione della pipe per lo stderr ha dato l'errore", errorRet);
+		exit(-1);
+	}
+
+	//crea questa pipe e comunica per pacchetti, ogni READ leggerà un solo pacchetto
+	errorRet = pipe2(FdDebugPipe, O_DIRECT);
+	if (errorRet != 0) {
+		printErrno("La creazione della pipe per lo stderr ha dato l'errore", errorRet);
+		exit(-1);
+	}
+	fdDebug = FdDebugPipe[1];
+}
+
 int main(int argc, char *argv[]) {
     if (argc != 4) {
         helpProject();
 		exit(EXIT_FAILURE);
 	}
-
-	/** Creo la pipe che avrà funzione di stdout e stderr al th**/
-	//crea questa pipe e comunica per pacchetti, ogni READ leggerà un solo pacchetto
-	errorRet = pipe2(fdStdoutPipe, O_DIRECT);
-	if (errorRet != 0) {
-		printErrno("La creazione della pipe per lo stdout ha dato l'errore", errorRet);
-		exit(-1);
-	}
-	fdOutP = fdStdoutPipe[1];
-
-	//crea questa pipe e comunica per pacchetti, ogni READ leggerà un solo pacchetto
-	errorRet = pipe2(fdStdErrPipe, O_DIRECT);
-	if (errorRet != 0) {
-		printErrno("La creazione della pipe per lo stderr ha dato l'errore", errorRet);
-		exit(-1);
-	}
+	pipeInit();
 
     /** fase di avvio STORAGE del server **/
     if (StartServerStorage(argv[1]) == -1)
@@ -84,7 +84,11 @@ int main(int argc, char *argv[]) {
 	}
     printf("SERVER STORAGE AVVIATO\n");
 
-    /** Spawn dei thread ROOM **/
+	usAvlPipe = init_avl_S();
+	rmAvlPipe = init_avl_S();
+
+
+	/** Spawn dei thread ROOM **/
 	// Necessario prima delle connessioni perche' le room sono intrinseche al server
 	// I thread user sono invece instanziati ad-hoc
 
@@ -94,7 +98,9 @@ int main(int argc, char *argv[]) {
 	for (int i = 0; i < chats->nMemb; i++) {
 		sprintf(roomDir, "./%s/%s", chatDirName, chats->names[i]);
 		info = openRoom(roomDir);
-		makeThRoom(i, roomDir, info);
+		strncpy(info->myName, roomDir, 128);
+		//idKey è la prima parte del nome, ovvero IDKEY:XXXXX
+		makeThRoom(atoi(chats->names[i]), roomDir, info);
 	}
 	printf("ROOM-th start-Up creati\n");
 
@@ -113,7 +119,7 @@ int main(int argc, char *argv[]) {
 	printf("Server CONNESSIONE avviato\n");
 
 	/** Spawn dei thread accetta user **/
-
+	int errorRet;
 	// precedente implementazione, todo: farle convergere
 	acceptArray = malloc(nAcceptTh * sizeof(pthread_t));
 	thAcceptArg *acceptArg;
@@ -139,11 +145,11 @@ int main(int argc, char *argv[]) {
 	/** Il Main Thread  diventa il terminale con cui interagire da qui in poi è il terminale **/
 	printf("\n\n__________________________________________________________________\n[x][x][x][x][x][x]\tAvvio Del terminale\t[x][x][x][x][x][x]\n");
 	/** Ridirezione dello stdErr, così chè gli errori vengano tutti scritti in rosso nel riquadro corrispondente **/
-	dup2(fdStdErrPipe[1], STDERR_FILENO);
-	close(fdStdErrPipe[1]);
+	dup2(FdStdErrPipe[1], STDERR_FILENO);
+	close(FdStdErrPipe[1]);
 	usleep(500000);
 
-	terminalShell(fdStdoutPipe, fdStdErrPipe);
+	terminalShell();
 
 	return 0;
 }

@@ -5,28 +5,40 @@
 #include "../include/terminalShell.h"
 
 
-void terminalShell(int fdStdOutPipe[], int fdStdErrPipe[]) {
+void terminalShell() {
 	int error;
 	windowSetUp();
 	sem_init(&screewWrite, 0, 1); //il semaforo può essere usato per scrivere
 
-	/** creazione dei 2 thread che si occupano di leggere le pipe **/
+	/** creazione dei 3 thread che si occupano di leggere le pipe **/
 	pthread_t ThSdtOut_var;
 	thShellArg *arg = malloc(sizeof(thShellArg));
-	arg->fd_Read = fdStdOutPipe[0];
+	arg->fd_Read = FdStdOutPipe[0];
 	error = pthread_create(&ThSdtOut_var, NULL, shellThStdout, arg);
 	if (error != 0) {
 		printErrno("La creazione del Thread shellThStdout ha dato il seguente errore", error);
 		exit(-1);
 	}
+
 	pthread_t ThSdtErr_var;
 	arg = malloc(sizeof(thShellArg));
-	arg->fd_Read = fdStdErrPipe[0];
+	arg->fd_Read = FdStdErrPipe[0];
 	error = pthread_create(&ThSdtErr_var, NULL, shellThStdErr, arg);
 	if (error != 0) {
 		printErrno("La creazione del Thread shellThSdtErr ha dato il seguente errore", error);
 		exit(-1);
 	}
+
+	pthread_t ThDebug_var;
+	arg = malloc(sizeof(thShellArg));
+	arg->fd_Read = FdDebugPipe[0];
+	error = pthread_create(&ThDebug_var, NULL, shellThDebug, arg);
+	if (error != 0) {
+		printErrno("La creazione del Thread shellThDebug ha dato il seguente errore", error);
+		exit(-1);
+	}
+
+
 
 	/** Cmd terminal **/
 	char *cmdBuf[1024];
@@ -51,7 +63,7 @@ void terminalShell(int fdStdOutPipe[], int fdStdErrPipe[]) {
 
 
 		for (int i = 0; i < sArgc; i++) {
-			dprintf(fdOutP, "sArgv[%d]=%s\n", i, sArgv[i]);
+			dprintf(fdDebug, "sArgv[%d]=%s\n", i, sArgv[i]);
 		}
 
 		/// interpretazione sArgv[] ed esecuzione comandi
@@ -78,14 +90,23 @@ void driverCmd(int argc, char *argv[], int *exit) {
 			chatShowW(showPannel, 1, 0);
 			return;
 		}
+		if (strcmp(argv[0], "p-avlC") == 0) {
+			print_avl(*rmAvlPipe.avlRoot, *rmAvlPipe.avlRoot);
+			return;
+		}
 		if (strcmp(argv[0], "user") == 0) {
 			userShowW(showPannel, 1, 0);
 			return;
 		}
-		if (strcmp(argv[0], "svst") == 0) {
-			printServStat(fdOutP);
+		if (strcmp(argv[0], "p-avlU") == 0) {
+			print_avl(*usAvlPipe.avlRoot, *usAvlPipe.avlRoot);
 			return;
 		}
+		if (strcmp(argv[0], "svst") == 0) {
+			printServStat(fdOut);
+			return;
+		}
+
 
 	}
 
@@ -126,7 +147,7 @@ void driverCmd(int argc, char *argv[], int *exit) {
 				return;
 			}
 			makeThUser(idSearch, userDir, info);
-			dprintf(fdOutP, "USER th creato, idKey=%d\n", idSearch);
+			dprintf(fdOut, "USER th creato, idKey=%d\n", idSearch);
 
 			return;
 		}
@@ -151,7 +172,7 @@ void driverCmd(int argc, char *argv[], int *exit) {
 
 				return;
 			}
-			dprintf(fdOutP, "path=%s\n", userDir);
+			dprintf(fdOut, "path=%s\n", userDir);
 			//tabPrint(info->tab);
 			wtabPrint(showPannel, info->tab, 0);
 			return;
@@ -173,7 +194,7 @@ void driverCmd(int argc, char *argv[], int *exit) {
 				dprintf(STDERR_FILENO, "Visualizzazione tabella impossibile\n");
 				return;
 			}
-			dprintf(fdOutP, "path=%s\n", chatDir);
+			dprintf(fdOut, "path=%s\n", chatDir);
 			//tabPrint(info->tab);
 			wtabPrint(showPannel, info->tab, 0);
 			return;
@@ -195,7 +216,7 @@ void driverCmd(int argc, char *argv[], int *exit) {
 				dprintf(STDERR_FILENO, "Visualizzazione tabella impossibile\n");
 				return;
 			}
-			dprintf(fdOutP, "path=%s\n", chatDir);
+			dprintf(fdOut, "path=%s\n", chatDir);
 
 
 			wprintConv(showPannel, info->conv, 0);
@@ -214,7 +235,7 @@ void driverCmd(int argc, char *argv[], int *exit) {
 			char roomDir[128];
 			sprintf(roomDir, "./%s/%ld:%s", chatDirName, idKey, argv[1]);
 			makeThRoom(idKey, roomDir, info);
-			dprintf(fdOutP, "ROOM th creato, idKey=%d\n", idKey);
+			dprintf(fdOut, "ROOM th creato, idKey=%d\n", idKey);
 			return;
 		}
 	}
@@ -228,12 +249,14 @@ void menuHelpw(WINDOW *w, int y_start, int x_start) {
 	wprintw(w, "->h\t-> Visualizza questa lista\n");
 	wprintw(w, "->q\t-> termina server\n");
 	wprintw(w, "->chat\t-> Chat Archiviate\n");
+	wprintw(w, "->p-avlC\t-> Printa l'avl delle chat\n");
 	wprintw(w, "->user\t-> Utenti Registrati\n");
+	wprintw(w, "->p-avlU\t-> Printa l'avl degli User\n");
 	wprintw(w, "->svst\t-> Mostra servStat sul monitor\n");
 	wprintw(w, "\t(1)arg\n");
 	wprintw(w, "->mkUs [Us Name]\t-> Crea un user nel file system\n");
 	wprintw(w, "->startUs [Us id]\t-> Tenta di avviare un thread user\n");
-	wprintw(w, "->usTab [Us id]\t-> Visualizza tabella user\n");
+	wprintw(w, "->usTab [Us id]\t\t-> Visualizza tabella user\n");
 	wprintw(w, "->roomTab [Rm id]\t-> Visualizza tabella Room\n");
 	wprintw(w, "->roomConv [Rm id]\t-> Visualizza conversazione Room\n");
 	wprintw(w, "\t(2)arg\n");
@@ -259,6 +282,7 @@ void windowSetUp() {
 	init_pair(ViewPan, COLOR_RED, COLOR_WHITE);
 	init_pair(StdoutPrint, COLOR_GREEN, COLOR_BLUE);
 	init_pair(ErrorPrint, COLOR_RED, COLOR_BLACK);
+	init_pair(DebugPrint, COLOR_MAGENTA, COLOR_BLUE);
 
 
 	/** Main windows print **/
@@ -282,12 +306,12 @@ void windowSetUp() {
 	wbkgd(showPannel, COLOR_PAIR(ViewPan));
 	wrefresh(showPannel);
 
-	/** STDOUT and STDERR windows setUp**/
+	/** STDOUT, STDERR and Debug windows setUp**/
 	wbkgd(monitor, COLOR_PAIR(StdoutPrint));
 	//box(monitor, ' ', 0);
 	attron(COLOR_PAIR(StdoutPrint));
 	mvprintw(monitor->_begy - 1, monitor->_begx,
-	         "------------------------------StdOut & StdErr Print-----------------------------");
+	         "---------------------------StdOut, StdErr & Debug Print-------------------------");
 	mvwprintw(monitor, 1, 0, "");
 	scrollok(monitor, TRUE);
 	wrefresh(monitor);
@@ -482,6 +506,7 @@ void shellThStdout(thShellArg *info) {
 		wrefresh(monitor);
 		sem_post(&screewWrite);
 	}
+	free(info);
 }
 
 void shellThStdErr(thShellArg *info) {
@@ -509,4 +534,34 @@ void shellThStdErr(thShellArg *info) {
 		wrefresh(monitor);
 		sem_post(&screewWrite);
 	}
+	free(info);
+
+}
+
+void shellThDebug(thShellArg *info) {
+	sleep(1);       //piccolo ritardo per permettere la sincronizzazione della main windows e dei thread
+	sem_wait(&screewWrite);
+	wattron(monitor, COLOR_PAIR(DebugPrint));
+	wprintw(monitor, "Monitor debug attivo\n");
+	wrefresh(monitor);
+	sem_post(&screewWrite);
+	char fdBuf[PIPE_BUF];
+	memset(fdBuf, 0, PIPE_BUF);
+	int byteRead;
+	while (1) {
+		byteRead = read(info->fd_Read, fdBuf, PIPE_BUF);
+		sem_wait(&screewWrite);
+		if (byteRead == -1) {
+			wattron(monitor, COLOR_PAIR(ErrorPrint));
+			mvwprintw(monitor, 2, 1, "byteRead error %s\n", strerror(byteRead));
+		} else {
+			fdBuf[byteRead] = '\0';
+			wattron(monitor, COLOR_PAIR(DebugPrint));
+			wprintw(monitor, "%s", fdBuf);
+		}
+		wclrtobot(monitor);
+		wrefresh(monitor);
+		sem_post(&screewWrite);
+	}
+	free(info);
 }

@@ -18,6 +18,7 @@
  * along with dslib.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "../include/common.h"
 #include <errno.h>
 #include "../include/stack.h"
 #include "../include/queue.h"
@@ -194,7 +195,7 @@ int delete_avl_nodes(avl_p root) {
 	int count = 0;
 
 	if (!root) {
-		log(ERROR, "root invalid.\n");
+		dprintf(STDERR_FILENO, "root invalid.\n");
 		return 0;
 	}
 
@@ -369,14 +370,14 @@ avl_pp generate_avl(int *arr, int len) {
 	avl_pp head = NULL;
 
 	if (!arr || !len) {
-		log(ERROR, "Invalid array.\n");
+		dprintf(STDERR_FILENO, "Invalid array.\n");
 		return NULL;
 	}
 
 	head = init_avl();
 	for (; i < len; i++) {
 		if (insert_avl_node(head, i, arr[i]) == FALSE) {
-			log(ERROR, "Insertion failed.\n");
+			dprintf(STDERR_FILENO, "Insertion failed.\n");
 			destroy_avl(head);
 			return NULL;
 		}
@@ -407,7 +408,7 @@ bool insert_avl_node(avl_pp head, int key, int data) {
 	stack_p stack = get_stack();
 
 	if (!head) {
-		log(ERROR, "Initialize AVL tree first\n");
+		dprintf(STDERR_FILENO, "Initialize AVL tree first\n");
 		return FALSE;
 	}
 
@@ -501,13 +502,13 @@ bool delete_avl_node(avl_pp head, int key) {
 	avl_p tmp;
 
 	if (!head) {
-		log(ERROR, "Initialize AVL tree first\n");
+		dprintf(fdOut, "Initialize AVL tree first\n");
 		return FALSE;
 	}
 
 	node = *head;
 	if (!node) {
-		log(ERROR, "No nodes to delete\n");
+		dprintf(STDERR_FILENO, "No nodes to delete\n");
 		return FALSE;
 	}
 
@@ -571,7 +572,7 @@ int destroy_avl(avl_pp head) {
 	int count = 0;
 
 	if (!head) {
-		log(ERROR, "head invalid.\n");
+		dprintf(STDERR_FILENO, "head invalid.\n");
 		return -1;
 	}
 
@@ -586,26 +587,28 @@ int destroy_avl(avl_pp head) {
 /*
  * Print the values in an AVL tree in preorder
  */
+/// correct Syntax in call print_avl(*head.avlRoot,*head.avlRoot);
+
 int print_avl(avl_p root, avl_p parent) {
 	int count = 0;
 
 	if (!root) {
-		log(ERROR, "root invalid.\n");
+		dprintf(STDERR_FILENO, "root invalid.\n");
 		return -1;
 	}
 
 	++count;
 
 	/* Print keyNode value in the node */
-	log(INFO, "keyNode: %6d:%d,  parent: %6d\n", root->keyNode, root->data, parent->keyNode);
+	dprintf(fdOut, "keyNode: %6d:%d,  parent: %6d\n", root->keyNode, root->data, parent->keyNode);
 
 	if (root->left) {
-		log(INFO, "LEFT.\n");
+		dprintf(fdOut, "LEFT.\n");
 		count += print_avl(root->left, root);
 	}
 
 	if (root->right) {
-		log(INFO, "RIGHT.\n");
+		dprintf(fdOut, "RIGHT.\n");
 		count += print_avl(root->right, root);
 	}
 
@@ -631,14 +634,13 @@ int search_BFS_avl(avl_pp root, int key) {
 	int ret = 0;
 
 	if (!root || !*root) {
-		log(ERROR, "avl tree or root node is NULL!\n");
+		dprintf(STDERR_FILENO, "avl tree or root node is NULL!\n");
 		return -1;
 	}
 
 	/* Check for a match in root node */
 	node = *root;
 	if (node->keyNode == key) {
-		//log(INFO, "FOUND %d\n", val);
 		return node->data;
 	}
 
@@ -646,26 +648,24 @@ int search_BFS_avl(avl_pp root, int key) {
 
 	/* Add root node to Queue */
 	if (!enqueue(queue, *root)) {
-		log(ERROR, "enqueue failed!\n");
+		dprintf(STDERR_FILENO, "enqueue failed!\n");
 		destroy_queue(queue);
 		return -1;
 	}
 
 	/* Loop through all nodes in the Queue */
 	while ((node = dequeue(queue)) != NULL) {
-		//log(INFO, "tracking...\n");
 
 		/* Process left child of node */
 		if (node->left) {
 			if (node->left->keyNode == key) {
-				//log(INFO, "FOUND %d\n", val);
 				destroy_queue(queue);
 				return node->left->data;
 			}
 
 			/* Add left child to Queue */
 			if (!enqueue(queue, node->left)) {
-				log(ERROR, "enqueue failed!\n");
+				dprintf(STDERR_FILENO, "enqueue failed!\n");
 				destroy_queue(queue);
 				return -1;
 			}
@@ -674,14 +674,13 @@ int search_BFS_avl(avl_pp root, int key) {
 		/* Process right child of node */
 		if (node->right) {
 			if (node->right->keyNode == key) {
-				//log(INFO, "FOUND %d\n", val);
 				destroy_queue(queue);
 				return node->right->data;
 			}
 
 			/* Add right child to Queue */
 			if (!enqueue(queue, node->right)) {
-				log(ERROR, "enqueue failed!\n");
+				dprintf(STDERR_FILENO, "enqueue failed!\n");
 				destroy_queue(queue);
 				return FALSE;
 			}
@@ -708,7 +707,7 @@ avl_pp_S generate_avl_S(int *arr, int len) {
 	avl_pp_S head;
 
 	if (!arr || !len) {
-		log(ERROR, "Invalid array.\n");
+		dprintf(STDERR_FILENO, "Invalid array.\n");
 		head.avlRoot = NULL;
 		return head;
 	}
@@ -717,7 +716,7 @@ avl_pp_S generate_avl_S(int *arr, int len) {
 
 	for (; i < len; i++) {
 		if (insert_avl_node(head.avlRoot, i, arr[i]) == FALSE) {
-			log(ERROR, "Insertion failed.\n");
+			dprintf(STDERR_FILENO, "Insertion failed.\n");
 			destroy_avl(head.avlRoot);
 			head.avlRoot = NULL;
 			return head;
@@ -750,7 +749,7 @@ avl_pp_S init_avl_S(void) {
 		return head;
 	}
 
-	printf("SEMAFORO CREATO\n");
+	dprintf(fdDebug, "SEMAFORO Avl CREATO\n");
 	semInfo(head.semId);
 
 
@@ -762,7 +761,7 @@ bool insert_avl_node_S(avl_pp_S head, int key, int data) {
 	lockWriteSem(head.semId);
 	ret = insert_avl_node(head.avlRoot, key, data);
 	unlockWriteSem(head.semId);
-
+	dprintf(fdDebug, "new Node %d:%d successfull add\n", key, data);
 	return ret;
 }
 
@@ -771,6 +770,8 @@ bool delete_avl_node_S(avl_pp_S head, int key) {
 	lockWriteSem(head.semId);
 	ret = delete_avl_node(head.avlRoot, key);
 	unlockWriteSem(head.semId);
+	dprintf(fdDebug, "Node %d removed\n", key);
+
 	return ret;
 }
 

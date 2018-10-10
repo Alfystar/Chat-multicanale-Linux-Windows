@@ -18,16 +18,24 @@
  * along with dslib.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+///NON USATA AL SUO POSTO LA LIBRERIA STANDARD #include <stdbool.h>
+
+#ifndef COMMON_H
+#define COMMON_H
+
 #include <stdlib.h>
 #include "log.h"
+#include <unistd.h>
+#include <stdio.h>
+#include <stdbool.h>
+#include "../../globalSet.h"
 
-#pragma once
-
-/* Introduce boolean type */
-#define TRUE 1
-#define FALSE !TRUE
 
 #define LEFT  0
 #define RIGHT 1
 
-typedef unsigned char bool;
+#define TRUE true
+#define FALSE false
+
+
+#endif

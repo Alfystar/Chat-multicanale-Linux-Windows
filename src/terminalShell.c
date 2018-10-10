@@ -144,7 +144,7 @@ void driverCmd(int argc, char *argv[], int *exit) {
 				return;
 			}
 			dprintf(fdDebug, "USER th da creare, idKey=%d  userDir=%s   infoUser=%p\n", idSc,userDir, info);
-			makeThUser(idSc, userDir, info);
+			setUpThUser(idSc, userDir, info);
             dprintf(fdDebug, "USER th creato, idKey=%d\n", idSc);
 
 			return;

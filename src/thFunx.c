@@ -31,7 +31,7 @@ void *acceptTh(thAcceptArg *info) {
 	long idKey = atoi(info->pathName);       //essendo myname xx:TEXT, la funzione termina ai : e ottengo la key
 	char userDir[128];
 	sprintf(userDir, "./%s/%ld:%s", userDirName, idKey, argv[1]);
-	makeThUser(idKey, userDir, info);
+	setUpThUser(idKey, userDir, info);
 	dprintf(fdOut, "USER th creato, idKey=%d\n", idKey);
 	*/
 	return NULL;
@@ -50,8 +50,11 @@ void *userTh(thConnArg *info) {
 	int idKey;
 	switch (pack->md.type) {
 		case login_p:
-			//login
-			loginServerSide(pack, arg);
+			if (loginServerSide(pack, arg)) {
+				perror("login fase fail :");
+				dprintf(STDERR_FILENO, "Shutdown Th %d\n", arg->id);
+				pthread_exit(NULL);
+			}
 			break;
 		case mkUser_p:
 			//mkuser funx
@@ -64,6 +67,7 @@ void *userTh(thConnArg *info) {
 			pthread_exit(NULL);
 			break;
 	}
+
 	dprintf(fdDebug, "Login success\nTx-th & Rx-th of %d now Create", arg->id);
 
 	int fdUserPipe[2];
@@ -73,6 +77,8 @@ void *userTh(thConnArg *info) {
 		printErrno("La creazione della pipe per il Th-room ha dato l'errore", errorRet);
 		exit(-1);
 	}
+
+
 	insert_avl_node_S(usAvlPipe, arg->id, fdUserPipe[1]);
 
     pthread_t tidRX, tidTX;
@@ -97,41 +103,20 @@ int loginServerSide(mail *pack, thUserArg *data) {
 	 * whoOrWhy=idKey (string)
 	 * dim=0
 	 */
-	if (makeThUser(atoi(pack->md.whoOrWhy), data)) {
+
+	mail response;
+
+
+	if (setUpThUser(atoi(pack->md.whoOrWhy), data)) {
 		perror("Impossible to create new ThUser of register User :");
+		fillPack(&response, failed_p, 0, NULL, "Server", "setUpThUser error");
+
 		return -1;
 	}
 
 	/// DEFINIRE DOVE TROVARE GLI UTENTI
-	pack->md.type = success_p;
-	//todo scrivere il resto della risposta
-	writePack(data->conUs.con.ds_sock, pack);
-
-	return 0;
-}
-
-int loginUserSide(int ds_sock, mail *pack) {
-
-	char buffUser[24];
-	char buffPass[28];
-
-	printf("Inserire credenziali per login.\nUtente: ");
-	scanf("%s", buffUser);
-	fflush(stdin);
-	printf("\nPassword:");
-	scanf("%s", buffPass);
-	fflush(stdin);
-	printf("\n");
-
-	if (fillPack(pack, 0, 0, NULL, buffUser, buffPass) == -1) {
-		return (-1);
-	}
-	writePack(ds_sock, pack);
-
-	readPack(ds_sock, pack);
-
-
-	printf("Login effettuato\n");
+	fillPack(&response, success_p, 0, NULL, "Server", NULL);
+	writePack(data->conUs.con.ds_sock, &response);
 
 	return 0;
 }
@@ -222,7 +207,7 @@ void makeThRoom(int keyChat, char *roomPath, infoChat *info) {
 }
 
 ///Funzione chiamata da cmd per testare i th
-int makeThUser(int keyId, thUserArg *argUs) {
+int setUpThUser(int keyId, thUserArg *argUs) {
 	/// keyId:= id da cercare       argUs:= puntatore alla struttura da impostare
 	nameList *user = userExist();
 

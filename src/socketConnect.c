@@ -193,13 +193,23 @@ void freeConnection(connection *con) {
 
 
 int fillPack(mail *pack, int type, int dim, void *mex, char *sender, char *whoOrWhy) {
-	pack->md.dim = dim;
-    pack->md.type = type;
-    strncpy(pack->md.whoOrWhy, whoOrWhy, 24);
-    strncpy(pack->md.sender, sender, 28);
+	if (pack == NULL) {
+		errno = EFAULT;
+		return -1;
+	}
 
-	if (dim = 0)pack->mex = NULL;
+    pack->md.type = type;
+	pack->md.dim = (size_t) dim;
+
+	if (dim == 0)pack->mex = NULL;
 	else pack->mex = mex;
+
+	if (sender == NULL)strncpy(pack->md.sender, "", 28);
+	else strncpy(pack->md.sender, sender, 28);
+
+	if (whoOrWhy == NULL)strncpy(pack->md.whoOrWhy, "", 24);
+	else strncpy(pack->md.whoOrWhy, whoOrWhy, 24);
+
     return 0;
 }
 

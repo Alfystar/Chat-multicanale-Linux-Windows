@@ -62,7 +62,7 @@ void *thUserServer(thConnArg *argTh);
 
 void makeThRoom(int keyChat, char *roomPath, infoChat *info);
 
-int makeThUser(int keyId, thUserArg *argUs);
+int setUpThUser(int keyId, thUserArg *argUs);
 
 //todo freeTh-s_arg
 

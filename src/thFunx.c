@@ -76,7 +76,7 @@ void *thrServRX(thUserArg *argTh) {
             exit(-1);
         }
 
-        dprintf(fdOutP, "Numero byte pacchetto: %d\n", packRecive.md.dim);
+        dprintf(fdOutP, "Numero byte pacchetto: %ld\n", packRecive.md.dim);
         dprintf(fdOutP, "Stringa da client: %s\n\n", packRecive.mex);
 
 	    writePack(argTh->conUs.con.ds_sock, &packRecive);

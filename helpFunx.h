@@ -9,10 +9,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include "defineSets.h"
 
-//#include <zconf.h>  // not compatible on Fil's PC, use the define below instead
-#define STDERR_FILENO 2
 
 extern char **environ;
 

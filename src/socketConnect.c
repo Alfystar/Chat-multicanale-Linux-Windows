@@ -192,12 +192,14 @@ void freeConnection(connection *con) {
 }
 
 
-int fillPack(mail *pack, int type, char *sender, char *whoOrWhy, void *mex, int len) {
-    pack->md.dim = len;
+int fillPack(mail *pack, int type, int dim, void *mex, char *sender, char *whoOrWhy) {
+	pack->md.dim = dim;
     pack->md.type = type;
     strncpy(pack->md.whoOrWhy, whoOrWhy, 24);
     strncpy(pack->md.sender, sender, 28);
-    pack->mex = mex;
+
+	if (dim = 0)pack->mex = NULL;
+	else pack->mex = mex;
     return 0;
 }
 
@@ -253,22 +255,6 @@ int acceptCreate(connection *c, void *(*thUserServer)(void *), void *arg) {
     return 0;
 }
 
-int loginServerSide(int ds_sock, mail *pack) {
-    // vedere sendfile() su man, potrebbe servire per il login
-    dprintf(fdOut, "Utente in fase di collegamento; socket univoco:%d\n", ds_sock);
-
-    readPack(ds_sock, pack);
-
-    dprintf(fdOut, "Utente = %s\n", (char *) pack->mex);
-    dprintf(fdOut, "Cerco corrispondenza utente e chat associate.\n");
-
-    /// DEFINIRE DOVE TROVARE GLI UTENTI
-
-    writePack(ds_sock, pack);
-
-
-    return 0;
-}
 
 ///Client FUNCTION
 

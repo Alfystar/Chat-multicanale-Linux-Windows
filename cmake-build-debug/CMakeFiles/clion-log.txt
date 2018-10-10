@@ -1,5 +1,5 @@
-/opt/clion-2018.2.3/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" /home/filippo/CLionProjects/Chat-MultiChannel
--- The C compiler identification is GNU 7.2.0
+/opt/clion-2017.3.4/bin/cmake/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" /home/alfylinux/CLionProjects/Chat-MultiChannel
+-- The C compiler identification is GNU 7.3.0
 -- Check for working C compiler: /usr/bin/cc
 -- Check for working C compiler: /usr/bin/cc -- works
 -- Detecting C compiler ABI info
@@ -18,4 +18,4 @@
 -- Found Curses: /usr/lib/x86_64-linux-gnu/libcurses.so  
 -- Configuring done
 -- Generating done
--- Build files have been written to: /home/filippo/CLionProjects/Chat-MultiChannel/cmake-build-debug
+-- Build files have been written to: /home/alfylinux/CLionProjects/Chat-MultiChannel/cmake-build-debug

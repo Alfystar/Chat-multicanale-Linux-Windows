@@ -122,17 +122,13 @@ void driverCmd(int argc, char *argv[], int *exit) {
 			}
 			return;
 		}
+		/*
 		if (strcmp(argv[0], "startUs") == 0) {
 			nameList *user = userExist();
-			int idSearch = atoi(argv[1]);
-			int want = -1;
-			for (int i = 0; i < user->nMemb; i++) {
-				if (idSearch == atoi(user->names[i])) {
-					want = i;
-					break;
-				}
+			int idSc = atoi(argv[1]);
 
-			}
+			int want = idSearch(user,idSc);
+
 			if (want == -1) {
 				dprintf(STDERR_FILENO, "Id richiesto inesistente\n");
 				return;
@@ -147,11 +143,13 @@ void driverCmd(int argc, char *argv[], int *exit) {
 				dprintf(STDERR_FILENO, "creazione dell'User impossibile\n");
 				return;
 			}
-			makeThUser(idSearch, userDir, info);
-            dprintf(fdOut, "USER th creato, idKey=%d\n", idSearch);
+			dprintf(fdDebug, "USER th da creare, idKey=%d  userDir=%s   infoUser=%p\n", idSc,userDir, info);
+			makeThUser(idSc, userDir, info);
+            dprintf(fdDebug, "USER th creato, idKey=%d\n", idSc);
 
 			return;
 		}
+		 */
 		if (strcmp(argv[0], "usTab") == 0) {
 
 
@@ -256,7 +254,7 @@ void menuHelpw(WINDOW *w, int y_start, int x_start) {
 	wprintw(w, "->svst\t-> Mostra servStat sul monitor\n");
 	wprintw(w, "\t(1)arg\n");
 	wprintw(w, "->mkUs [Us Name]\t-> Crea un user nel file system\n");
-	wprintw(w, "->startUs [Us id]\t-> Tenta di avviare un thread user\n");
+	//wprintw(w, "->startUs [Us id]\t-> Tenta di avviare un thread user\n");
     wprintw(w, "->usTab [Us id]\t\t-> Visualizza tabella user\n");
 	wprintw(w, "->roomTab [Rm id]\t-> Visualizza tabella Room\n");
 	wprintw(w, "->roomConv [Rm id]\t-> Visualizza conversazione Room\n");

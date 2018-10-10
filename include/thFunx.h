@@ -20,6 +20,7 @@
 #include "socketConnect.h"
 #include "../treeFunx/include/avl.h"
 #include "../globalSet.h"
+#include "terminalShell.h"
 
 typedef struct thAcceptArg_ {
 	int id;
@@ -28,9 +29,9 @@ typedef struct thAcceptArg_ {
 
 typedef struct thUserArg_ {
     int id;             //idKey dell'user definito in fase di login
-    char userPath[50];  // path relativo a home dell'user in questione, login
+	char userName[50];  // Nome dell'user (dopo :)
     infoUser *info;     // contiene tabella e nome per esteso, fase login
-	thConnArg conUs;
+	thConnArg conUs;    //contiene Tab e path dir dell'user
 } thUserArg;
 
 typedef struct thRoomArg_ {
@@ -48,7 +49,7 @@ void *acceptTh(thAcceptArg *);
 
 void *userTh(thConnArg *);
 
-int loginUserSide(int sock, mail *pack);
+int loginServerSide(mail *pack, thUserArg *data);
 
 void *thrServRX(thUserArg *);
 
@@ -61,7 +62,8 @@ void *thUserServer(thConnArg *argTh);
 
 void makeThRoom(int keyChat, char *roomPath, infoChat *info);
 
-void makeThUser(int keyId, char *userPath, infoUser *info);
+int makeThUser(int keyId, thUserArg *argUs);
 
+//todo freeTh-s_arg
 
 #endif //CHAT_MULTILEVEL_THFUNX_H

@@ -53,13 +53,11 @@ typedef struct infoChat_ {
 } infoChat;
 
 typedef struct infoUser_ {
-	table *tab;
-	char myName[128];
+	table *tab;         //struttura tab
+	char pathName[128];   //path name of dir user
 } infoUser;
 
 ///GLOBAL VARIABLE
-extern char **environ;
-extern int fdOut;  //pipe di uscita per lo stdOut
 
 serverStat serStat;
 
@@ -123,6 +121,8 @@ void nameListPrint(nameList *nameList);
 
 void infoChatPrint(infoChat *info);
 
+
+//todo freeInfoUser
 
 #endif //CHAT_MULTILEVEL_FILESYSTEMUTYLITY_H
 

@@ -17,7 +17,7 @@ void *acceptTh(thAcceptArg *info) {
         arg->id = -1;
 		arg->conUs = info->conInfo; //copia negli argomenti del th una copia totale della connessione del server
         arg->info = NULL;
-        arg->userPath[0] = 0;
+		arg->userName[0] = 0;
 
         if (acceptCreate(&info->conInfo.con, userTh, arg) == -1) {
 	        dprintf(STDERR_FILENO, "errore in accept\n");
@@ -26,43 +26,89 @@ void *acceptTh(thAcceptArg *info) {
 	free(info);
 
 	///Codice funzionante per la creazione di un thread user passandogli correttamente il parametro info
-    /*
-    infoUser *info;
-    long idKey = atoi(info->myName);       //essendo myname xx:TEXT, la funzione termina ai : e ottengo la key
-    char userDir[128];
-    sprintf(userDir, "./%s/%ld:%s", userDirName, idKey, argv[1]);
-    makeThUser(idKey, userDir, info);
-    dprintf(fdOut, "USER th creato, idKey=%d\n", idKey);
-    */
+	/*
+	infoUser *info;
+	long idKey = atoi(info->pathName);       //essendo myname xx:TEXT, la funzione termina ai : e ottengo la key
+	char userDir[128];
+	sprintf(userDir, "./%s/%ld:%s", userDirName, idKey, argv[1]);
+	makeThUser(idKey, userDir, info);
+	dprintf(fdOut, "USER th creato, idKey=%d\n", idKey);
+	*/
 	return NULL;
 }
 
 void *userTh(thConnArg *info) {
-	thUserArg *arg = info->arg;
-	arg->conUs.con = info->con;
-    dprintf(fdOut, "TH-User creato\nId = %d\n", arg->id);
+	thUserArg *arg = info->arg; //da impostare in base al login
+	arg->conUs.con = info->con; //copio i dati di info
+	free(info); //il tipo thConnArg non serve più tutto è stato copiato
 
-    //mail *packRecive= malloc(sizeof(mail));
+	dprintf(fdOut, "TH-User creato\nId = %d\nIn Attesa primo pack\n", arg->id);
+	//pause();
+	mail *pack = malloc(sizeof(mail));
 
-    /*
-    if(loginServerSide(argTh->con.ds_sock, packRecive) == -1){
-        printf("Login fallito; disconnessione...\n");
-        pthread_exit(NULL);
-    }  /// RIVEDERE LA PARTE DELL'IF, RIMANGONO TROPPI ACCEPT NON LIBERATI COMPLETAMENTE IN QUESTO MODO
-    */
+	readPack(arg->conUs.con.ds_sock, pack);        //ottengo il primo pack per capire il da fare.
+	int idKey;
+	switch (pack->md.type) {
+		case login_p:
+			//login
+			loginServerSide(pack, arg);
+			break;
+		case mkUser_p:
+			//mkuser funx
+			break;
+		default:
+			dprintf(STDERR_FILENO, "Pack rivevuto inadatto a instaurazione com\n");
+			fillPack(pack, failed_p, 0, NULL, "SERVER", "User Not yet Created");
+			writePack(arg->conUs.con.ds_sock, pack);
+			//todo in caso salvare possibili file (FUNX saveOnExit)
+			pthread_exit(NULL);
+			break;
+	}
+	dprintf(fdDebug, "Login success\nTx-th & Rx-th of %d now Create", arg->id);
 
+	int fdUserPipe[2];
+	int errorRet = pipe2(fdUserPipe,
+	                     O_DIRECT); // dal manuale: fd[0] refers to the read end of the pipe. fd[1] refers to the write end of the pipe.
+	if (errorRet != 0) {
+		printErrno("La creazione della pipe per il Th-room ha dato l'errore", errorRet);
+		exit(-1);
+	}
+	insert_avl_node_S(usAvlPipe, arg->id, fdUserPipe[1]);
 
-    dprintf(fdOut, "mi metto in ascolto\n");
     pthread_t tidRX, tidTX;
 
 	pthread_create(&tidRX, NULL, thrServRX, arg);
     //pthread_create(&tidTX,NULL, thrServTX,info);
 
 	while (1) pause();
-	free(info);
+	free(arg);  //todo da sostituire con free_thUserArg quando fatta
 	pthread_exit(NULL);
 
 	return NULL;
+}
+
+int loginServerSide(mail *pack, thUserArg *data) {
+
+	dprintf(fdDebug, "LOGIN FASE\nUtente = %s\n Type=%d", pack->md.sender, pack->md.type);
+	/*
+	 * Login:
+	 * type=login_p
+	 * Sender=xxxx
+	 * whoOrWhy=idKey (string)
+	 * dim=0
+	 */
+	if (makeThUser(atoi(pack->md.whoOrWhy), data)) {
+		perror("Impossible to create new ThUser of register User :");
+		return -1;
+	}
+
+	/// DEFINIRE DOVE TROVARE GLI UTENTI
+	pack->md.type = success_p;
+	//todo scrivere il resto della risposta
+	writePack(data->conUs.con.ds_sock, pack);
+
+
+	return 0;
 }
 
 int loginUserSide(int ds_sock, mail *pack) {
@@ -78,7 +124,7 @@ int loginUserSide(int ds_sock, mail *pack) {
 	fflush(stdin);
 	printf("\n");
 
-	if (fillPack(pack, 0, buffUser, buffPass, NULL, 0) == -1) {
+	if (fillPack(pack, 0, 0, NULL, buffUser, buffPass) == -1) {
 		return (-1);
 	}
 	writePack(ds_sock, pack);
@@ -145,10 +191,10 @@ void *roomTh(thRoomArg *info) {
         printErrno("La creazione della pipe per il Th-room ha dato l'errore", errorRet);
         exit(-1);
     }
+	insert_avl_node_S(rmAvlPipe, info->id, fdRoomPipe[1]);
 
     dprintf(fdOut, "Ciao sono Un Tr-ROOM\n\tsono la %d\tmi chiamo %s\n\tmi ragiungi da %d\n", info->id, info->roomPath,
             fdRoomPipe[1]);
-    insert_avl_node_S(rmAvlPipe, info->id, fdRoomPipe[1]);
 	pause();
 	free(info);
 	return NULL;
@@ -176,21 +222,51 @@ void makeThRoom(int keyChat, char *roomPath, infoChat *info) {
 
 }
 
-void makeThUser(int keyId, char *userPath, infoUser *info) {
+///Funzione chiamata da cmd per testare i th
+int makeThUser(int keyId, thUserArg *argUs) {
+	/// keyId:= id da cercare       argUs:= puntatore alla struttura da impostare
+	nameList *user = userExist();
+
+	int want = idSearch(user, keyId);
+
+	if (want == -1) {
+		dprintf(STDERR_FILENO, "Id richiesto inesistente\n");
+		errno = ENOENT;
+		return -1;
+	}
+
+	///Inizio la creazione del thread
+	char userDir[128];
+	sprintf(userDir, "./%s/%s", userDirName, user->names[want]);
+
+	infoUser *info = openUser(userDir);
 	if (info == NULL) {
-		dprintf(STDERR_FILENO, "infoUser NULL, impossibile creare Tr-ROOM\n");
+		dprintf(STDERR_FILENO, "creazione dell'User impossibile\n");
+		errno = ENOENT;
+		return -1;
 	}
+
 	pthread_t usertid;
-	thUserArg *arg = malloc(sizeof(thUserArg));
-	arg->id = keyId;
 
-	strncpy(arg->userPath, userPath, 50);
-	arg->info = info;
+	argUs->id = keyId;
+	argUs->info = info;
 
-	int errorRet;
-	errorRet = pthread_create(&usertid, NULL, userTh, arg);
-	if (errorRet != 0) {
-		printErrno("La creazione del Thread USER ha dato il seguente errore", errorRet);
-		exit(-1);
+	/** Tokenizzazione di user->names[want] per ottenere name **/
+	// !!!!rompo user ma tanto non serve più
+
+	char *sArgv[2];  //consento lo storage fino a 64 comandi
+	int sArgc = 0;
+	char *savePoint;
+
+	sArgc = 0;
+	sArgv[sArgc] = strtok_r(user->names[want], ":", &savePoint);
+	while (sArgv[sArgc] != NULL && sArgc < 2) {
+		sArgc++;
+		sArgv[sArgc] = strtok_r(NULL, ":", &savePoint);
 	}
+
+	strncpy(argUs->userName, sArgv[1], 50);   //serve a prendere solo il nome dell'utente
+	nameListFree(user);
+
+	return 0;
 }

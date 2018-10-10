@@ -68,7 +68,7 @@ int writePack(int ds_sock, mail *pack); // ma all'interno contengono la struct m
 
 int testConnection(int ds_sock);
 
-int fillPack(mail *pack, int type, char *sender, char *whoOrWhy, void *mex, int len);
+int fillPack(mail *pack, int type, int dim, void *mex, char *sender, char *whoOrWhy);
 
 void printPack(mail *pack);
 
@@ -78,8 +78,6 @@ int initServer(connection *connection, int coda);
 
 //tira su un th del tipo void th(thConnArg* info) e dentro info.arg viene messo argFx
 int acceptCreate(connection *connection, void *(*thUserServer)(void *), void *argFx);
-
-int loginServerSide(int sock, mail *pack);
 
 ///Client FUNCTION
 int initClient(connection *c);

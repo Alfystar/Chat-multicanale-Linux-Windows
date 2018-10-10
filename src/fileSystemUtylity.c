@@ -199,7 +199,7 @@ infoUser *newUser(char *name) {
 	if (mkdir(userPath, 0777)) {
 		switch (errno) {
 			case EEXIST:
-				fprintf(stderr, "userPath already exist");
+				fprintf(stderr, "userName already exist");
 				return NULL;
 			default:
 				perror("makeDir chat take error :");
@@ -209,12 +209,13 @@ infoUser *newUser(char *name) {
 	}
 	///se arrivo qui sicuramente la cartella non esisteva e posso procedere tranquillamente
 
-	strncpy(info->myName, nameUser, 128);
+	strncpy(info->pathName, nameUser, 128);
 
 	///Creo tabella
 	char tabNamePath[128];
 	sprintf(tabNamePath, "%s/%s", userPath, userTable);
 	info->tab = init_Tab(tabNamePath, nameUser);
+	strncpy(info->pathName, userPath, 128);
 
 
 	return info;
@@ -232,7 +233,7 @@ infoUser *openUser(char *pathDir) {
 	char tabNamePath[128];
 	sprintf(tabNamePath, "%s/%s", pathDir, userTable);
 	info->tab = open_Tab(tabNamePath);
-
+	strncpy(info->pathName, pathDir, 128);
 	return info;
 }
 
@@ -589,12 +590,12 @@ void infoChatPrint(infoChat *info) {
 	/*
 	 info->tab
 	 info->conv
-	 info->myName
+	 info->pathName
 	 */
 	printf("########[[]][[]] infoChat contenent [[]][[]]########\n");
 	tabPrint(info->tab);
 	printConv(info->conv, STDOUT_FILENO);
-	printf("info->myName= %s\n", info->myName);
+	printf("info->pathName= %s\n", info->myName);
 	printf("----------------------------------------------------\n");
 
 }

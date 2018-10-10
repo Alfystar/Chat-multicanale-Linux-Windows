@@ -19,6 +19,8 @@
  */
 
 #include "../include/queue.h"
+#include "../include/common.h"
+
 
 /*
  * Create a new Queue
@@ -41,9 +43,9 @@ bool enqueue(queue_p queue, void *val) {
 	nodeptr->data = val;
 
 	if (add_head_dlist(queue->head, nodeptr)) /* Last In */
-		return TRUE;
+		return true;
 	else
-		return FALSE;
+		return false;
 }
 
 /*
@@ -54,7 +56,7 @@ void *dequeue(queue_p queue) {
 	void *data = get_tail_dlist(queue->head); /* Last Out */
 
 	if (delete_tail_dlist(queue->head) == -1)
-		log(DEBUG, "head or first node is NULL!\n");
+		dprintf(STDERR_FILENO, "head or first node is NULL!\n");
 
 	return data;
 }

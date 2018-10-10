@@ -21,6 +21,7 @@
 #include "../helpFunx.h"
 #include "fileSystemUtylity.h"
 #include "thFunx.h"
+#include "../globalSet.h"
 
 /** Strutture utili alla shell **/
 typedef struct thShellArg_ {
@@ -37,11 +38,12 @@ WINDOW *monitor; //schermo autonomo che si occupa di visualizzare i printf gener
 
 sem_t screewWrite;
 
-extern int fdOutP;  //pipe di uscita per lo stdOut
+/** Extern Global **/
+extern int fdOut;  //pipe di uscita per lo stdOut
 
 
 /** Funzioni generali e mainTh **/
-void terminalShell(int [], int []);
+void terminalShell();
 
 void driverCmd(int argc, char *argv[], int *exit);
 
@@ -78,6 +80,9 @@ int idSearch(nameList *nl, int idSearch);
 void shellThStdout(thShellArg *);
 
 void shellThStdErr(thShellArg *);
+
+void shellThDebug(thShellArg *);
+
 
 
 

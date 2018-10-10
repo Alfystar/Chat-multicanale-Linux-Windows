@@ -21,8 +21,9 @@
 #include <poll.h>
 #include <signal.h>
 
+#include "../globalSet.h"
+
 #define fflush(stdin) while(getchar() != '\n')
-extern int fdOutP;  //pipe di uscita per lo stdOut
 
 typedef struct metadata_ {
     size_t dim;

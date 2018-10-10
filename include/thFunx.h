@@ -5,14 +5,21 @@
 #ifndef CHAT_MULTILEVEL_THFUNX_H
 #define CHAT_MULTILEVEL_THFUNX_H
 
+#define _GNU_SOURCE             /* See feature_test_macros(7) */
+
 /** Thread lib **/
-#include <unistd.h>
 #include <pthread.h>
+#include <unistd.h>
+#include <fcntl.h>              /* Obtain O_* constant definitions */
+#include <limits.h>
+
 
 #include "fileSystemUtylity.h"
 #include "mexData.h"
 #include "tableFile.h"
 #include "socketConnect.h"
+#include "../treeFunx/include/avl.h"
+#include "../globalSet.h"
 
 typedef struct thAcceptArg_ {
 	int id;
@@ -33,7 +40,7 @@ typedef struct thRoomArg_ {
 } thRoomArg;
 
 ///GLOBAL VARIABLE
-extern int fdOutP;  //pipe di uscita per lo stdOut
+extern int fdOut;  //pipe di uscita per lo stdOut
 
 
 /** PROTOTIPI   **/

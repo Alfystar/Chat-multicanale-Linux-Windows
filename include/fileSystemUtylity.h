@@ -21,7 +21,7 @@
 #include <semaphore.h>
 
 #include "../helpFunx.h"
-#include "../defineSets.h"
+#include "../globalSet.h"
 #include "tableFile.h"
 #include "mexData.h"
 
@@ -48,8 +48,8 @@ typedef struct serverStat_ {
 typedef struct infoChat_ {
 	table *tab;
 	conversation *conv;
-	char myName[128];
-	int fdTemp;
+	char myName[128];   //path della mia chat
+	int fdTemp;         //file temporaneo, probabilemente non serve più
 } infoChat;
 
 typedef struct infoUser_ {
@@ -59,7 +59,7 @@ typedef struct infoUser_ {
 
 ///GLOBAL VARIABLE
 extern char **environ;
-extern int fdOutP;  //pipe di uscita per lo stdOut
+extern int fdOut;  //pipe di uscita per lo stdOut
 
 serverStat serStat;
 

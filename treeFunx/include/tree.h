@@ -19,7 +19,6 @@
  */
 
 #include "common.h"
-
 #pragma once
 
 typedef struct tree {

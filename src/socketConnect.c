@@ -202,13 +202,13 @@ int fillPack(mail *pack, int type, char *sender, char *whoOrWhy, void *mex, int 
 }
 
 void printPack(mail *pack) {
-    dprintf(fdOutP, "######[][]I METADATI SONO[][]######\n");
-    dprintf(fdOutP, "Dim pack = %ld\n", pack->md.dim);
-    dprintf(fdOutP, "Type = %d\n", pack->md.type);
-    dprintf(fdOutP, "Sender = %s\n", pack->md.sender);
-    dprintf(fdOutP, "whoOrWhy = %s\n", pack->md.whoOrWhy);
-    dprintf(fdOutP, "------[][]IL MESSAGGIO[][]------\n");
-    dprintf(fdOutP, "TEXT :\n--> %s\n\n", pack->mex); //non sempre stringa
+	dprintf(fdOut, "######[][]I METADATI SONO[][]######\n");
+	dprintf(fdOut, "Dim pack = %ld\n", pack->md.dim);
+	dprintf(fdOut, "Type = %d\n", pack->md.type);
+	dprintf(fdOut, "Sender = %s\n", pack->md.sender);
+	dprintf(fdOut, "whoOrWhy = %s\n", pack->md.whoOrWhy);
+	dprintf(fdOut, "------[][]IL MESSAGGIO[][]------\n");
+	dprintf(fdOut, "TEXT :\n--> %s\n\n", pack->mex); //non sempre stringa
 }
 ///Server FUNCTION
 
@@ -226,7 +226,7 @@ int initServer(connection *c, int coda) {
 
 int acceptCreate(connection *c, void *(*thUserServer)(void *), void *arg) {
     //in caso arrivi una connessione crea un th di tipo void* NAME (thConnArg*) in thConnArg.arg si trovano i parametri per il th
-    dprintf(fdOutP, "Dentro acceptCreate-funx\n");
+	dprintf(fdOut, "Dentro acceptCreate-funx\n");
     // Si suppone che arg sia stata precedentemente malloccata
     connection *conNew;
     conNew = malloc(sizeof(connection));
@@ -242,12 +242,12 @@ int acceptCreate(connection *c, void *(*thUserServer)(void *), void *arg) {
 
     thConnArg *argTh = malloc(sizeof(thConnArg));
 
-    dprintf(fdOutP, "arg prima e': %p\n", argTh->arg);
+	dprintf(fdOut, "arg prima e': %p\n", argTh->arg);
 
     argTh->arg = arg;
     argTh->con = *conNew;
 
-    dprintf(fdOutP, "arg adesso e': %p\n", argTh->arg);
+	dprintf(fdOut, "arg adesso e': %p\n", argTh->arg);
 
     pthread_create(&tid, NULL, thUserServer, argTh);
     return 0;
@@ -255,12 +255,12 @@ int acceptCreate(connection *c, void *(*thUserServer)(void *), void *arg) {
 
 int loginServerSide(int ds_sock, mail *pack) {
     // vedere sendfile() su man, potrebbe servire per il login
-    dprintf(fdOutP, "Utente in fase di collegamento; socket univoco:%d\n", ds_sock);
+	dprintf(fdOut, "Utente in fase di collegamento; socket univoco:%d\n", ds_sock);
 
     readPack(ds_sock, pack);
 
-    dprintf(fdOutP, "Utente = %s\n", (char *) pack->mex);
-    dprintf(fdOutP, "Cerco corrispondenza utente e chat associate.\n");
+	dprintf(fdOut, "Utente = %s\n", (char *) pack->mex);
+	dprintf(fdOut, "Cerco corrispondenza utente e chat associate.\n");
 
     /// DEFINIRE DOVE TROVARE GLI UTENTI
 

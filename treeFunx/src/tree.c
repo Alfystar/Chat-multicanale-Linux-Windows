@@ -29,7 +29,7 @@ int delete_tree_nodes(tree_p root) {
 	int count = 0;
 
 	if (!root) {
-		log(ERROR, "root invalid.\n");
+		dprintf(STDERR_FILENO, "root invalid.\n");
 		return -1;
 	}
 
@@ -57,7 +57,7 @@ tree_pp generate_tree(int *arr, int len) {
 	tree_pp head = NULL;
 
 	if (!arr || !len) {
-		log(ERROR, "Invalid array.\n");
+		dprintf(STDERR_FILENO, "Invalid array.\n");
 		return NULL;
 	}
 
@@ -65,7 +65,7 @@ tree_pp generate_tree(int *arr, int len) {
 
 	for (; i < len; i++) {
 		if (insert_tree_node(head, arr[i]) == FALSE) {
-			log(ERROR, "Insertion failed.\n");
+			dprintf(STDERR_FILENO, "Insertion failed.\n");
 			destroy_tree(head);
 			return NULL;
 		}
@@ -91,7 +91,7 @@ bool insert_tree_node(tree_pp head, int val) {
 	tree_p root = NULL;
 
 	if (!head) {
-		log(ERROR, "Initialize tree first.\n");
+		dprintf(STDERR_FILENO, "Initialize tree first.\n");
 		return FALSE;
 	}
 
@@ -117,7 +117,7 @@ bool insert_tree_node(tree_pp head, int val) {
 
 			root = root->right;
 		} else {
-			log(ERROR, "BST must have unique values.\n");
+			dprintf(STDERR_FILENO, "BST must have unique values.\n");
 			break;
 		}
 	}
@@ -142,7 +142,7 @@ bool delete_tree_node(tree_pp head, int val) {
 	int direction;
 
 	if (!head) {
-		log(ERROR, "Initialize tree first.\n");
+		dprintf(STDERR_FILENO, "Initialize tree first.\n");
 		return FALSE;
 	}
 
@@ -212,7 +212,7 @@ int destroy_tree(tree_pp head) {
 	int count = 0;
 
 	if (!head) {
-		log(ERROR, "head invalid.\n");
+		dprintf(STDERR_FILENO, "head invalid.\n");
 		return -1;
 	}
 
@@ -231,7 +231,7 @@ int print_tree(tree_p root) {
 	int count = 0;
 
 	if (!root) {
-		log(ERROR, "root invalid.\n");
+		dprintf(STDERR_FILENO, "root invalid.\n");
 		return -1;
 	}
 
@@ -263,7 +263,7 @@ bool search_BFS(tree_pp root, int val, bool stop) {
 	int ret = FALSE;
 
 	if (!root || !*root) {
-		log(ERROR, "tree or root node is NULL!\n");
+		dprintf(STDERR_FILENO, "tree or root node is NULL!\n");
 		return FALSE;
 	}
 
@@ -280,7 +280,7 @@ bool search_BFS(tree_pp root, int val, bool stop) {
 
 	/* Add root node to Queue */
 	if (!enqueue(queue, *root)) {
-		log(ERROR, "enqueue failed!\n");
+		dprintf(STDERR_FILENO, "enqueue failed!\n");
 		destroy_queue(queue);
 		return FALSE;
 	}
@@ -301,7 +301,7 @@ bool search_BFS(tree_pp root, int val, bool stop) {
 
 			/* Add left child to Queue */
 			if (!enqueue(queue, node->left)) {
-				log(ERROR, "enqueue failed!\n");
+				dprintf(STDERR_FILENO, "enqueue failed!\n");
 				destroy_queue(queue);
 				return FALSE;
 			}
@@ -319,7 +319,7 @@ bool search_BFS(tree_pp root, int val, bool stop) {
 
 			/* Add right child to Queue */
 			if (!enqueue(queue, node->right)) {
-				log(ERROR, "enqueue failed!\n");
+				dprintf(STDERR_FILENO, "enqueue failed!\n");
 				destroy_queue(queue);
 				return FALSE;
 			}
@@ -352,7 +352,7 @@ bool search_DFS(tree_pp root, int val, bool stop) {
 	stack_p stack = NULL;
 
 	if (!root || !*root) {
-		log(ERROR, "tree or root node is NULL.\n");
+		dprintf(STDERR_FILENO, "tree or root node is NULL.\n");
 		return FALSE;
 	}
 
@@ -369,7 +369,7 @@ bool search_DFS(tree_pp root, int val, bool stop) {
 
 	/* Add root node to Stack */
 	if (!push(stack, *root)) {
-		log(ERROR, "push failed!\n");
+		dprintf(STDERR_FILENO, "push failed!\n");
 		destroy_stack(stack);
 		return FALSE;
 	}
@@ -393,7 +393,7 @@ bool search_DFS(tree_pp root, int val, bool stop) {
 
 			/* Add node to stack */
 			if (!push(stack, node->left)) {
-				log(ERROR, "push failed!\n");
+				dprintf(STDERR_FILENO, "push failed!\n");
 				destroy_stack(stack);
 				return FALSE;
 			}
@@ -416,7 +416,7 @@ bool search_DFS(tree_pp root, int val, bool stop) {
 
 				/* Add right child to Stack */
 				if (!push(stack, node->right)) {
-					log(ERROR, "push failed!\n");
+					dprintf(STDERR_FILENO, "push failed!\n");
 					destroy_stack(stack);
 					return FALSE;
 				}

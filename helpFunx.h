@@ -9,8 +9,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "globalSet.h"
-#include <zconf.h>
+#include <unistd.h>
+#include "defineSets.h"
 
 
 extern char **environ;

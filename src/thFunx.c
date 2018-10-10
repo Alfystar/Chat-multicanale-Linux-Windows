@@ -3,7 +3,7 @@
 //
 
 #include "../include/thFunx.h"
-#include <unistd.h>
+
 
 
 void *acceptTh(thAcceptArg *info) {
@@ -12,7 +12,7 @@ void *acceptTh(thAcceptArg *info) {
 
 	while (1) {
         arg = malloc(sizeof(thUserArg));
-		dprintf(fdOut, "acceptTh Creato, arg = %p creato.\n", arg);
+		dprintf(fdOutP, "acceptTh Creato, arg = %p creato.\n", arg);
 		//definisco gli argomenti da passare al th user come puntati da arg di thConnArg.arg
         arg->id = -1;
 		arg->conUs = info->conInfo; //copia negli argomenti del th una copia totale della connessione del server
@@ -71,9 +71,13 @@ void *thrServRX(thUserArg *argTh) {
 
     while (1) {
 	    dprintf(fdOut, "thrServRx %d in attesa di messaggio da %d sock\n", argTh->id, argTh->conUs.con.ds_sock);
-	    readPack(argTh->conUs.con.ds_sock, &packRecive);
-	    dprintf(fdOut, "Numero byte pacchetto: %d\n", packRecive.md.dim);
-	    dprintf(fdOut, "Stringa da client: %s\n\n", packRecive.mex);
+        if (readPack(argTh->conUs.con.ds_sock, &packRecive) == -1) {
+            dprintf(STDERR_FILENO, "Read error, broken pipe\n");
+            exit(-1);
+        }
+
+        dprintf(fdOut, "Numero byte pacchetto: %ld\n", packRecive.md.dim);
+        dprintf(fdOut, "Stringa da client: %s\n\n", packRecive.mex);
 
 	    writePack(argTh->conUs.con.ds_sock, &packRecive);
 
@@ -98,8 +102,8 @@ void *thrServTX(thUserArg *argTh) {
         //readPack() da aggiungere il selettore in ingresso di chat
 
 
-	    writePack(argTh->conUs.con.ds_sock, &packWrite);
-        if (errno) {
+        if (writePack(argTh->conUs.con.ds_sock, &packWrite) == -1) {
+            dprintf(STDERR_FILENO, "Write error, broken pipe\n");
             exit(-1);
         }
 

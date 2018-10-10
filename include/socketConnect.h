@@ -60,6 +60,8 @@ void freeConnection(connection *con);
 int readPack(int ds_sock, mail *pack);  // queste due funzioni prendono il pacchetto thread-specifico
 int writePack(int ds_sock, mail *pack); // ma all'interno contengono la struct mail conInfo i dati
 
+int testConnection(int ds_sock);
+
 int fillPack(mail *pack, int type, char *sender, char *whoOrWhy, void *mex, int len);
 
 void printPack(mail *pack);

@@ -107,7 +107,6 @@ int loginServerSide(mail *pack, thUserArg *data) {
 	//todo scrivere il resto della risposta
 	writePack(data->conUs.con.ds_sock, pack);
 
-
 	return 0;
 }
 

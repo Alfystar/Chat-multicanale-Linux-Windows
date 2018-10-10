@@ -39,6 +39,7 @@ void helpProject(void) {
     printf("I parametri inseribili sono:\n");
     printf("\tServer command:\n");
     printf("\t[storage] [port] [coda]\nCreo il server nella cartella, porta, e per {coda} persone specificate\n");
+
 }
 
 void pipeInit() {
@@ -83,6 +84,7 @@ int main(int argc, char *argv[]) {
 	}
     printf("SERVER STORAGE AVVIATO\n");
 
+	/** INIT GLOBAL AVL TREE**/
 	usAvlPipe = init_avl_S();
 	rmAvlPipe = init_avl_S();
 
@@ -105,8 +107,8 @@ int main(int argc, char *argv[]) {
 
 
 	/** fase di avvio CONNESSIONE del server **/
-
-	connection *serverCon = initSocket((u_int16_t) strtol(argv[2], NULL, 10), "INADDR_ANY");
+	portProces = atoi(argv[2]);   //save global port data
+	connection *serverCon = initSocket((u_int16_t) portProces, "INADDR_ANY");
 	if (serverCon == NULL) {
 		exit(-1);
 	}

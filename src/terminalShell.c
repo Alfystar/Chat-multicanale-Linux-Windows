@@ -285,7 +285,7 @@ void windowSetUp() {
 
 
 	/** Main windows print **/
-	mvprintw(LINES - 1, 1, "Versione del server: %s", firmwareVersion);
+	mvprintw(LINES - 1, 1, "Versione del server: %s  Port-Proces: %d", firmwareVersion, portProces);
 	refresh();
 
 	/** Finestra Titolo setUp **/

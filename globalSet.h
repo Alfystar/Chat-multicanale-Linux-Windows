@@ -23,6 +23,9 @@ enum colorText {
 };
 
 
+/** SERVER CONNECT IP AND PORT**/
+int portProces; //port of process
+
 /** GLOBAL PIPE TO TALK **/
 /*
  * LaS libreria ncurse usa lo stdout per printare gli schermi, di conseguenza redirizzando il flusso si perde

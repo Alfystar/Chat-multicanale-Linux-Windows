@@ -9,10 +9,10 @@
 void *acceptTh(thAcceptArg *info) {
 
     thUserArg *arg;
+	dprintf(fdOut, "acceptTh Creato\n");
 
 	while (1) {
         arg = malloc(sizeof(thUserArg));
-        dprintf(fdOut, "acceptTh Creato, arg = %p creato.\n", arg);
 		//definisco gli argomenti da passare al th user come puntati da arg di thConnArg.arg
         arg->id = -1;
 		arg->conUs = info->conInfo; //copia negli argomenti del th una copia totale della connessione del server
@@ -22,6 +22,8 @@ void *acceptTh(thAcceptArg *info) {
         if (acceptCreate(&info->conInfo.con, userTh, arg) == -1) {
 	        dprintf(STDERR_FILENO, "errore in accept\n");
         }
+		dprintf(fdOut, "userTh Creato da accept,i suoi arg = %p sono stati creati.\n", arg);
+
 	}
 	free(info);
 
@@ -38,7 +40,7 @@ void *acceptTh(thAcceptArg *info) {
 }
 
 void *userTh(thConnArg *info) {
-	thUserArg *arg = info->arg; //da impostare in base al login
+	thUserArg *arg = info->arg; //da impostare in base al login, l'accept lascia campi "vuoti"
 	arg->conUs.con = info->con; //copio i dati di info
 	free(info); //il tipo thConnArg non serve più tutto è stato copiato
 
@@ -48,6 +50,7 @@ void *userTh(thConnArg *info) {
 
 	readPack(arg->conUs.con.ds_sock, pack);        //ottengo il primo pack per capire il da fare.
 	int idKey;
+	///in base al tipo di connessione si riepe arg con i giusti dati
 	switch (pack->md.type) {
 		case login_p:
 			if (loginServerSide(pack, arg)) {
@@ -57,7 +60,11 @@ void *userTh(thConnArg *info) {
 			}
 			break;
 		case mkUser_p:
-			//mkuser funx
+			if (mkUserServerSide(pack, arg)) {
+				perror("make New User fase fail :");
+				dprintf(STDERR_FILENO, "Shutdown Th %d\n", arg->id);
+				pthread_exit(NULL);
+			}
 			break;
 		default:
 			dprintf(STDERR_FILENO, "Pack rivevuto inadatto a instaurazione com\n");
@@ -106,7 +113,6 @@ int loginServerSide(mail *pack, thUserArg *data) {
 
 	mail response;
 
-
 	if (setUpThUser(atoi(pack->md.whoOrWhy), data)) {
 		perror("Impossible to create new ThUser of register User :");
 		fillPack(&response, failed_p, 0, NULL, "Server", "setUpThUser error");
@@ -114,8 +120,40 @@ int loginServerSide(mail *pack, thUserArg *data) {
 		return -1;
 	}
 
-	/// DEFINIRE DOVE TROVARE GLI UTENTI
+	/// Invio risposta affermativa
 	fillPack(&response, success_p, 0, NULL, "Server", NULL);
+	writePack(data->conUs.con.ds_sock, &response);
+
+	return 0;
+}
+
+int mkUserServerSide(mail *pack, thUserArg *data) {
+
+	dprintf(fdDebug, "LOGIN FASE, create user\n");
+	/*
+	 * mkUser:
+	 * type=mkUser_p
+	 * Sender=Name new (string)
+	 * whoOrWhy= null
+	 * dim=0
+	 */
+
+	mail response;
+
+	infoUser *info = newUser(pack->md.sender);
+	if (info == NULL) {
+		dprintf(STDERR_FILENO, "creazione della chat impossibile");
+		return -1;
+	}
+	data->info = info;
+	//todo da vedere se sscanf funziona
+	sscanf(info->pathName, "%ld:%s", &data->id, data->userName);
+
+
+	/// Invio dataSend
+	char idSend[16];
+	sprintf(idSend, "%d", data->id);
+	fillPack(&response, dataUs_p, 0, NULL, "Server", idSend);
 	writePack(data->conUs.con.ds_sock, &response);
 
 	return 0;
@@ -206,7 +244,6 @@ void makeThRoom(int keyChat, char *roomPath, infoChat *info) {
 
 }
 
-///Funzione chiamata da cmd per testare i th
 int setUpThUser(int keyId, thUserArg *argUs) {
 	/// keyId:= id da cercare       argUs:= puntatore alla struttura da impostare
 	nameList *user = userExist();

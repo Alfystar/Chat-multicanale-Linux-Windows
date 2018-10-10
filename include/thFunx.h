@@ -51,6 +51,8 @@ void *userTh(thConnArg *);
 
 int loginServerSide(mail *pack, thUserArg *data);
 
+int mkUserServerSide(mail *pack, thUserArg *data);
+
 void *thrServRX(thUserArg *);
 
 void *thrServTX(thUserArg *);

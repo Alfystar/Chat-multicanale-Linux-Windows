@@ -116,7 +116,7 @@ void driverCmd(int argc, char *argv[], int *exit) {
 
 		if (strcmp(argv[0], "mkUs") == 0) {
 			infoUser *info = newUser(argv[1]);
-			if (info == 0) {
+			if (info == NULL) {
 				dprintf(STDERR_FILENO, "creazione della chat impossibile");
 				return;
 			}

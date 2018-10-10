@@ -117,7 +117,7 @@ int readPack(int ds_sock, mail *pack) //todo: implementare controllo sulle read
 
     ssize_t bRead = 0;
     ssize_t ret = 0;
-    dprintf(STDERR_FILENO, "readPack\n");
+	dprintf(fdDebug, "readPack Funx\n");
     do {
         ret = read(ds_sock, &pack->md + bRead, sizeof(metadata) - bRead);
         if (ret == -1) {

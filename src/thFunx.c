@@ -71,7 +71,11 @@ void *thrServRX(thUserArg *argTh) {
 
     while (1) {
 	    dprintf(fdOutP, "thrServRx %d in attesa di messaggio da %d sock\n", argTh->id, argTh->conUs.con.ds_sock);
-	    readPack(argTh->conUs.con.ds_sock, &packRecive);
+        if (readPack(argTh->conUs.con.ds_sock, &packRecive) == -1) {
+            dprintf(STDERR_FILENO, "Read error, broken pipe\n");
+            exit(-1);
+        }
+
         dprintf(fdOutP, "Numero byte pacchetto: %d\n", packRecive.md.dim);
         dprintf(fdOutP, "Stringa da client: %s\n\n", packRecive.mex);
 
@@ -98,11 +102,10 @@ void *thrServTX(thUserArg *argTh) {
         //readPack() da aggiungere il selettore in ingresso di chat
 
 
-	    writePack(argTh->conUs.con.ds_sock, &packWrite);
-        if (errno) {
+        if (writePack(argTh->conUs.con.ds_sock, &packWrite) == -1) {
+            dprintf(STDERR_FILENO, "Write error, broken pipe\n");
             exit(-1);
         }
-
     }
 }
 

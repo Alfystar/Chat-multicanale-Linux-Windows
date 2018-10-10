@@ -84,7 +84,7 @@ int writePack(int ds_sock, mail *pack) //dentro il thArg deve essere puntato un 
         if (ret == -1) {
             if (errno == EPIPE) {
                 dprintf(STDERR_FILENO, "write pack pipe break 1\n");
-
+                return -1;
                 //GESTIRE LA CHIUSURA DEL SOCKET (LA CONNESSIONE E' STATA INTERROTTA IMPROVVISAMENTE)
             }
         }
@@ -99,7 +99,7 @@ int writePack(int ds_sock, mail *pack) //dentro il thArg deve essere puntato un 
         if (ret == -1) {
             if (errno == EPIPE) {
                 dprintf(STDERR_FILENO, "write pack pipe break 2\n");
-
+                return -1;
                 //GESTIRE LA CHIUSURA DEL SOCKET (LA CONNESSIONE E' STATA INTERROTTA IMPROVVISAMENTE)
             }
         }
@@ -113,14 +113,15 @@ int writePack(int ds_sock, mail *pack) //dentro il thArg deve essere puntato un 
 int readPack(int ds_sock, mail *pack) //todo: implementare controllo sulle read
 {
     ssize_t bRead = 0;
+    ssize_t ret = 0;
     dprintf(STDERR_FILENO, "readPack\n");
     do {
-        bRead += read(ds_sock, &pack->md + bRead, sizeof(metadata) - bRead);
-        dprintf(STDERR_FILENO, "readPack metadata\n");
-        //todo read in caso di sick pipe entra in while perpetuo qui
+        ret = read(ds_sock, &pack->md + bRead, sizeof(metadata) - bRead);
+        dprintf(STDERR_FILENO, "readPack metadata; ret value: %d\n", ret);
+        //todo read in caso di  broken pipe entra in while perpetuo qui
         // SOLUZIONE STUPIDA: vedere se i byte letti dopo un certo numero di cicli (es: 10)
         //                    sono sempre 0; in tal caso interrompiamo la read
-
+        bRead += ret;
     } while (sizeof(metadata) - bRead != 0);
 
     size_t dimMex = pack->md.dim;
@@ -133,10 +134,11 @@ int readPack(int ds_sock, mail *pack) //todo: implementare controllo sulle read
     pack->mex = malloc(dimMex);
 
     bRead = 0; //rimetto a zero per la nuova lettura
+    ret = 0;
     do {
-        bRead += read(ds_sock, pack->mex + bRead, dimMex - bRead);
+        ret = read(ds_sock, pack->mex + bRead, dimMex - bRead);
         dprintf(STDERR_FILENO, "readPack mex\n");
-
+        bRead += ret;
     } while (dimMex - bRead != 0);
 
     return 0;

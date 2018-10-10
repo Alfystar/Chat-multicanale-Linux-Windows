@@ -73,7 +73,8 @@ void *thrServRX(thUserArg *argTh) {
 	    dprintf(fdOutP, "thrServRx %d in attesa di messaggio da %d sock\n", argTh->id, argTh->conUs.con.ds_sock);
         if (readPack(argTh->conUs.con.ds_sock, &packRecive) == -1) {
             dprintf(STDERR_FILENO, "Read error, broken pipe\n");
-            exit(-1);
+            sleep(1);
+            exit(-1); // todo gestione broken pipe e uscita thread
         }
 
         dprintf(fdOutP, "Numero byte pacchetto: %ld\n", packRecive.md.dim);

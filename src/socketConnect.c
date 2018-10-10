@@ -175,7 +175,7 @@ int readPack(int ds_sock, mail *pack) //todo: implementare controllo sulle read
 int testConnection(int ds_sock) {
     mail packTest;
     packTest.mex = NULL;
-    packTest.md.dim = strlen(packTest.mex) + 1;
+    packTest.md.dim = 0;
     packTest.md.type = 1;
     strncpy(packTest.md.sender, "Server", 28);
     strncpy(packTest.md.whoOrWhy, "testing_code", 24);

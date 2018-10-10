@@ -12,7 +12,7 @@ void *acceptTh(thAcceptArg *info) {
 
 	while (1) {
         arg = malloc(sizeof(thUserArg));
-		dprintf(fdOutP, "acceptTh Creato, arg = %p creato.\n", arg);
+        dprintf(fdOut, "acceptTh Creato, arg = %p creato.\n", arg);
 		//definisco gli argomenti da passare al th user come puntati da arg di thConnArg.arg
         arg->id = -1;
 		arg->conUs = info->conInfo; //copia negli argomenti del th una copia totale della connessione del server

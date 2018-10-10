@@ -48,6 +48,8 @@ void *acceptTh(thAcceptArg *);
 
 void *userTh(thConnArg *);
 
+int loginUserSide(int sock, mail *pack);
+
 void *thrServRX(thUserArg *);
 
 void *thrServTX(thUserArg *);

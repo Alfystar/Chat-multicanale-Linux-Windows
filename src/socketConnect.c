@@ -281,28 +281,3 @@ int initClient(connection *c) {
     return 0;
 }
 
-int loginUserSide(int ds_sock, mail *pack) {
-
-    char buffUser[24];
-    char buffPass[28];
-
-    printf("Inserire credenziali per login.\nUtente: ");
-    scanf("%s", buffUser);
-    fflush(stdin);
-    printf("\nPassword:");
-    scanf("%s", buffPass);
-    fflush(stdin);
-    printf("\n");
-
-    if (fillPack(pack, 0, buffUser, buffPass, NULL, 0) == -1) {
-        return (-1);
-    }
-    writePack(ds_sock, pack);
-
-    readPack(ds_sock, pack);
-
-
-    printf("Login effettuato\n");
-
-    return 0;
-}

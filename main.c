@@ -77,8 +77,7 @@ int main(int argc, char *argv[]) {
 	pipeInit();
 
     /** fase di avvio STORAGE del server **/
-    if (StartServerStorage(argv[1]) == -1)
-	{
+    if (StartServerStorage(argv[1]) == -1) {
 		perror("\n!! Il server non è stato in grado di essere inizializato\nEXIT_FAILURE :");
 		exit(EXIT_FAILURE);
 	}

@@ -166,7 +166,7 @@ conversation *loadConvF(FILE *stream) {
 	dataPoint = buf + sizeof(conv->head);
 	if (streamInfo.st_size == sizeof(conv->head)) {
 		//non sono presenti messaggi e ho una conversazione vuota
-		dprintf(fdOut, "File conInfo solo testa\n");
+        dprintf(fdOut, "File conInfo solo testa\n");
 		return conv;
 	}
 	conv->mexList = calloc(conv->head.nMex, sizeof(mex *));   //creo un array di puntatori a mex
@@ -186,10 +186,10 @@ conversation *loadConvF(FILE *stream) {
 		dataPoint += len;
 
 		conv->mexList[i] = mexNode;   //salvo il puntatore nell'array
-		/*
-		dprintf(fdOut,"\nil nuovo messaggio creato è:\n");
-		printMex(mexNode);
-		*/
+        /*
+        dprintf(fdOut,"\nil nuovo messaggio creato è:\n");
+        printMex(mexNode);
+        */
 	}
 	return conv;
 }
@@ -206,7 +206,7 @@ int fWriteF(FILE *f, size_t sizeElem, int nelem, void *dat) {
 			errno = EBADFD;   //file descriptor in bad state
 			return -1;
 		}
-		//dprintf(fdOut,"prima fwrite; dat=%p\n",dat);
+        //dprintf(fdOut,"prima fwrite; dat=%p\n",dat);
 		cont += fwrite(dat + cont, 1, sizeElem * nelem - cont, f);
 	}
 	return 0;
@@ -301,9 +301,9 @@ void printConvInfo(convInfo *cI, int fdOutP) {
 char *timeString(time_t t) {
 	char *c_time_string;
 /* Convert to local time format. */
-	//dprintf(fdOut,"ctime before\n");
+    //dprintf(fdOut,"ctime before\n");
 	c_time_string = ctime(&t);   /// è thread safe, ha una memoria interna
-	//dprintf(fdOut,"ctime after\n");
+    //dprintf(fdOut,"ctime after\n");
 	if (c_time_string == NULL) {
 		fprintf(stderr, "Failure to convert the current time.\n");
 	}

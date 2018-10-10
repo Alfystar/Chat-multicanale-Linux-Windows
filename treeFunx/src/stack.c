@@ -54,7 +54,7 @@ void *pop(stack_p stack) {
 	void *data = get_head_dlist(stack->head); /* First out */
 
 	if (delete_head_dlist(stack->head) == -1)
-		dprintf(fdOut, "head or first node is NULL!\n");
+        dprintf(fdOut, "head or first node is NULL!\n");
 
 	return data;
 }

@@ -31,21 +31,21 @@ void debug_log(const char *file,
                int level,
                const char *format,
                ...) {
-	return;
-	/*
-	va_list ap;
+    return;
+    /*
+    va_list ap;
 
-	va_start(ap, format);
+    va_start(ap, format);
 
-	if (level < 0 || level > DEBUG)
-		return;
+    if (level < 0 || level > DEBUG)
+        return;
 
-	if (level <= current_log_level) {
-		fprintf(stderr, "[%s, %s(), ln %d] %s: ",
-		        file, func, line, logarr[level]);
-		vfprintf(stderr, format, ap);
-	}
+    if (level <= current_log_level) {
+        fprintf(stderr, "[%s, %s(), ln %d] %s: ",
+                file, func, line, logarr[level]);
+        vfprintf(stderr, format, ap);
+    }
 
-	va_end(ap);
-	 */
+    va_end(ap);
+     */
 }

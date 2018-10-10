@@ -43,9 +43,9 @@ bool enqueue(queue_p queue, void *val) {
 	nodeptr->data = val;
 
 	if (add_head_dlist(queue->head, nodeptr)) /* Last In */
-		return true;
+        return true;
 	else
-		return false;
+        return false;
 }
 
 /*
@@ -56,7 +56,7 @@ void *dequeue(queue_p queue) {
 	void *data = get_tail_dlist(queue->head); /* Last Out */
 
 	if (delete_tail_dlist(queue->head) == -1)
-		dprintf(STDERR_FILENO, "head or first node is NULL!\n");
+        dprintf(STDERR_FILENO, "head or first node is NULL!\n");
 
 	return data;
 }

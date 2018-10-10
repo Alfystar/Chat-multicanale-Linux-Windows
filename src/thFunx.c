@@ -26,21 +26,21 @@ void *acceptTh(thAcceptArg *info) {
 	free(info);
 
 	///Codice funzionante per la creazione di un thread user passandogli correttamente il parametro info
-	/*
-	infoUser *info;
-	long idKey = atoi(info->myName);       //essendo myname xx:TEXT, la funzione termina ai : e ottengo la key
-	char userDir[128];
-	sprintf(userDir, "./%s/%ld:%s", userDirName, idKey, argv[1]);
-	makeThUser(idKey, userDir, info);
-	dprintf(fdOut, "USER th creato, idKey=%d\n", idKey);
-	*/
+    /*
+    infoUser *info;
+    long idKey = atoi(info->myName);       //essendo myname xx:TEXT, la funzione termina ai : e ottengo la key
+    char userDir[128];
+    sprintf(userDir, "./%s/%ld:%s", userDirName, idKey, argv[1]);
+    makeThUser(idKey, userDir, info);
+    dprintf(fdOut, "USER th creato, idKey=%d\n", idKey);
+    */
 	return NULL;
 }
 
 void *userTh(thConnArg *info) {
 	thUserArg *arg = info->arg;
 	arg->conUs.con = info->con;
-	dprintf(fdOut, "TH-User creato\nId = %d\n", arg->id);
+    dprintf(fdOut, "TH-User creato\nId = %d\n", arg->id);
 
     //mail *packRecive= malloc(sizeof(mail));
 
@@ -52,7 +52,7 @@ void *userTh(thConnArg *info) {
     */
 
 
-	dprintf(fdOut, "mi metto in ascolto\n");
+    dprintf(fdOut, "mi metto in ascolto\n");
     pthread_t tidRX, tidTX;
 
 	pthread_create(&tidRX, NULL, thrServRX, arg);
@@ -70,7 +70,7 @@ void *thrServRX(thUserArg *argTh) {
     mail packRecive;
 
     while (1) {
-	    dprintf(fdOut, "thrServRx %d in attesa di messaggio da %d sock\n", argTh->id, argTh->conUs.con.ds_sock);
+        dprintf(fdOut, "thrServRx %d in attesa di messaggio da %d sock\n", argTh->id, argTh->conUs.con.ds_sock);
         if (readPack(argTh->conUs.con.ds_sock, &packRecive) == -1) {
             dprintf(STDERR_FILENO, "Read error, broken pipe\n");
             sleep(1);
@@ -112,17 +112,17 @@ void *thrServTX(thUserArg *argTh) {
 }
 
 void *roomTh(thRoomArg *info) {
-	int fdRoomPipe[2];
-	int errorRet = pipe2(fdRoomPipe,
-	                     O_DIRECT); // dal manuale: fd[0] refers to the read end of the pipe. fd[1] refers to the write end of the pipe.
-	if (errorRet != 0) {
-		printErrno("La creazione della pipe per il Th-room ha dato l'errore", errorRet);
-		exit(-1);
-	}
+    int fdRoomPipe[2];
+    int errorRet = pipe2(fdRoomPipe,
+                         O_DIRECT); // dal manuale: fd[0] refers to the read end of the pipe. fd[1] refers to the write end of the pipe.
+    if (errorRet != 0) {
+        printErrno("La creazione della pipe per il Th-room ha dato l'errore", errorRet);
+        exit(-1);
+    }
 
-	dprintf(fdOut, "Ciao sono Un Tr-ROOM\n\tsono la %d\tmi chiamo %s\n\tmi ragiungi da %d\n", info->id, info->roomPath,
-	        fdRoomPipe[1]);
-	insert_avl_node_S(rmAvlPipe, info->id, fdRoomPipe[1]);
+    dprintf(fdOut, "Ciao sono Un Tr-ROOM\n\tsono la %d\tmi chiamo %s\n\tmi ragiungi da %d\n", info->id, info->roomPath,
+            fdRoomPipe[1]);
+    insert_avl_node_S(rmAvlPipe, info->id, fdRoomPipe[1]);
 	pause();
 	free(info);
 	return NULL;

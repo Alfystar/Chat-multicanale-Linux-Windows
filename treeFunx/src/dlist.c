@@ -28,12 +28,12 @@
  */
 int add_head_dlist(dlist_pp head, dlist_p node) {
 	if (!node) {
-		dprintf(STDERR_FILENO, "node is NULL!\n");
+        dprintf(STDERR_FILENO, "node is NULL!\n");
 		return -1;
 	}
 
 	if (!head) {
-		dprintf(STDERR_FILENO, "head is NULL!\n");
+        dprintf(STDERR_FILENO, "head is NULL!\n");
 		return -1;
 	}
 
@@ -60,7 +60,7 @@ int add_head_dlist(dlist_pp head, dlist_p node) {
  */
 void *get_head_dlist(dlist_pp head) {
 	if (!head || !*head) {
-		dprintf(STDERR_FILENO, "head or first node is NULL!\n");
+        dprintf(STDERR_FILENO, "head or first node is NULL!\n");
 		return NULL;
 	}
 
@@ -73,7 +73,7 @@ void *get_head_dlist(dlist_pp head) {
  */
 void *get_tail_dlist(dlist_pp head) {
 	if (!head || !*head) {
-		dprintf(STDERR_FILENO, "head or first node is NULL!\n");
+        dprintf(STDERR_FILENO, "head or first node is NULL!\n");
 		return NULL;
 	}
 
@@ -87,7 +87,7 @@ int delete_head_dlist(dlist_pp head) {
 	dlist_p tmp;
 
 	if (!head || !*head) {
-		dprintf(STDERR_FILENO, "No nodes to delete!\n");
+        dprintf(STDERR_FILENO, "No nodes to delete!\n");
 		return -1;
 	}
 
@@ -115,7 +115,7 @@ int delete_tail_dlist(dlist_pp head) {
 	dlist_p tmp;
 
 	if (!head || !*head) {
-		dprintf(STDERR_FILENO, "head or first node is NULL!\n");
+        dprintf(STDERR_FILENO, "head or first node is NULL!\n");
 		return -1;
 	}
 
@@ -144,7 +144,7 @@ int destroy_dlist(dlist_pp head) {
 	int deleted = 0;
 
 	if (!head || !*head) {
-		dprintf(STDERR_FILENO, "No nodes to delete.\n");
+        dprintf(STDERR_FILENO, "No nodes to delete.\n");
 		return -1;
 	}
 
@@ -172,7 +172,7 @@ int count_nodes_dlist(dlist_pp head) {
 	int count = 0;
 
 	if (!head || !*head) {
-		dprintf(STDERR_FILENO, "head or first node is NULL!\n");
+        dprintf(STDERR_FILENO, "head or first node is NULL!\n");
 		return -1;
 	}
 

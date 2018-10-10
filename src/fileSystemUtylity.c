@@ -414,7 +414,7 @@ int serStat_addchat_lock() {
 		perror("serStat sem_post take error: ");
 		return -1;
 	}
-	printServStat(fdOut);
+    printServStat(fdOut);
 	overrideServerStatConf();
 	return 0;
 }

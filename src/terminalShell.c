@@ -86,6 +86,7 @@ void driverCmd(int argc, char *argv[], int *exit) {
 			*exit = 0;
 			return;
 		}
+
 		if (strcmp(argv[0], "chat") == 0) {
 			chatShowW(showPannel, 1, 0);
 			return;

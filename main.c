@@ -85,8 +85,8 @@ int main(int argc, char *argv[]) {
     printf("SERVER STORAGE AVVIATO\n");
 
 	/** INIT GLOBAL AVL TREE**/
-	usAvlPipe = init_avl_S();
-	rmAvlPipe = init_avl_S();
+	usAvlTree_Pipe = init_avl_S();
+	rmAvlTree_Pipe = init_avl_S();
 
 
 	/** Spawn dei thread ROOM **/

@@ -209,14 +209,11 @@ infoUser *newUser(char *name) {
 	}
 	///se arrivo qui sicuramente la cartella non esisteva e posso procedere tranquillamente
 
-	strncpy(info->pathName, nameUser, 128);
-
 	///Creo tabella
 	char tabNamePath[128];
 	sprintf(tabNamePath, "%s/%s", userPath, userTable);
 	info->tab = init_Tab(tabNamePath, nameUser);
 	strncpy(info->pathName, userPath, 128);
-
 
 	return info;
 }

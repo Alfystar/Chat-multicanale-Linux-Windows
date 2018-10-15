@@ -54,7 +54,7 @@ typedef struct infoChat_ {
 
 typedef struct infoUser_ {
 	table *tab;         //struttura tab
-	char pathName[128];   //path name of dir user
+	char pathName[128];   //path name of dir user ./USER_PATH_DIR/
 } infoUser;
 
 ///GLOBAL VARIABLE

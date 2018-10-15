@@ -92,7 +92,7 @@ void driverCmd(int argc, char *argv[], int *exit) {
 			return;
         }
         if (strcmp(argv[0], "p-avlC") == 0) {
-            print_avl(*rmAvlPipe.avlRoot, *rmAvlPipe.avlRoot);
+	        print_avl(*rmAvlTree_Pipe.avlRoot, *rmAvlTree_Pipe.avlRoot);
             return;
         }
 		if (strcmp(argv[0], "user") == 0) {
@@ -100,13 +100,18 @@ void driverCmd(int argc, char *argv[], int *exit) {
 			return;
 		}
         if (strcmp(argv[0], "p-avlU") == 0) {
-            print_avl(*usAvlPipe.avlRoot, *usAvlPipe.avlRoot);
+	        print_avl(*usAvlTree_Pipe.avlRoot, *usAvlTree_Pipe.avlRoot);
             return;
         }
-		if (strcmp(argv[0], "svst") == 0) {
-            printServStat(fdOut);
+		if (strcmp(argv[0], "sstat") == 0) {
+			printServStat(fdOut);
 			return;
 		}
+		if (strcmp(argv[0], "reset") == 0) {
+			windowSetUp();
+			return;
+		}
+
 
 
 	}
@@ -238,28 +243,58 @@ void driverCmd(int argc, char *argv[], int *exit) {
 			return;
 		}
 	}
-	menuHelpw(cmdW, 2, 0);
+	menuHelpw(cmdW, 2, 0, argc, argv);
 }
 
-void menuHelpw(WINDOW *w, int y_start, int x_start) {
+void menuHelpw(WINDOW *w, int y_start, int x_start, int argc, char *argv[]) {
 	mvwprintw(w, y_start, x_start, "elenco comandi disponibili\n");
+	wclrtobot(w);
 	wprintw(w, "## <command> [argv] ...\n");
-	wprintw(w, "\t(0)arg\n");
-	wprintw(w, "->h\t-> Visualizza questa lista\n");
-	wprintw(w, "->q\t-> termina server\n");
-	wprintw(w, "->chat\t-> Chat Archiviate\n");
-    wprintw(w, "->p-avlC\t-> Printa l'avl delle chat\n");
-	wprintw(w, "->user\t-> Utenti Registrati\n");
-    wprintw(w, "->p-avlU\t-> Printa l'avl degli User\n");
-	wprintw(w, "->svst\t-> Mostra servStat sul monitor\n");
-	wprintw(w, "\t(1)arg\n");
-	wprintw(w, "->mkUs [Us Name]\t-> Crea un user nel file system\n");
-	//wprintw(w, "->startUs [Us id]\t-> Tenta di avviare un thread user\n");
-    wprintw(w, "->usTab [Us id]\t\t-> Visualizza tabella user\n");
-	wprintw(w, "->roomTab [Rm id]\t-> Visualizza tabella Room\n");
-	wprintw(w, "->roomConv [Rm id]\t-> Visualizza conversazione Room\n");
-	wprintw(w, "\t(2)arg\n");
-	wprintw(w, "->mkRm [Room Name] [id Admin]\t-> Crea una nuova Room\n");
+	if (argc <= 1) {
+		wprintw(w, "->h <sys>\t-> Visualizza comandi di sistema\n");
+		wprintw(w, "->h <user>\t-> Visualizza comandi per gli utenti\n");
+		wprintw(w, "->h <room>\t-> Visualizza comandi per le room\n");
+		return;
+	}
+	if (argc >= 2) {
+		if (strcmp(argv[1], "sys") == 0) {
+			wprintw(w, "\t(0)arg\n");
+			wprintw(w, "->h\t-> Visualizza lista classi di help\n");
+			wprintw(w, "->q\t-> termina server\n");
+			wprintw(w, "->sstat\t-> Mostra servStat sul monitor\n");
+			wprintw(w, "->reset\t-> restart Interface\n");
+
+			//wprintw(w, "\t(1)arg\n");
+			//wprintw(w, "\t(2)arg\n");
+			return;
+		}
+		if (strcmp(argv[1], "user") == 0) {
+			wprintw(w, "\t(0)arg\n");
+			wprintw(w, "->user\t-> Utenti Registrati\n");
+			wprintw(w, "->p-avlU\t-> Printa l'avl degli User\n");
+
+			wprintw(w, "\t(1)arg\n");
+			wprintw(w, "->mkUs [Us Name]\t-> Crea un user nel file system\n");
+			wprintw(w, "->usTab [Us id]\t\t-> Visualizza tabella user\n");
+
+			//wprintw(w, "\t(2)arg\n");
+			return;
+		}
+		if (strcmp(argv[1], "room") == 0) {
+			wprintw(w, "\t(0)arg\n");
+			wprintw(w, "->chat\t-> Chat Archiviate\n");
+			wprintw(w, "->p-avlC\t-> Printa l'avl delle chat\n");
+
+			wprintw(w, "\t(1)arg\n");
+			wprintw(w, "->roomTab [Rm id]\t-> Visualizza tabella Room\n");
+			wprintw(w, "->roomConv [Rm id]\t-> Visualizza conversazione Room\n");
+
+			wprintw(w, "\t(2)arg\n");
+			wprintw(w, "->mkRm [Room Name] [id Admin]\t-> Crea una nuova Room\n");
+			return;
+		}
+
+	}
 
 
 	//todo print infoChat of specific chat
@@ -296,8 +331,11 @@ void windowSetUp() {
 
 	/** Finestra dei comandi setUp **/
 	wbkgd(cmdW, COLOR_PAIR(Comandi));
+	attron(COLOR_PAIR(Comandi));
+
 	//box(cmdW, ' ', '#');    //sovrascrive il testo
-	mvprintw(cmdW->_begy - 1, cmdW->_begx, "---------------------Finestra di comando--------------------");
+	mvprintw(cmdW->_begy - 1, cmdW->_begx,
+	         "-------------------------------Finestra di comando------------------------------");
 
 	wrefresh(cmdW);
 
@@ -388,7 +426,7 @@ void wfirstPrint(WINDOW *w, firstFree *f) {
 
 	wprintw(w, "#1\tfirstFree data Store:\n");
 	wprintw(w, "name\t\t-> %s\n", f->name);
-	wprintw(w, " couterFree\t-> %d\n", f->counter);
+	wprintw(w, "couterFree\t-> %d\n", f->counter);
 	wprintw(w, "Len\t\t-> %d\n", f->len);
 	wprintw(w, "nextFree\t-> %d\n", f->nf_id);
 	return;

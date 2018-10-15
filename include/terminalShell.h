@@ -47,7 +47,7 @@ void terminalShell();
 
 void driverCmd(int argc, char *argv[], int *exit);
 
-void menuHelpw(WINDOW *, int, int);
+void menuHelpw(WINDOW *, int, int, int argc, char *argv[]);
 
 
 ///Funzioni specifiche di comando

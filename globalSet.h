@@ -4,7 +4,7 @@
 #ifndef CHAT_MULTILEVEL_GLOBALSETS_H
 #define CHAT_MULTILEVEL_GLOBALSETS_H
 
-#define firmwareVersion "0.04"
+#define firmwareVersion "0.05"
 #define userDirName "Users"
 #define chatDirName "Chats_ROOM"
 #define serverConfFile "serverStat.conf"
@@ -47,7 +47,7 @@ int fdDebug;
 /// data := Fd of Pipe to write at the thread same-things
 #include "treeFunx/include/avl.h"
 
-avl_pp_S usAvlPipe;
-avl_pp_S rmAvlPipe;
+avl_pp_S usAvlTree_Pipe;
+avl_pp_S rmAvlTree_Pipe;
 
 #endif //CHAT_MULTILEVEL_DEFINESETS_H

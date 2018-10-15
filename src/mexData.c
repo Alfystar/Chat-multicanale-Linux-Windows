@@ -213,6 +213,7 @@ int fWriteF(FILE *f, size_t sizeElem, int nelem, void *dat) {
 }
 
 int fReadF(FILE *f, size_t sizeElem, int nelem, void *save) {
+	//todo signal free
 	fflush(f);   /// NECESSARIO SE I USA LA MODALITA +, serve a garantire la sincronia tra R/W
 	size_t cont = 0;
 	while (cont != sizeElem * nelem) {

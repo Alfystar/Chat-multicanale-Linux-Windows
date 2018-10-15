@@ -86,12 +86,13 @@ void *userTh(thConnArg *info) {
 	}
 
 
-	insert_avl_node_S(usAvlPipe, arg->id, fdUserPipe[1]);
+	insert_avl_node_S(usAvlTree_Pipe, arg->id, fdUserPipe[1]);
 
     pthread_t tidRX, tidTX;
 
 	pthread_create(&tidRX, NULL, thrServRX, arg);
     //pthread_create(&tidTX,NULL, thrServTX,info);
+	pthread_exit(-1); // todo gestione broken pipe e uscita thread
 
 	while (1) pause();
 	free(arg);  //todo da sostituire con free_thUserArg quando fatta
@@ -102,7 +103,8 @@ void *userTh(thConnArg *info) {
 
 int loginServerSide(mail *pack, thUserArg *data) {
 
-	dprintf(fdDebug, "LOGIN FASE\nUtente = %s\n Type=%d", pack->md.sender, pack->md.type);
+	dprintf(fdDebug, "LOGIN FASE\nUtente = %s & iDKey=%d\n Type= %d\n", pack->md.sender, atoi(pack->md.whoOrWhy),
+	        pack->md.type);
 	/*
 	 * Login:
 	 * type=login_p
@@ -120,10 +122,35 @@ int loginServerSide(mail *pack, thUserArg *data) {
 		return -1;
 	}
 
-	/// Invio risposta affermativa
-	fillPack(&response, success_p, 0, NULL, "Server", NULL);
-	writePack(data->conUs.con.ds_sock, &response);
+	firstFree *head = &data->info->tab->head;
+	entry *cell = data->info->tab->data;
 
+	for (int i = 0; i < data->info->tab->head.len; i++) {
+		if (isEmptyEntry(&cell[i]) == 1) {
+			continue;
+		}
+		if (search_BFS_avl_S(rmAvlTree_Pipe, atoi(cell[i].name)) == -2) {
+			//name:= keyRoom:NAME  se key non è trovata nell'avl allora la room non esiste più
+			dprintf(fdDebug, "Room %s not found in Avl-Room. Deleting from userTab\n", cell[i].name);
+			if (delEntry(data->info->tab, i)) {
+				dprintf(fdDebug, "Deleting from userTab FAIL\n");
+			}
+		} else {
+			dprintf(fdDebug, "room %s trovata\n", cell[i].name);
+		}
+
+	}
+
+	int sizeTab = (head->len) * sizeof(entry) + sizeof(firstFree);
+	char *mex = malloc(sizeTab);
+
+	memcpy(mex, head, sizeof(firstFree));
+	memcpy(mex + sizeof(firstFree), cell, sizeTab - sizeof(firstFree));
+
+	/// Invio risposta affermativa
+	fillPack(&response, dataUs_p, sizeTab, mex, "Server", NULL);
+	writePack(data->conUs.con.ds_sock, &response);
+	free(mex);
 	return 0;
 }
 
@@ -147,7 +174,10 @@ int mkUserServerSide(mail *pack, thUserArg *data) {
 	}
 	data->info = info;
 	//todo da vedere se sscanf funziona
-	sscanf(info->pathName, "%ld:%s", &data->id, data->userName);
+	// dentro info pathName è 		sprintf(userPath, "./%s/%s", userDirName, nameUser); e nameUser è 	sprintf(nameUser, "%ld:%s", newId, name);
+	// => ./%s/%ld:%s
+	char userDir[64];   // non mi serve, ma devo tenere i dati di appoggio
+	sscanf(info->pathName, "./%s/%ld:%s", userDir, &data->id, data->userName);
 
 
 	/// Invio dataSend
@@ -167,8 +197,10 @@ void *thrServRX(thUserArg *argTh) {
         dprintf(fdOut, "thrServRx %d in attesa di messaggio da %d sock\n", argTh->id, argTh->conUs.con.ds_sock);
         if (readPack(argTh->conUs.con.ds_sock, &packRecive) == -1) {
             dprintf(STDERR_FILENO, "Read error, broken pipe\n");
-            sleep(1);
-            exit(-1); // todo gestione broken pipe e uscita thread
+	        dprintf(STDERR_FILENO, "thrServRx %d in chiusura\n", argTh->id);
+	        sleep(1);
+	        free(argTh); //todo creare i free per ogni tipo di dato !!!!
+	        pthread_exit(-1); // todo gestione broken pipe e uscita thread
         }
 
         dprintf(fdOut, "Numero byte pacchetto: %ld\n", packRecive.md.dim);
@@ -184,7 +216,7 @@ void *thrServRX(thUserArg *argTh) {
         //writePack(); da aggiungere il selettore chat
     }
 	close(argTh->conUs.con.ds_sock);
-    //free(argTh); //todo creare i free per ogni tipo di dato !!!!
+	free(argTh); //todo creare i free per ogni tipo di dato !!!!
     pthread_exit(0);
 }
 
@@ -213,7 +245,7 @@ void *roomTh(thRoomArg *info) {
         printErrno("La creazione della pipe per il Th-room ha dato l'errore", errorRet);
         exit(-1);
     }
-	insert_avl_node_S(rmAvlPipe, info->id, fdRoomPipe[1]);
+	insert_avl_node_S(rmAvlTree_Pipe, info->id, fdRoomPipe[1]);
 
     dprintf(fdOut, "Ciao sono Un Tr-ROOM\n\tsono la %d\tmi chiamo %s\n\tmi ragiungi da %d\n", info->id, info->roomPath,
             fdRoomPipe[1]);

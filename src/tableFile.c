@@ -357,6 +357,7 @@ size_t lenTabF(FILE *tab) {
 }
 
 int fileWrite(FILE *f, size_t sizeElem, int nelem, void *dat) {
+	//todo signal free
 	fflush(f);   /// NECESSARIO SE I USA LA MODALITA +, serve a garantire la sincronia tra R/W
 	size_t cont = 0;
 	while (cont != sizeElem * nelem) {
@@ -442,6 +443,7 @@ table *makeTable(FILE *tab) {
 	fflush(tab);    //garantisco che tutto quello che va scritto venga scritto
 	struct stat tabInfo;
 	fstat(fileno(tab), &tabInfo);
+
 	if (tabInfo.st_size == 0) {
         dprintf(fdOut, "File Vuoto, o Inesistente\n");
 		return NULL;

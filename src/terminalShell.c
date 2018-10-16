@@ -92,6 +92,7 @@ void driverCmd(int argc, char *argv[], int *exit) {
 			return;
         }
         if (strcmp(argv[0], "p-avlC") == 0) {
+	        dprintf(fdOut, "Legend id:pipe\n");
 	        print_avl(*rmAvlTree_Pipe.avlRoot, *rmAvlTree_Pipe.avlRoot);
             return;
         }
@@ -276,9 +277,9 @@ void menuHelpw(WINDOW *w, int y_start, int x_start, int argc, char *argv[]) {
 void windowSetUp() {
 	mainWindows = initscr();    //è lo sfondo, scrivere su di lui i commenti perpetui
 	titleW = newwin(10, 80, 1, 1);
-	cmdW = newwin(20, 80, 12, 1);
+	cmdW = newwin(15, 80, 12, 1);
 	showPannel = newwin(46, 60, 1, 83);
-	monitor = newwin(13, 80, 34, 1);
+	monitor = newwin(18, 80, 29, 1);
 	curs_set(0); //disattivo il cursore così il movimento causato dai thread non si nota
 	refresh();
 
@@ -470,9 +471,6 @@ void wprintConvInfo(WINDOW *w, convInfo *cI) {
 	wprintw(w, "Time Creat\t-> %s\n", timeString(cI->timeCreate));
 	nameListFree(user);
 }
-
-
-
 
 
 /** shell th funx**/

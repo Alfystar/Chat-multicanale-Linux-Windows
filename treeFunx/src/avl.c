@@ -417,6 +417,7 @@ bool insert_avl_node(avl_pp head, int key, int data) {
 	if (!root) {
 		root = (avl_p) calloc(1, sizeof(avl_t));
 		root->keyNode = key;
+		root->data = data;
 		*head = root;
 
 		return TRUE;
@@ -469,8 +470,7 @@ bool insert_avl_node(avl_pp head, int key, int data) {
 
 				while ((p = pop(stack)) != NULL) {
 					if (!modified) {
-						modified = rebalance(stack,
-						                     head, p->node, key);
+						modified = rebalance(stack, head, p->node, key);
 					}
 
 					free(p);
@@ -502,7 +502,7 @@ bool delete_avl_node(avl_pp head, int key) {
 	avl_p tmp;
 
 	if (!head) {
-        dprintf(fdOut, "Initialize AVL tree first\n");
+		dprintf(fdDebug, "Initialize AVL tree first\n");
 		return FALSE;
 	}
 
@@ -600,7 +600,7 @@ int print_avl(avl_p root, avl_p parent) {
 	++count;
 
 	/* Print keyNode value in the node */
-    dprintf(fdOut, "keyNode: %6d:%d,  parent: %6d\n", root->keyNode, root->data, parent->keyNode);
+	dprintf(fdOut, "keyNode: %d:%d\tparent: %d\n", root->keyNode, root->data, parent->keyNode);
 
 	if (root->left) {
         dprintf(fdOut, "LEFT.\n");
@@ -608,7 +608,7 @@ int print_avl(avl_p root, avl_p parent) {
 	}
 
 	if (root->right) {
-        dprintf(fdOut, "RIGHT.\n");
+		dprintf(fdOut, "\tRIGHT.\n");
 		count += print_avl(root->right, root);
 	}
 
@@ -749,7 +749,7 @@ avl_pp_S init_avl_S(void) {
 		return head;
 	}
 
-    dprintf(fdDebug, "SEMAFORO Avl CREATO\n");
+	//dprintf(fdDebug, "SEMAFORO Avl CREATO\n");
 	semInfo(head.semId);
 
 

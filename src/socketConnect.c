@@ -249,7 +249,6 @@ int initServer(connection *c, int coda) {
 
 int acceptCreate(connection *c, void *(*thUserServer)(void *), void *arg) {
 	//in caso arrivi una connessione crea un th di tipo void* NAME (thConnArg*) in thConnArg.arg si trovano i parametri per il th
-	dprintf(fdOut, "Dentro acceptCreate-funx\n");
 	// Si suppone che arg sia stata precedentemente malloccata
 	connection *conNew;
 	conNew = malloc(sizeof(connection));
@@ -265,12 +264,8 @@ int acceptCreate(connection *c, void *(*thUserServer)(void *), void *arg) {
 
 	thConnArg *argTh = malloc(sizeof(thConnArg));
 
-	dprintf(fdOut, "arg prima e': %p\n", argTh->arg);
-
 	argTh->arg = arg;
 	argTh->con = *conNew;
-
-	dprintf(fdOut, "arg adesso e': %p\n", argTh->arg);
 
 	pthread_create(&tid, NULL, thUserServer, argTh);
 	return 0;

@@ -53,7 +53,11 @@ int loginServerSide(mail *pack, thUserArg *data);
 
 int mkUserServerSide(mail *pack, thUserArg *data);
 
+int sentTab(table *t, void *mex);
+
 void *thrServRX(thUserArg *);
+
+int mkRoomSocket(mail *pack, char *nameChatRet, int len);
 
 void *thrServTX(thUserArg *);
 

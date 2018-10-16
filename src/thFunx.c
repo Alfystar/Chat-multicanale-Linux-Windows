@@ -26,16 +26,6 @@ void *acceptTh(thAcceptArg *info) {
 
 	}
 	free(info);
-
-	///Codice funzionante per la creazione di un thread user passandogli correttamente il parametro info
-	/*
-	infoUser *info;
-	long idKey = atoi(info->pathName);       //essendo myname xx:TEXT, la funzione termina ai : e ottengo la key
-	char userDir[128];
-	sprintf(userDir, "./%s/%ld:%s", userDirName, idKey, argv[1]);
-	setUpThUser(idKey, userDir, info);
-	dprintf(fdOut, "USER th creato, idKey=%d\n", idKey);
-	*/
 	return NULL;
 }
 
@@ -44,18 +34,20 @@ void *userTh(thConnArg *info) {
 	arg->conUs.con = info->con; //copio i dati di info
 	free(info); //il tipo thConnArg non serve più tutto è stato copiato
 
-	dprintf(fdOut, "TH-User creato, In Attesa primo pack\n");
+	dprintf(fdDebug, "TH-User creato, In Attesa primo pack\n");
 	//pause();
 	mail *pack = malloc(sizeof(mail));
+	mail responde;
 
 	readPack(arg->conUs.con.ds_sock, pack);        //ottengo il primo pack per capire il da fare.
-	int idKey;
 	///in base al tipo di connessione si riepe arg con i giusti dati
 	switch (pack->md.type) {
 		case login_p:
 			if (loginServerSide(pack, arg)) {
 				perror("login fase fail :");
 				dprintf(STDERR_FILENO, "Shutdown Th %d\n", arg->id);
+				fillPack(&responde, failed_p, 0, 0, "Server", "Impossibile loggare");
+				writePack(arg->conUs.con.ds_sock, &responde);
 				pthread_exit(NULL);
 			}
 			break;
@@ -63,6 +55,8 @@ void *userTh(thConnArg *info) {
 			if (mkUserServerSide(pack, arg)) {
 				perror("make New User fase fail :");
 				dprintf(STDERR_FILENO, "Shutdown Th %d\n", arg->id);
+				fillPack(&responde, failed_p, 0, 0, "Server", "Can't create user");
+				writePack(arg->conUs.con.ds_sock, &responde);
 				pthread_exit(NULL);
 			}
 			break;
@@ -186,31 +180,41 @@ int mkUserServerSide(mail *pack, thUserArg *data) {
 	dprintf(fdDebug, "sscanf ha identificato:\n userDir= %s\ndata->id= %d\ndata->userName =%s\n", userDir, data->id,
 	        data->userName);
 
-	firstFree *head = &infoNewUs->tab->head;
-	entry *cell = infoNewUs->tab->data;
-
-
-	int sizeTab = (head->len) * sizeof(entry) + sizeof(firstFree);
-	char *mex = malloc(sizeTab);
-
-	memcpy(mex, head, sizeof(firstFree));
-	memcpy(mex + sizeof(firstFree), cell, sizeTab - sizeof(firstFree));
+	char *mex;
+	int len = sentTab(infoNewUs->tab, mex);
 
 	/// Invio dataSend
 	char idSend[16];
 	sprintf(idSend, "%d", data->id);
-	fillPack(&response, dataUs_p, sizeTab, mex, "Server", idSend);
+	fillPack(&response, dataUs_p, len, mex, "Server", idSend);
 	writePack(data->conUs.con.ds_sock, &response);
 
+	free(mex);
+
 	return 0;
+}
+
+int sentTab(table *t, void *mex) {
+	firstFree *head = &t->head;
+	entry *cell = t->data;
+
+
+	int sizeTab = (head->len) * sizeof(entry) + sizeof(firstFree);
+	mex = malloc(sizeTab);
+
+	memcpy(mex, head, sizeof(firstFree));
+	memcpy(mex + sizeof(firstFree), cell, sizeTab - sizeof(firstFree));
+
+	return sizeTab;
 }
 
 void *thrServRX(thUserArg *argTh) {
 
     mail packRecive;
 	mail packSend;
-
-    while (1) {
+	bool exit = true;
+	char buffRet[128];
+	while (exit) {
         dprintf(fdOut, "thrServRx %d in attesa di messaggio da %d sock\n", argTh->id, argTh->conUs.con.ds_sock);
 
         if (readPack(argTh->conUs.con.ds_sock, &packRecive) == -1) {
@@ -220,16 +224,23 @@ void *thrServRX(thUserArg *argTh) {
 	        free(argTh); //todo creare i free per ogni tipo di dato !!!!
 	        pthread_exit(-1); // todo gestione broken pipe e uscita thread
         }
-	    dprintf(fdDebug, "thrServRx %d ricevuto type=%d\n", packRecive.md.type);
-	    printPack(&packRecive);
-	    switch (packRecive.md.type) {
+		/*
+		dprintf(fdDebug, "thrServRx %d ricevuto type=%d\n", packRecive.md.type);
+		printPack(&packRecive);
+		 */
+
+		switch (packRecive.md.type) {
 		    case mkRoom_p:
-			    if (mkRoomSocket(&packRecive)) {
+			    if (mkRoomSocket(&packRecive, buffRet, 128)) {
 				    dprintf(STDERR_FILENO, "mkRoom coommand from socket fail\n");
 				    fillPack(&packSend, failed_p, 0, 0, "Server", "Impossible Create room");
 				    writePack(argTh->conUs.con.ds_sock, &packSend);
 			    } else {
-				    fillPack(&packSend, success_p, 0, 0, "Server", "Room-Create");
+				    //ho successo, aggiungo la chat alla tabella dell'utente attuale
+				    //la prima entry delle tabelle è il proprietario (come first free)
+				    addEntry(argTh->info->tab, buffRet, 0);
+
+				    fillPack(&packSend, success_p, 0, 0, "Server", buffRet);
 				    writePack(argTh->conUs.con.ds_sock, &packSend);
 			    }
 			    break;
@@ -237,6 +248,10 @@ void *thrServRX(thUserArg *argTh) {
 			    break;
 		    case mess_p:
 			    break;
+			case logout_p:
+				exit = false;
+				continue;
+				break;
 
 		    default:
 			    dprintf(fdDebug, "thrServRx %d ricevuto type=%d, NON GESTITO\n", packRecive.md.type);
@@ -244,23 +259,17 @@ void *thrServRX(thUserArg *argTh) {
 			    break;
 	    }
 
-	    dprintf(fdDebug, "Numero byte pacchetto: %ld\n", packRecive.md.dim);
-        dprintf(fdOut, "Stringa da client: %s\n\n", packRecive.mex);
-
-	    writePack(argTh->conUs.con.ds_sock, &packRecive);
-
-        if (strcmp(packRecive.mex, "quit") == 0) {
-            break;
-        }
-
 	    if (!packRecive.mex) free(packRecive.mex);
     }
 	close(argTh->conUs.con.ds_sock);
+	if (!packRecive.mex) free(packRecive.mex);
+	if (!packSend.mex) free(packSend.mex);
 	free(argTh); //todo creare i free per ogni tipo di dato !!!!
     pthread_exit(0);
 }
 
-int mkRoomSocket(mail *pack) {
+int mkRoomSocket(mail *pack, char *nameChatRet, int len) {
+	//nameChatRet= puntatore a un buffer dove viene salvato il nome (id:name) della chat creata
 	/*
 	 * type= mkRoom_p
 	 * sender= user (string) //non lo uso
@@ -268,27 +277,33 @@ int mkRoomSocket(mail *pack) {
 	 * mex="<nameRoom>
 	 */
 	nameList *user = userExist();
-	//user = idKey:Name
+	//user = idKeyUser:Name
 	char nameUsAdmin[64];
-	long idKey;       //essendo myname xx:TEXT, la funzione termina ai : e ottengo la key
+	long idKeyUser;       //essendo myname xx:TEXT, la funzione termina ai : e ottengo la key
 
 	int want = idSearch(user, atoi(pack->md.whoOrWhy));
 	dprintf(fdDebug, "user->names[want]=%s\n", user->names[want]);
-	sscanf(user->names[want], "%ld:%s", &idKey, nameUsAdmin);
+	sscanf(user->names[want], "%ld:%s", &idKeyUser, nameUsAdmin);
 
 	infoChat *info = newRoom(pack->mex, atoi(pack->md.whoOrWhy));
+	nameListFree(user);
 
 	if (info == 0) {
 		dprintf(STDERR_FILENO, "creazione della chat impossibile");
 		nameListFree(user);
 		return -1;
 	}
+
+	strncpy(nameChatRet, info->myName, len);
+
 	char roomDir[128];
-	sprintf(roomDir, "./%s/%s", chatDirName, user->names[want]);
-	makeThRoom(idKey, roomDir, info);
-	dprintf(fdOut, "ROOM th creato, idKey=%d\n", idKey);
-	nameListFree(user);
-	sleep(5);
+	sprintf(roomDir, "./%s/%s", chatDirName, info->myName);
+
+
+	//info->myName = idKeyChat:name
+	makeThRoom(atoi(info->myName), roomDir, info);
+	dprintf(fdDebug, "ROOM-th by idKeyUser=%d\n", idKeyUser);
+
 	return 0;
 
 }
@@ -312,9 +327,9 @@ void *thrServTX(thUserArg *argTh) {
 
 void *roomTh(thRoomArg *info) {
     int fdRoomPipe[2];
-    int errorRet = pipe2(fdRoomPipe,
-                         O_DIRECT); // dal manuale: fd[0] refers to the read end of the pipe. fd[1] refers to the write end of the pipe.
-    if (errorRet != 0) {
+	// dal manuale: fd[0] refers to the read end of the pipe. fd[1] refers to the write end of the pipe.
+	int errorRet = pipe2(fdRoomPipe, O_DIRECT);
+	if (errorRet != 0) {
         printErrno("La creazione della pipe per il Th-room ha dato l'errore", errorRet);
         exit(-1);
     }

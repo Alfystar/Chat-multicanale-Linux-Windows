@@ -39,6 +39,8 @@ table *open_Tab(char *path) {
 }
 
 int addEntry(table *t, char *name, int data) {
+	//name= nome inserito nella nuova cella idKey:name
+	//data= il pointer della tabella all'altra tabella
 	if (addEntryTabF(t->stream, name, data)) {
         //Aggiunta non avvenuta conInfo successo
 		return -1;
@@ -47,6 +49,7 @@ int addEntry(table *t, char *name, int data) {
 	entry *freeData = &t->data[t->head.nf_id];
 	if (isLastEntry(freeData))        //se è la fine si cambiano i valori e si crea un nuovo last-entry
 	{
+		dprintf(fdDebug, "é un lastFree\n");
 		/// last free diventa un dato
 		freeData->point = data;
 		strncpy(freeData->name, name, nameEntrySize);
@@ -61,14 +64,16 @@ int addEntry(table *t, char *name, int data) {
 		memset(last->name, 0, nameEntrySize);
 		last->point = -1;
 	} else        //si trasforma in una cella dati e first-free punta la successiva
-
 	{
+		dprintf(fdDebug, "é una cella deletata\n");
+
 		first->nf_id = freeData->point;   //first free ora punta una nuova casella libera
 		first->counter--;
 		/// la prima casella libera diventa un dato
 		freeData->point = data;
 		strncpy(freeData->name, name, nameEntrySize);
 	}
+	//tabPrint(t);
 	return 0;
 }
 

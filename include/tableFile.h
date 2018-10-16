@@ -18,12 +18,12 @@
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/sem.h>
+#include "../globalSet.h"
 
 
 #define nameFirstFreeSize 50
 #define nameEntrySize 28
 
-extern int fdOut;  //pipe di uscita per lo stdOut
 
 
 typedef struct firstFree_ {

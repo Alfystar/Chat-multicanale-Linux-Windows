@@ -106,6 +106,7 @@ int StartServerStorage(char *storage)  //apre o crea un nuovo storage per il dat
 ///Funzioni di per operare sulle chat
 
 infoChat *newRoom(char *nameRoom, int adminUs) {
+	//adminUs DEVE essere già istanziato
 	infoChat *info = malloc(sizeof(infoChat));
 	if (info == NULL) {
 		perror("infoChat malloc() take error: ");
@@ -148,8 +149,14 @@ infoChat *newRoom(char *nameRoom, int adminUs) {
 
 	nameList *user = userExist();
 	int want = idSearch(user, adminUs);
+	if (want == -1)//id non esistente
+	{
+		dprintf(STDERR_FILENO, "Utente da id %d non esiste, room senza amminiztratore\n", adminUs);
+		info->tab = init_Tab(tabNamePath, "ROOT");
+	} else {
+		info->tab = init_Tab(tabNamePath, user->names[want]);
+	}
 
-	info->tab = init_Tab(tabNamePath, user->names[want]);
 	char convNamePath[128];
 	sprintf(convNamePath, "%s/%s", chatPath, chatConv);
 	info->conv = initConv(convNamePath, adminUs);

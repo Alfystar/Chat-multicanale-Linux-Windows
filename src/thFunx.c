@@ -120,8 +120,9 @@ int loginServerSide(mail *pack, thUserArg *data) {
 	firstFree *head = &data->info->tab->head;
 	entry *cell = data->info->tab->data;
 
+	//for per eliminare room non più esistenti
 	for (int i = 0; i < head->len; i++) {
-		if (isEmptyEntry(&cell[i]) == 1) {
+		if ((isEmptyEntry(&cell[i]) || isLastEntry(&cell[i])) == true) {
 			continue;
 		}
 		if (search_BFS_avl_S(rmAvlTree_Pipe, atoi(cell[i].name)) == -2) {
@@ -136,14 +137,11 @@ int loginServerSide(mail *pack, thUserArg *data) {
 
 	}
 
-	int sizeTab = (head->len) * sizeof(entry) + sizeof(firstFree);
-	char *mex = malloc(sizeTab);
-
-	memcpy(mex, head, sizeof(firstFree));
-	memcpy(mex + sizeof(firstFree), cell, sizeTab - sizeof(firstFree));
+	int len;
+	void *mex = sendTab(data->info->tab, &len);
 
 	/// Invio risposta affermativa
-	fillPack(&response, dataUs_p, sizeTab, mex, "Server", NULL);
+	fillPack(&response, dataUs_p, len, mex, "Server", NULL);
 	writePack(data->conUs.con.ds_sock, &response);
 	free(mex);
 
@@ -180,8 +178,8 @@ int mkUserServerSide(mail *pack, thUserArg *data) {
 	dprintf(fdDebug, "sscanf ha identificato:\n userDir= %s\ndata->id= %d\ndata->userName =%s\n", userDir, data->id,
 	        data->userName);
 
-	char *mex;
-	int len = sentTab(infoNewUs->tab, mex);
+	int len;
+	char *mex = sendTab(infoNewUs->tab, &len);
 
 	/// Invio dataSend
 	char idSend[16];
@@ -194,18 +192,18 @@ int mkUserServerSide(mail *pack, thUserArg *data) {
 	return 0;
 }
 
-int sentTab(table *t, void *mex) {
+void *sendTab(table *t, int *len) {
 	firstFree *head = &t->head;
 	entry *cell = t->data;
 
 
 	int sizeTab = (head->len) * sizeof(entry) + sizeof(firstFree);
-	mex = malloc(sizeTab);
+	void *mex = malloc(sizeTab);
 
 	memcpy(mex, head, sizeof(firstFree));
 	memcpy(mex + sizeof(firstFree), cell, sizeTab - sizeof(firstFree));
-
-	return sizeTab;
+	*len = sizeTab;
+	return mex;
 }
 
 void *thrServRX(thUserArg *argTh) {
@@ -239,6 +237,9 @@ void *thrServRX(thUserArg *argTh) {
 				    //ho successo, aggiungo la chat alla tabella dell'utente attuale
 				    //la prima entry delle tabelle è il proprietario (come first free)
 				    addEntry(argTh->info->tab, buffRet, 0);
+				    sem_wait(&screewWrite);
+				    wtabPrint(showPannel, argTh->info->tab, 0);
+				    sem_post(&screewWrite);
 
 				    fillPack(&packSend, success_p, 0, 0, "Server", buffRet);
 				    writePack(argTh->conUs.con.ds_sock, &packSend);
@@ -387,11 +388,15 @@ int setUpThUser(int keyId, thUserArg *argUs) {
 		errno = ENOENT;
 		return -1;
 	}
+	sem_wait(&screewWrite);
+	wtabPrint(showPannel, info->tab, 0);
+	sem_post(&screewWrite);
 
 	pthread_t usertid;
 
 	argUs->id = keyId;
 	argUs->info = info;
+
 
 	/** Tokenizzazione di user->names[want] per ottenere name **/
 	// !!!!rompo user ma tanto non serve più

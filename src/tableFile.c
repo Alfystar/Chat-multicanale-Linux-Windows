@@ -49,7 +49,7 @@ int addEntry(table *t, char *name, int data) {
 	entry *freeData = &t->data[t->head.nf_id];
 	if (isLastEntry(freeData))        //se è la fine si cambiano i valori e si crea un nuovo last-entry
 	{
-		dprintf(fdDebug, "é un lastFree\n");
+		//dprintf(fdDebug, "é un lastFree\n");
 		/// last free diventa un dato
 		freeData->point = data;
 		strncpy(freeData->name, name, nameEntrySize);
@@ -65,7 +65,7 @@ int addEntry(table *t, char *name, int data) {
 		last->point = -1;
 	} else        //si trasforma in una cella dati e first-free punta la successivaif
 	{
-		dprintf(fdDebug, "é una cella deletata\n");
+		//dprintf(fdDebug, "é una cella deletata\n");
 
 		first->nf_id = freeData->point;   //first free ora punta una nuova casella libera
 		first->counter--;
@@ -137,7 +137,7 @@ table *compressTable(table *t) {
 	return t;
 }
 
-int searchFirstEntry(table *t, char *search) {
+int searchOneOccurence(table *t, char *search) {
 	for (int i = 0; i < t->head.len; i++) {
 		if (strcmp(t->data[i].name, search) == 0) {
 			return i;
@@ -270,6 +270,7 @@ int addEntryTabF(FILE *tab, char *name, int data) {
 			perror("Override FirstFree take error:");
 			return -1;
 		}
+		fflush(tab);
 
 	} else        //si trasforma in una cella dati e first-free punta la successiva
 	{
@@ -288,6 +289,8 @@ int addEntryTabF(FILE *tab, char *name, int data) {
 			perror("Override FirstFree take error:");
 			return -1;
 		}
+		fflush(tab);
+
 	}
 
 	funlockfile(tab);

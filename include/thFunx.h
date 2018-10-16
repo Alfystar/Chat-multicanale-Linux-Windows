@@ -53,7 +53,7 @@ int loginServerSide(mail *pack, thUserArg *data);
 
 int mkUserServerSide(mail *pack, thUserArg *data);
 
-int sentTab(table *t, void *mex);
+void *sendTab(table *t, int *len);
 
 void *thrServRX(thUserArg *);
 

@@ -61,7 +61,7 @@ int delEntry(table *table, int index);
 
 table *compressTable(table *table);
 
-int searchFirstEntry(table *tabel, char *search);
+int searchOneOccurence(table *tabel, char *search);
 
 int searchEntryBy(table *tabel, char *search, int startIndex);
 

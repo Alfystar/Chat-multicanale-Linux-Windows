@@ -85,6 +85,11 @@ int main(int argc, char *argv[]) {
     printf("SERVER STORAGE AVVIATO\n");
 
 	/** INIT GLOBAL AVL TREE**/
+/*
+	destroy_avl(usAvlTree_Pipe.avlRoot);
+	destroy_avl(rmAvlTree_Pipe.avlRoot);
+ */
+
 	usAvlTree_Pipe = init_avl_S();
 	rmAvlTree_Pipe = init_avl_S();
 	printf("SEMAFORI AVL INIZIALIZZATI\n");

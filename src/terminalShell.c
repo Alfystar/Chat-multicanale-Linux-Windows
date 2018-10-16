@@ -129,8 +129,6 @@ void driverCmd(int argc, char *argv[], int *exit) {
 			return;
 		}
 		if (strcmp(argv[0], "usTab") == 0) {
-
-
 			nameList *user = userExist();
 			int want = idSearch(user, atoi(argv[1]));
 			if (want == -1) {
@@ -138,7 +136,6 @@ void driverCmd(int argc, char *argv[], int *exit) {
 				return;
 			}
 
-			///Inizio la creazione del thread
 			char userDir[128];
 			sprintf(userDir, "./%s/%s", userDirName, user->names[want]);
 			nameListFree(user);
@@ -150,10 +147,11 @@ void driverCmd(int argc, char *argv[], int *exit) {
 				return;
 			}
             dprintf(fdOut, "path=%s\n", userDir);
-			//tabPrint(info->tab);
+			tabPrintFile(info->tab->stream);
 			wtabPrint(showPannel, info->tab, 0);
 			return;
 		}
+
 		if (strcmp(argv[0], "roomTab") == 0) {
 			nameList *chat = chatRoomExist();
 			int want = idSearch(chat, atoi(argv[1]));

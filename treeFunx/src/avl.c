@@ -732,7 +732,7 @@ avl_pp_S init_avl_S(void) {
 	*head.avlRoot = NULL;
 
 
-	head.semId = semget(IPC_PRIVATE, 3, IPC_CREAT | 0666);
+	head.semId = semget(IPC_PRIVATE, 3, IPC_CREAT | IPC_EXCL | 0666);
 	if (head.semId == -1) {
 		perror("Create Sem-s take error:");
 		head.avlRoot = NULL;

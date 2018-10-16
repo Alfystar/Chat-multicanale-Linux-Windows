@@ -44,7 +44,7 @@ void *userTh(thConnArg *info) {
 	arg->conUs.con = info->con; //copio i dati di info
 	free(info); //il tipo thConnArg non serve più tutto è stato copiato
 
-	dprintf(fdOut, "TH-User creato\nId = %d\nIn Attesa primo pack\n", arg->id);
+	dprintf(fdOut, "TH-User creato, In Attesa primo pack\n");
 	//pause();
 	mail *pack = malloc(sizeof(mail));
 
@@ -102,6 +102,7 @@ void *userTh(thConnArg *info) {
 }
 
 int loginServerSide(mail *pack, thUserArg *data) {
+	//imposto i thUserArg correttamente
 
 	dprintf(fdDebug, "LOGIN FASE\nUtente = %s & iDKey=%d\n Type= %d\n", pack->md.sender, atoi(pack->md.whoOrWhy),
 	        pack->md.type);
@@ -125,7 +126,7 @@ int loginServerSide(mail *pack, thUserArg *data) {
 	firstFree *head = &data->info->tab->head;
 	entry *cell = data->info->tab->data;
 
-	for (int i = 0; i < data->info->tab->head.len; i++) {
+	for (int i = 0; i < head->len; i++) {
 		if (isEmptyEntry(&cell[i]) == 1) {
 			continue;
 		}
@@ -151,10 +152,12 @@ int loginServerSide(mail *pack, thUserArg *data) {
 	fillPack(&response, dataUs_p, sizeTab, mex, "Server", NULL);
 	writePack(data->conUs.con.ds_sock, &response);
 	free(mex);
+
 	return 0;
 }
 
 int mkUserServerSide(mail *pack, thUserArg *data) {
+	//imposto i thUserArg correttamente
 
 	dprintf(fdDebug, "LOGIN FASE, create user\n");
 	/*
@@ -167,23 +170,36 @@ int mkUserServerSide(mail *pack, thUserArg *data) {
 
 	mail response;
 
-	infoUser *info = newUser(pack->md.sender);
-	if (info == NULL) {
+	infoUser *infoNewUs = newUser(pack->md.sender);
+	if (infoNewUs == NULL) {
 		dprintf(STDERR_FILENO, "creazione della chat impossibile");
 		return -1;
 	}
-	data->info = info;
+	data->info = infoNewUs;
 	//todo da vedere se sscanf funziona
-	// dentro info pathName è 		sprintf(userPath, "./%s/%s", userDirName, nameUser); e nameUser è 	sprintf(nameUser, "%ld:%s", newId, name);
+	// dentro infoNewUs pathName è 		sprintf(userPath, "./%s/%s", userDirName, nameUser); e nameUser è 	sprintf(nameUser, "%ld:%s", newId, name);
 	// => ./%s/%ld:%s
 	char userDir[64];   // non mi serve, ma devo tenere i dati di appoggio
-	sscanf(info->pathName, "./%s/%ld:%s", userDir, &data->id, data->userName);
+	sscanf(infoNewUs->pathName, "./%[^/]/%ld:%s", userDir, &data->id, data->userName);
 
+	dprintf(fdDebug, "infoNewUs->pathName = %s\n", infoNewUs->pathName);
+	dprintf(fdDebug, "sscanf ha identificato:\n userDir= %s\ndata->id= %d\ndata->userName =%s\n", userDir, data->id,
+	        data->userName);
+
+	firstFree *head = &infoNewUs->tab->head;
+	entry *cell = infoNewUs->tab->data;
+
+
+	int sizeTab = (head->len) * sizeof(entry) + sizeof(firstFree);
+	char *mex = malloc(sizeTab);
+
+	memcpy(mex, head, sizeof(firstFree));
+	memcpy(mex + sizeof(firstFree), cell, sizeTab - sizeof(firstFree));
 
 	/// Invio dataSend
 	char idSend[16];
 	sprintf(idSend, "%d", data->id);
-	fillPack(&response, dataUs_p, 0, NULL, "Server", idSend);
+	fillPack(&response, dataUs_p, sizeTab, mex, "Server", idSend);
 	writePack(data->conUs.con.ds_sock, &response);
 
 	return 0;
@@ -277,6 +293,7 @@ void makeThRoom(int keyChat, char *roomPath, infoChat *info) {
 }
 
 int setUpThUser(int keyId, thUserArg *argUs) {
+	//modifica argUs per salvare dentro i file
 	/// keyId:= id da cercare       argUs:= puntatore alla struttura da impostare
 	nameList *user = userExist();
 

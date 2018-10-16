@@ -14,10 +14,10 @@
 #define chatConv "chatConversation.conv"
 
 
-#define fflush(stdin) while(getchar()!='\n');
 
 /** Define di setup delle funx **/
 #define nAcceptTh 1
+
 enum colorText {
     Titoli = 1, Comandi, ViewPan, StdoutPrint, ErrorPrint, DebugPrint
 };

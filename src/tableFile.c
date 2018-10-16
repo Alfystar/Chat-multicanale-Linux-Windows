@@ -63,7 +63,7 @@ int addEntry(table *t, char *name, int data) {
 		entry *last = &t->data[t->head.len - 1];
 		memset(last->name, 0, nameEntrySize);
 		last->point = -1;
-	} else        //si trasforma in una cella dati e first-free punta la successiva
+	} else        //si trasforma in una cella dati e first-free punta la successivaif
 	{
 		dprintf(fdDebug, "é una cella deletata\n");
 
@@ -447,7 +447,9 @@ char *booleanPrint(int i) {
 }
 
 table *makeTable(FILE *tab) {
+
 	fflush(tab);    //garantisco che tutto quello che va scritto venga scritto
+
 	struct stat tabInfo;
 	fstat(fileno(tab), &tabInfo);
 

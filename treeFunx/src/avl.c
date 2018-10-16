@@ -353,7 +353,7 @@ void semInfo(int semId) {
 	semctl(semId, 0, GETALL, semInfo);
 	//enum semName {wantWrite=0,readWorking=1,writeWorking=2};
 
-	printf("\nsem writeWorking=%d\n", semInfo[writeWorking]);
+	printf("\nsem (mutex)writeWorking=%d\n", semInfo[writeWorking]);
 	printf("sem readWorking=%d\n", semInfo[readWorking]);
 	printf("sem wantWrite=%d\n", semInfo[wantWrite]);
 }

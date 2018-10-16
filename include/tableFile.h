@@ -18,8 +18,12 @@
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/sem.h>
-#include "../globalSet.h"
 
+#include "../globalSet.h"
+/*
+extern int fdOut;
+extern int fdDebug;
+*/
 
 #define nameFirstFreeSize 50
 #define nameEntrySize 28

@@ -87,6 +87,7 @@ int main(int argc, char *argv[]) {
 	/** INIT GLOBAL AVL TREE**/
 	usAvlTree_Pipe = init_avl_S();
 	rmAvlTree_Pipe = init_avl_S();
+	printf("SEMAFORI AVL INIZIALIZZATI\n");
 
 
 	/** Spawn dei thread ROOM **/
@@ -94,6 +95,9 @@ int main(int argc, char *argv[]) {
 	// I thread user sono invece instanziati ad-hoc
 
 	nameList *chats = chatRoomExist();
+	/** Visualizzazione chat già presenti all'avvio**/
+	printf("Current nameList created:\n");
+	nameListPrint(chats, STDOUT_FILENO);
 	char roomDir[128];
 	infoChat *info;
 	for (int i = 0; i < chats->nMemb; i++) {
@@ -103,8 +107,10 @@ int main(int argc, char *argv[]) {
 		//idKey è la prima parte del nome, ovvero IDKEY:XXXXX
 		makeThRoom(atoi(chats->names[i]), roomDir, info);
 	}
+	nameListFree(chats);
 	printf("ROOM-th start-Up creati\n");
 
+	printf("connessione\n");
 
 	/** fase di avvio CONNESSIONE del server **/
 	portProces = atoi(argv[2]);   //save global port data
@@ -137,11 +143,7 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-	/** Visualizzazione chat già presenti all'avvio**/
 
-	printf("Current nameList created:\n");
-	nameListPrint(chats, STDOUT_FILENO);
-	nameListFree(chats);
 
 	/** Il Main Thread  diventa il terminale con cui interagire da qui in poi è il terminale **/
 	printf("\n\n__________________________________________________________________\n[x][x][x][x][x][x]\tAvvio Del terminale\t[x][x][x][x][x][x]\n");

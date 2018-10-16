@@ -172,15 +172,15 @@ infoChat *openRoom(char *pathDir) {
 		perror("infoChat malloc() take error: ");
 		return info;
 	}
-
 	//todo verificare creazione del file temporaneo
+	/*
 	char tempFile[128];
 	sprintf(tempFile, "%s%s", pathDir, "/temp");
 	info->fdTemp = lockDirFile(tempFile);
 	if (info->fdTemp == -1) {
 		return -1;
 	}
-
+	*/
 
 	///Creo tabella e conversazione
 	char tabNamePath[128];

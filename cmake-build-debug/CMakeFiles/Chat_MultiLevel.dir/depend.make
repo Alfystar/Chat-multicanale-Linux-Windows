@@ -41,8 +41,12 @@ CMakeFiles/Chat_MultiLevel.dir/src/socketConnect.c.o: ../treeFunx/include/avl.h
 CMakeFiles/Chat_MultiLevel.dir/src/socketConnect.c.o: ../treeFunx/include/common.h
 CMakeFiles/Chat_MultiLevel.dir/src/socketConnect.c.o: ../treeFunx/include/log.h
 
+CMakeFiles/Chat_MultiLevel.dir/src/tableFile.c.o: ../globalSet.h
 CMakeFiles/Chat_MultiLevel.dir/src/tableFile.c.o: ../include/tableFile.h
 CMakeFiles/Chat_MultiLevel.dir/src/tableFile.c.o: ../src/tableFile.c
+CMakeFiles/Chat_MultiLevel.dir/src/tableFile.c.o: ../treeFunx/include/avl.h
+CMakeFiles/Chat_MultiLevel.dir/src/tableFile.c.o: ../treeFunx/include/common.h
+CMakeFiles/Chat_MultiLevel.dir/src/tableFile.c.o: ../treeFunx/include/log.h
 
 CMakeFiles/Chat_MultiLevel.dir/src/terminalShell.c.o: ../globalSet.h
 CMakeFiles/Chat_MultiLevel.dir/src/terminalShell.c.o: ../helpFunx.h

@@ -140,7 +140,7 @@ int main(int argc, char *argv[]) {
 	/** Visualizzazione chat già presenti all'avvio**/
 
 	printf("Current nameList created:\n");
-	nameListPrint(chats);
+	nameListPrint(chats, STDOUT_FILENO);
 	nameListFree(chats);
 
 	/** Il Main Thread  diventa il terminale con cui interagire da qui in poi è il terminale **/

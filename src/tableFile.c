@@ -7,13 +7,14 @@
 /// Funzioni di Interfaccia operanti su Tabella
 
 /** La funzione ha lo scopo di creare una tabella completamente nuova in memoria **/
-table *init_Tab(char *path, char *name) {
+table *init_Tab(char *path, char *nameFirst) {
 	//path è l'indirizzo della cartella/NOME_FILE sulla quale creare la tabella
 	//roomPath è il nome scritto in first-Free
+	//nameFirst = nome del scritto in first free
 	table *t;
 	FILE *f;
 	f = openTabF(path);
-	if (setUpTabF(f, name)) {
+	if (setUpTabF(f, nameFirst)) {
 		char buf[128]; // buff per creare la tringa di errore dinamicamente
 		switch (errno) {
 			case EEXIST:
@@ -173,7 +174,8 @@ FILE *openTabF(char *path) {
 
 }
 
-int setUpTabF(FILE *tab, char *name) {
+int setUpTabF(FILE *tab, char *nameFirst) {
+	//nameFirst = nome nel first-free
 	struct stat tabInfo;
 	fstat(fileno(tab), &tabInfo);
 	if (tabInfo.st_size != 0)     //il file era già esistente e contiene dei dati
@@ -184,7 +186,7 @@ int setUpTabF(FILE *tab, char *name) {
 
 	/// setup di firstFree
 	firstFree head;
-	strncpy(head.name, name, nameFirstFreeSize);
+	strncpy(head.name, nameFirst, nameFirstFreeSize);
 	head.counter = 1;
 	head.len = 1;
 	head.nf_id = 0;

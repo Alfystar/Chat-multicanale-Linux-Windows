@@ -112,6 +112,7 @@ int writePack(int ds_sock, mail *pack) //dentro il thArg deve essere puntato un 
 
 int readPack(int ds_sock, mail *pack) //todo: implementare controllo sulle read
 {
+	//se mex è presente DEVE essere Free fuori
 	int iterContr = 0; // vediamo se la read fallisce
 
 
@@ -224,13 +225,13 @@ int fillPack(mail *pack, int type, int dim, void *mex, char *sender, char *whoOr
 }
 
 void printPack(mail *pack) {
-	dprintf(fdOut, "######[][]I METADATI SONO[][]######\n");
-	dprintf(fdOut, "Dim pack = %ld\n", pack->md.dim);
-	dprintf(fdOut, "Type = %d\n", pack->md.type);
-	dprintf(fdOut, "Sender = %s\n", pack->md.sender);
-	dprintf(fdOut, "whoOrWhy = %s\n", pack->md.whoOrWhy);
-	dprintf(fdOut, "------[][]IL MESSAGGIO[][]------\n");
-	dprintf(fdOut, "TEXT :\n--> %s\n\n", pack->mex); //non sempre stringa
+	dprintf(fdDebug, "######[][]I METADATI SONO[][]######\n");
+	dprintf(fdDebug, "Dim pack = %ld\n", pack->md.dim);
+	dprintf(fdDebug, "Type = %d\n", pack->md.type);
+	dprintf(fdDebug, "Sender = %s\n", pack->md.sender);
+	dprintf(fdDebug, "whoOrWhy = %s\n", pack->md.whoOrWhy);
+	dprintf(fdDebug, "------[][]IL MESSAGGIO[][]------\n");
+	dprintf(fdDebug, "MEX = %p\n", pack->mex);
 }
 ///Server FUNCTION
 

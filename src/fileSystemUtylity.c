@@ -60,7 +60,7 @@ int StartServerStorage(char *storage)  //apre o crea un nuovo storage per il dat
 		if (errno == 2)//file non presente
 		{
 			nameList *dir = allDir();
-			nameListPrint(dir);
+			nameListPrint(dir, STDOUT_FILENO);
 
 			if (dir->nMemb == 0)
 			{
@@ -105,7 +105,7 @@ int StartServerStorage(char *storage)  //apre o crea un nuovo storage per il dat
 
 ///Funzioni di per operare sulle chat
 
-infoChat *newRoom(char *name, int adminUs) {
+infoChat *newRoom(char *nameRoom, int adminUs) {
 	infoChat *info = malloc(sizeof(infoChat));
 	if (info == NULL) {
 		perror("infoChat malloc() take error: ");
@@ -117,7 +117,7 @@ infoChat *newRoom(char *name, int adminUs) {
 
 	///Creo la directory Chat
 	char nameChat[128];
-	sprintf(nameChat, "%ld:%s", newId, name);
+	sprintf(nameChat, "%ld:%s", newId, nameRoom);
 	char chatPath[128];
 	sprintf(chatPath, "./%s/%s", chatDirName, nameChat);
 	if (mkdir(chatPath, 0777)) {
@@ -145,11 +145,16 @@ infoChat *newRoom(char *name, int adminUs) {
 	///Creo tabella e conversazione
 	char tabNamePath[128];
 	sprintf(tabNamePath, "%s/%s", chatPath, chatTable);
-	info->tab = init_Tab(tabNamePath, nameChat);
+
+	nameList *user = userExist();
+	int want = idSearch(user, adminUs);
+
+	info->tab = init_Tab(tabNamePath, user->names[want]);
 	char convNamePath[128];
 	sprintf(convNamePath, "%s/%s", chatPath, chatConv);
 	info->conv = initConv(convNamePath, adminUs);
 
+	nameListFree(user);
 	return info;
 }
 
@@ -574,25 +579,39 @@ char *fileType(unsigned char d_type, char *buf, int bufLen) {
 }
 
 ///show funcion
-void nameListPrint(nameList *nl) {
-	printf("N° elem: %d\n", nl->nMemb);
+void nameListPrint(nameList *nl, int fd) {
+	dprintf(fd, "N° elem: %d\n", nl->nMemb);
 	for (int i = 0; i < nl->nMemb; i++) {
-		printf("%s\n", nl->names[i]);
+		dprintf(fd, "%s\n", nl->names[i]);
 	}
-	printf("\t# End list #\n");
+	dprintf(fd, "\t# End list #\n");
 }
 
-void infoChatPrint(infoChat *info) {
+void infoChatPrint(infoChat *info, int fd) {
 
 	/*
 	 info->tab
 	 info->conv
 	 info->pathName
 	 */
-	printf("########[[]][[]] infoChat contenent [[]][[]]########\n");
+	dprintf(fd, "########[[]][[]] infoChat contenent [[]][[]]########\n");
 	tabPrint(info->tab);
 	printConv(info->conv, STDOUT_FILENO);
-	printf("info->pathName= %s\n", info->myName);
-	printf("----------------------------------------------------\n");
+	dprintf(fd, "info->pathName= %s\n", info->myName);
+	dprintf(fd, "----------------------------------------------------\n");
 
+}
+
+///id funx shortcut
+
+int idSearch(nameList *nl, int idSearch) {
+	//sfruttando che i nomi sono ID:NAME posso cercare conInfo questo stratagemma
+	int want = -1;
+	for (int i = 0; i < nl->nMemb; i++) {
+		if (idSearch == atoi(nl->names[i])) {
+			want = i;
+			break;
+		}
+	}
+	return want;
 }

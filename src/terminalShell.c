@@ -127,34 +127,6 @@ void driverCmd(int argc, char *argv[], int *exit) {
 			}
 			return;
 		}
-		/*
-		if (strcmp(argv[0], "startUs") == 0) {
-			nameList *user = userExist();
-			int idSc = atoi(argv[1]);
-
-			int want = idSearch(user,idSc);
-
-			if (want == -1) {
-				dprintf(STDERR_FILENO, "Id richiesto inesistente\n");
-				return;
-			}
-
-			///Inizio la creazione del thread
-			char userDir[128];
-			sprintf(userDir, "./%s/%s", userDirName, user->names[want]);
-			nameListFree(user);
-			infoUser *info = openUser(userDir);
-			if (info == 0) {
-				dprintf(STDERR_FILENO, "creazione dell'User impossibile\n");
-				return;
-			}
-			dprintf(fdDebug, "USER th da creare, idKey=%d  userDir=%s   infoUser=%p\n", idSc,userDir, info);
-			setUpThUser(idSc, userDir, info);
-            dprintf(fdDebug, "USER th creato, idKey=%d\n", idSc);
-
-			return;
-		}
-		 */
 		if (strcmp(argv[0], "usTab") == 0) {
 
 
@@ -499,19 +471,6 @@ void wprintConvInfo(WINDOW *w, convInfo *cI) {
 	nameListFree(user);
 }
 
-///id funx shortcut
-
-int idSearch(nameList *nl, int idSearch) {
-    //sfruttando che i nomi sono ID:NAME posso cercare conInfo questo stratagemma
-	int want = -1;
-	for (int i = 0; i < nl->nMemb; i++) {
-		if (idSearch == atoi(nl->names[i])) {
-			want = i;
-			break;
-		}
-	}
-	return want;
-}
 
 
 

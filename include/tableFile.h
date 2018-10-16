@@ -47,7 +47,7 @@ typedef struct table_ {
 /** Prototipi **/
 
 /// Funzioni di Interfaccia operanti su Tabella
-table *init_Tab(char *path_file, char *name_tab);
+table *init_Tab(char *path_file, char *nameFirst);
 
 table *open_Tab(char *path_file);
 
@@ -65,7 +65,7 @@ int searchEntryBy(table *tabel, char *search, int startIndex);
 /// Funzioni di supporto operanti sul file
 FILE *openTabF(char *path_file);
 
-int setUpTabF(FILE *fdTable, char *name_Table);
+int setUpTabF(FILE *fdTable, char *nameFirst);
 
 int addEntryTabF(FILE *fdTable, char *name, int data);
 

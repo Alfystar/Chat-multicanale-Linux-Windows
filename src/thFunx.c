@@ -208,9 +208,11 @@ int mkUserServerSide(mail *pack, thUserArg *data) {
 void *thrServRX(thUserArg *argTh) {
 
     mail packRecive;
+	mail packSend;
 
     while (1) {
         dprintf(fdOut, "thrServRx %d in attesa di messaggio da %d sock\n", argTh->id, argTh->conUs.con.ds_sock);
+
         if (readPack(argTh->conUs.con.ds_sock, &packRecive) == -1) {
             dprintf(STDERR_FILENO, "Read error, broken pipe\n");
 	        dprintf(STDERR_FILENO, "thrServRx %d in chiusura\n", argTh->id);
@@ -218,8 +220,31 @@ void *thrServRX(thUserArg *argTh) {
 	        free(argTh); //todo creare i free per ogni tipo di dato !!!!
 	        pthread_exit(-1); // todo gestione broken pipe e uscita thread
         }
+	    dprintf(fdDebug, "thrServRx %d ricevuto type=%d\n", packRecive.md.type);
+	    printPack(&packRecive);
+	    switch (packRecive.md.type) {
+		    case mkRoom_p:
+			    if (mkRoomSocket(&packRecive)) {
+				    dprintf(STDERR_FILENO, "mkRoom coommand from socket fail\n");
+				    fillPack(&packSend, failed_p, 0, 0, "Server", "Impossible Create room");
+				    writePack(argTh->conUs.con.ds_sock, &packSend);
+			    } else {
+				    fillPack(&packSend, success_p, 0, 0, "Server", "Room-Create");
+				    writePack(argTh->conUs.con.ds_sock, &packSend);
+			    }
+			    break;
+		    case joinRm_p:
+			    break;
+		    case mess_p:
+			    break;
 
-        dprintf(fdOut, "Numero byte pacchetto: %ld\n", packRecive.md.dim);
+		    default:
+			    dprintf(fdDebug, "thrServRx %d ricevuto type=%d, NON GESTITO\n", packRecive.md.type);
+			    printPack(&packRecive);
+			    break;
+	    }
+
+	    dprintf(fdDebug, "Numero byte pacchetto: %ld\n", packRecive.md.dim);
         dprintf(fdOut, "Stringa da client: %s\n\n", packRecive.mex);
 
 	    writePack(argTh->conUs.con.ds_sock, &packRecive);
@@ -228,12 +253,44 @@ void *thrServRX(thUserArg *argTh) {
             break;
         }
 
-
-        //writePack(); da aggiungere il selettore chat
+	    if (!packRecive.mex) free(packRecive.mex);
     }
 	close(argTh->conUs.con.ds_sock);
 	free(argTh); //todo creare i free per ogni tipo di dato !!!!
     pthread_exit(0);
+}
+
+int mkRoomSocket(mail *pack) {
+	/*
+	 * type= mkRoom_p
+	 * sender= user (string) //non lo uso
+	 * who=id (string)
+	 * mex="<nameRoom>
+	 */
+	nameList *user = userExist();
+	//user = idKey:Name
+	char nameUsAdmin[64];
+	long idKey;       //essendo myname xx:TEXT, la funzione termina ai : e ottengo la key
+
+	int want = idSearch(user, atoi(pack->md.whoOrWhy));
+	dprintf(fdDebug, "user->names[want]=%s\n", user->names[want]);
+	sscanf(user->names[want], "%ld:%s", &idKey, nameUsAdmin);
+
+	infoChat *info = newRoom(pack->mex, atoi(pack->md.whoOrWhy));
+
+	if (info == 0) {
+		dprintf(STDERR_FILENO, "creazione della chat impossibile");
+		nameListFree(user);
+		return -1;
+	}
+	char roomDir[128];
+	sprintf(roomDir, "./%s/%s", chatDirName, user->names[want]);
+	makeThRoom(idKey, roomDir, info);
+	dprintf(fdOut, "ROOM th creato, idKey=%d\n", idKey);
+	nameListFree(user);
+	sleep(5);
+	return 0;
+
 }
 
 void *thrServTX(thUserArg *argTh) {

@@ -73,9 +73,6 @@ void wprintMex(WINDOW *window, mex *m);
 
 void wprintConvInfo(WINDOW *window, convInfo *cI);
 
-int idSearch(nameList *nl, int idSearch);
-
-
 /** shell th funx**/
 void shellThStdout(thShellArg *);
 

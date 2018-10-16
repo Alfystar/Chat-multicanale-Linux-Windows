@@ -67,7 +67,7 @@ serverStat serStat;
 int StartServerStorage(char *storage_name);
 
 ///Funzioni di per operare sulle chat
-infoChat *newRoom(char *name, int adminId);
+infoChat *newRoom(char *nameRoom, int adminId);
 
 infoChat *openRoom(char *pathDir);
 
@@ -117,9 +117,12 @@ int filterDirAndFile(const struct dirent *entry);
 char *fileType(unsigned char d_type, char *externalBuf, int bufLen);
 
 ///Funzioni per visualizzare gli elementi
-void nameListPrint(nameList *nameList);
+void nameListPrint(nameList *nameList, int fdOut);
 
-void infoChatPrint(infoChat *info);
+void infoChatPrint(infoChat *info, int fdOut);
+
+int idSearch(nameList *nl, int idSearch);
+
 
 
 //todo freeInfoUser

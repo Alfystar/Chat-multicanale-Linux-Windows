@@ -151,6 +151,60 @@ int loginServerSide(mail *pack, thUserArg *data) {
 	return 0;
 }
 
+int setUpThUser(int keyId, thUserArg *argUs) {
+	//modifica argUs per salvare dentro i file
+	/// keyId:= id da cercare       argUs:= puntatore alla struttura da impostare
+	nameList *user = userExist();
+
+	int want = idSearch(user, keyId);
+
+	if (want == -1) {
+		dprintf(STDERR_FILENO, "Id richiesto inesistente\n");
+		errno = ENOENT;
+		return -1;
+	}
+
+	///Inizio la creazione del thread
+	char userDir[128];
+	sprintf(userDir, "./%s/%s", userDirName, user->names[want]);
+
+	infoUser *info = openUser(userDir);
+	if (info == NULL) {
+		dprintf(STDERR_FILENO, "creazione dell'User impossibile\n");
+		errno = ENOENT;
+		return -1;
+	}
+	sem_wait(&screewWrite);
+	wtabPrint(showPannel, info->tab, 0);
+	sem_post(&screewWrite);
+
+	pthread_t usertid;
+
+	argUs->id = keyId;
+	argUs->info = info;
+
+
+	/** Tokenizzazione di user->names[want] per ottenere name **/
+	// !!!!rompo user ma tanto non serve più
+
+	char *sArgv[2];  //consento lo storage fino a 64 comandi
+	int sArgc = 0;
+	char *savePoint;
+
+	sArgc = 0;
+	sArgv[sArgc] = strtok_r(user->names[want], ":", &savePoint);
+	while (sArgv[sArgc] != NULL && sArgc < 2) {
+		sArgc++;
+		sArgv[sArgc] = strtok_r(NULL, ":", &savePoint);
+	}
+
+	strncpy(argUs->userName, sArgv[1], 50);   //serve a prendere solo il nome dell'utente
+	nameListFree(user);
+
+	return 0;
+}
+
+
 int mkUserServerSide(mail *pack, thUserArg *data) {
 	//imposto i thUserArg correttamente
 
@@ -317,6 +371,28 @@ int mkRoomSocket(mail *pack, char *nameChatRet, int len) {
 
 }
 
+void makeThRoom(int keyChat, char *roomPath, infoChat *info) {
+	if (info == NULL) {
+		dprintf(STDERR_FILENO, "infoChat NULL, impossibile creare Tr-ROOM\n");
+		return;
+	}
+	pthread_t roomtid;
+	thRoomArg *arg = malloc(sizeof(thRoomArg));
+	arg->id = keyChat;
+
+	strncpy(arg->roomPath, roomPath, 50);
+	arg->info = info;
+
+	int errorRet;
+	errorRet = pthread_create(&roomtid, NULL, roomTh, arg);
+	if (errorRet != 0) {
+		printErrno("La creazione del Thread ROOM ha dato il seguente errore", errorRet);
+		exit(-1);
+	}
+
+}
+
+
 int joinRoomSocket(mail *pack, thUserArg *data) {
 	/*
 	 * con Data ho accesso alla tabella dell'utente in questione
@@ -356,95 +432,38 @@ void *thrServTX(thUserArg *argTh) {
 
 	}
 }
+/** FUNZIONI DI SUPPORTO PER TH-USER SUL SERVER CON RUOLO DI TX **/
 
+
+
+
+
+/** [][][] TH-ROOM GENERICO, prima di specializzarsi, HA IL COMPITO DI creare le strutture **/
 void *roomTh(thRoomArg *info) {
-    int fdRoomPipe[2];
+	int fdRoomPipe[2];
 	// dal manuale: fd[0] refers to the read end of the pipe. fd[1] refers to the write end of the pipe.
 	int errorRet = pipe2(fdRoomPipe, O_DIRECT);
 	if (errorRet != 0) {
-        printErrno("La creazione della pipe per il Th-room ha dato l'errore", errorRet);
-        exit(-1);
-    }
+		printErrno("La creazione della pipe per il Th-room ha dato l'errore", errorRet);
+		exit(-1);
+	}
 	insert_avl_node_S(rmAvlTree_Pipe, info->id, fdRoomPipe[1]);
 
-    dprintf(fdOut, "Ciao sono Un Tr-ROOM\n\tsono la %d\tmi chiamo %s\n\tmi ragiungi da %d\n", info->id, info->roomPath,
-            fdRoomPipe[1]);
+	dprintf(fdOut, "Ciao sono Un Tr-ROOM\n\tsono la %d\tmi chiamo %s\n\tmi ragiungi da %d\n", info->id, info->roomPath,
+	        fdRoomPipe[1]);
 	pause();
 	free(info);
 	return NULL;
 
 }
 
-void makeThRoom(int keyChat, char *roomPath, infoChat *info) {
-	if (info == NULL) {
-		dprintf(STDERR_FILENO, "infoChat NULL, impossibile creare Tr-ROOM\n");
-		return;
-	}
-	pthread_t roomtid;
-	thRoomArg *arg = malloc(sizeof(thRoomArg));
-	arg->id = keyChat;
+/** #### TH-ROOM CON RUOLO DI RX **/
 
-	strncpy(arg->roomPath, roomPath, 50);
-	arg->info = info;
-
-	int errorRet;
-	errorRet = pthread_create(&roomtid, NULL, roomTh, arg);
-	if (errorRet != 0) {
-		printErrno("La creazione del Thread ROOM ha dato il seguente errore", errorRet);
-		exit(-1);
-	}
-
-}
-
-int setUpThUser(int keyId, thUserArg *argUs) {
-	//modifica argUs per salvare dentro i file
-	/// keyId:= id da cercare       argUs:= puntatore alla struttura da impostare
-	nameList *user = userExist();
-
-	int want = idSearch(user, keyId);
-
-	if (want == -1) {
-		dprintf(STDERR_FILENO, "Id richiesto inesistente\n");
-		errno = ENOENT;
-		return -1;
-	}
-
-	///Inizio la creazione del thread
-	char userDir[128];
-	sprintf(userDir, "./%s/%s", userDirName, user->names[want]);
-
-	infoUser *info = openUser(userDir);
-	if (info == NULL) {
-		dprintf(STDERR_FILENO, "creazione dell'User impossibile\n");
-		errno = ENOENT;
-		return -1;
-	}
-	sem_wait(&screewWrite);
-	wtabPrint(showPannel, info->tab, 0);
-	sem_post(&screewWrite);
-
-	pthread_t usertid;
-
-	argUs->id = keyId;
-	argUs->info = info;
+/** FUNZIONI DI SUPPORTO PER TH-ROOM CON RUOLO DI RX **/
 
 
-	/** Tokenizzazione di user->names[want] per ottenere name **/
-	// !!!!rompo user ma tanto non serve più
+/** #### TH-ROOM CON RUOLO DI TX **/
 
-	char *sArgv[2];  //consento lo storage fino a 64 comandi
-	int sArgc = 0;
-	char *savePoint;
+/** FUNZIONI DI SUPPORTO PER TH-ROOM CON RUOLO DI TX **/
 
-	sArgc = 0;
-	sArgv[sArgc] = strtok_r(user->names[want], ":", &savePoint);
-	while (sArgv[sArgc] != NULL && sArgc < 2) {
-		sArgc++;
-		sArgv[sArgc] = strtok_r(NULL, ":", &savePoint);
-	}
 
-	strncpy(argUs->userName, sArgv[1], 50);   //serve a prendere solo il nome dell'utente
-	nameListFree(user);
-
-	return 0;
-}

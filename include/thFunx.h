@@ -49,11 +49,13 @@ extern int fdOut;  //pipe di uscita per lo stdOut
 /** TH-ACCEPT, GENERA TH USER IN FASE DI ACCEPT **/
 void *acceptTh(thAcceptArg *);
 
-/** #### TH-USER GENERICO, prima di specializzarsi, HA IL COMPITO DI LOGIN **/
+/** [][][] TH-USER GENERICO, prima di specializzarsi, HA IL COMPITO DI LOGIN **/
 void *userTh(thConnArg *);
 
 /** FUNZIONI PER IL TH-USER GENERICO, prima di specializzarsi **/
 int loginServerSide(mail *pack, thUserArg *data);
+
+int setUpThUser(int keyId, thUserArg *argUs);
 
 int mkUserServerSide(mail *pack, thUserArg *data);
 
@@ -66,6 +68,8 @@ void *thrServRX(thUserArg *);
 
 int mkRoomSocket(mail *pack, char *nameChatRet, int len);
 
+void makeThRoom(int keyChat, char *roomPath, infoChat *info);
+
 int joinRoomSocket(mail *pack, thUserArg *data);
 
 /** #### TH-USER SUL SERVER CON RUOLO DI TX **/
@@ -74,14 +78,19 @@ void *thrServTX(thUserArg *);
 /** FUNZIONI DI SUPPORTO PER TH-USER SUL SERVER CON RUOLO DI TX **/
 
 
-/** #### TH- SUL SERVER CON RUOLO DI RX **/
+/** [][][] TH-ROOM GENERICO, prima di specializzarsi, HA IL COMPITO DI creare le strutture **/
 void *roomTh(thRoomArg *);
 
+/** #### TH-ROOM CON RUOLO DI RX **/
+
+/** FUNZIONI DI SUPPORTO PER TH-ROOM CON RUOLO DI RX **/
 
 
-void makeThRoom(int keyChat, char *roomPath, infoChat *info);
+/** #### TH-ROOM CON RUOLO DI TX **/
 
-int setUpThUser(int keyId, thUserArg *argUs);
+/** FUNZIONI DI SUPPORTO PER TH-ROOM CON RUOLO DI TX **/
+
+
 
 //todo freeTh-s_arg
 

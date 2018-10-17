@@ -26,9 +26,9 @@
 #define fflush(stdin) while(getchar() != '\n')
 
 enum typePack {
-	success_p, failed_p, mess_p,                        /** SYSTEM **/
+	success_p, failed_p, mess_p, test_p,               /** SYSTEM **/
 	login_p, logout_p, delUs_p, mkUser_p, dataUs_p,    /** USER**/
-	mkRoom_p, joinRm_p, openRm_p, dataRm_p, exitRm_p    /** ROOM**/
+	mkRoom_p, joinRm_p, openRm_p, dataRm_p, exitRm_p   /** ROOM**/
 };
 
 typedef struct metadata_ {

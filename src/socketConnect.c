@@ -73,43 +73,6 @@ int keepAlive(int *ds_sock) {
 	return 0;
 }
 
-int writePack(int ds_sock, mail *pack) //dentro il thArg deve essere puntato un mail
-{
-	/// la funzione si aspetta che il buffer non sia modificato durante l'invio
-	ssize_t bWrite = 0;
-	ssize_t ret = 0;
-
-	do {
-		ret = send(ds_sock, pack + bWrite, sizeof(metadata) - bWrite, MSG_NOSIGNAL);
-		if (ret == -1) {
-			if (errno == EPIPE) {
-				dprintf(STDERR_FILENO, "write pack pipe break 1\n");
-				return -1;
-				//GESTIRE LA CHIUSURA DEL SOCKET (LA CONNESSIONE E' STATA INTERROTTA IMPROVVISAMENTE)
-			}
-		}
-		bWrite += ret;
-
-	} while (sizeof(metadata) - bWrite != 0);
-
-	bWrite = 0;
-
-	do {
-		ret = send(ds_sock, pack->mex + bWrite, pack->md.dim - bWrite, MSG_NOSIGNAL);
-		if (ret == -1) {
-			if (errno == EPIPE) {
-				dprintf(STDERR_FILENO, "write pack pipe break 2\n");
-				return -1;
-				//GESTIRE LA CHIUSURA DEL SOCKET (LA CONNESSIONE E' STATA INTERROTTA IMPROVVISAMENTE)
-			}
-		}
-		bWrite += ret;
-
-	} while (pack->md.dim - bWrite != 0);
-
-	return 0;
-}
-
 int readPack(int ds_sock, mail *pack) //todo: implementare controllo sulle read
 {
 	//se mex è presente DEVE essere Free fuori
@@ -183,11 +146,50 @@ int readPack(int ds_sock, mail *pack) //todo: implementare controllo sulle read
 	return 0;
 }
 
+int writePack(int ds_sock, mail *pack) //dentro il thArg deve essere puntato un mail
+{
+	/// la funzione si aspetta che il buffer non sia modificato durante l'invio
+	ssize_t bWrite = 0;
+	ssize_t ret = 0;
+
+	do {
+		ret = send(ds_sock, pack + bWrite, sizeof(metadata) - bWrite, MSG_NOSIGNAL);
+		if (ret == -1) {
+			if (errno == EPIPE) {
+				dprintf(STDERR_FILENO, "write pack pipe break 1\n");
+				return -1;
+				//GESTIRE LA CHIUSURA DEL SOCKET (LA CONNESSIONE E' STATA INTERROTTA IMPROVVISAMENTE)
+			}
+		}
+		bWrite += ret;
+
+	} while (sizeof(metadata) - bWrite != 0);
+
+	bWrite = 0;
+
+	do {
+		ret = send(ds_sock, pack->mex + bWrite, pack->md.dim - bWrite, MSG_NOSIGNAL);
+		if (ret == -1) {
+			if (errno == EPIPE) {
+				dprintf(STDERR_FILENO, "write pack pipe break 2\n");
+				return -1;
+				//GESTIRE LA CHIUSURA DEL SOCKET (LA CONNESSIONE E' STATA INTERROTTA IMPROVVISAMENTE)
+			}
+		}
+		bWrite += ret;
+
+	} while (pack->md.dim - bWrite != 0);
+
+	return 0;
+}
+
+
+
 int testConnection(int ds_sock) {
 	mail packTest;
 	packTest.mex = NULL;
 	packTest.md.dim = 0;
-	packTest.md.type = 1;
+	packTest.md.type = test_p;
 	strncpy(packTest.md.sender, "Server", 28);
 	strncpy(packTest.md.whoOrWhy, "testing_code", 24);
 

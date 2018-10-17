@@ -85,10 +85,9 @@ void *userTh(thConnArg *info) {
 	insert_avl_node_S(usAvlTree_Pipe, arg->id, fdUserPipe[1]);
 
 	pthread_t tidRX, tidTX;
-
+	//i thUser condividono lo stesso oggetto thUserArg arg, quindi stare attenti !!!!
 	pthread_create(&tidRX, NULL, thrServRX, arg);
 	//pthread_create(&tidTX,NULL, thrServTX,info);
-	pthread_exit(-1); // todo gestione broken pipe e uscita thread
 
 	while (1) pause();
 	free(arg);  //todo da sostituire con free_thUserArg quando fatta
@@ -440,6 +439,9 @@ void *thrServTX(thUserArg *argTh) {
 
 /** [][][] TH-ROOM GENERICO, prima di specializzarsi, HA IL COMPITO DI creare le strutture **/
 void *roomTh(thRoomArg *info) {
+
+	///creo le pipe con cui venir ragiunto
+
 	int fdRoomPipe[2];
 	// dal manuale: fd[0] refers to the read end of the pipe. fd[1] refers to the write end of the pipe.
 	int errorRet = pipe2(fdRoomPipe, O_DIRECT);
@@ -451,19 +453,111 @@ void *roomTh(thRoomArg *info) {
 
 	dprintf(fdOut, "Ciao sono Un Tr-ROOM\n\tsono la %d\tmi chiamo %s\n\tmi ragiungi da %d\n", info->id, info->roomPath,
 	        fdRoomPipe[1]);
-	pause();
-	free(info);
+
+
+	pthread_t tidRX, tidTX;
+	//i thRoom condividono lo stesso oggetto thRoomArg info, quindi stare attenti
+	pthread_create(&tidRX, NULL, thRoomRX, info);
+	//pthread_create(&tidTX,NULL, thRoomTx,info);
+
+	while (1) pause();
+
+	free(info);     //todo fare free-thRoomArg
+	pthread_exit(NULL);
+
 	return NULL;
 
 }
 
 /** #### TH-ROOM CON RUOLO DI RX **/
+void *thRoomRX(thRoomArg *info) {
+
+}
 
 /** FUNZIONI DI SUPPORTO PER TH-ROOM CON RUOLO DI RX **/
 
 
 /** #### TH-ROOM CON RUOLO DI TX **/
+void *thRoomTX(thRoomArg *info) {
 
+}
 /** FUNZIONI DI SUPPORTO PER TH-ROOM CON RUOLO DI TX **/
 
 
+/** SEND PACK_inside e WRITE PACK_inside**/
+
+/*
+ * I dati inviati tramite mex, devono essere freezati dopo dal ricevente, e allocati a parte prima dal mittente
+ */
+
+int readPack_inside(int fdPipe, mail *pack) {
+	//rispetto alla versione normale ricevo il puntatore di mex, per cui prima è stato malloccato,e ora il ricevente lo freezerà
+
+	//se mex è presente DEVE essere Freezato fuori
+
+	int iterContr = 0; // vediamo se la read fallisce
+	ssize_t bRead = 0;
+	ssize_t ret = 0;
+	dprintf(fdDebug, "readPack_inside Funx\n");
+	do {
+		ret = read(fdPipe, &pack->md + bRead, sizeof(mail) - bRead);
+		if (ret == -1) {
+			perror("Read error; cause:");
+			return -1;
+		}
+		if (ret == 0) {
+			iterContr++;
+			if (iterContr > 4) {
+				dprintf(STDERR_FILENO, "Seems Read can't go further; test connection... [%d]\n", iterContr);
+				if (testConnection_inside(fdPipe) == -1) {
+					dprintf(STDERR_FILENO, "test Fail\n");
+					return -1;
+				} else {
+					iterContr = 0;
+				}
+			}
+		} else {
+			iterContr = 0;
+		}
+		bRead += ret;
+	} while (sizeof(mail) - bRead != 0);
+
+	return 0;
+}
+
+int writePack_inside(int fdPipe, mail *pack) //dentro il thArg deve essere puntato un mail
+{
+	//rispetto alla versione normale invio il puntatore di mex, per cui prima lo si mallocca ,e il ricevente lo freeza
+	/// la funzione si aspetta che il buffer non sia modificato durante l'invio
+	ssize_t bWrite = 0;
+	ssize_t ret = 0;
+
+	do {
+		ret = send(fdPipe, pack + bWrite, sizeof(mail) - bWrite, MSG_NOSIGNAL);
+		if (ret == -1) {
+			if (errno == EPIPE) {
+				dprintf(STDERR_FILENO, "write pack pipe break 1\n");
+				return -1;
+				//GESTIRE LA CHIUSURA DEL SOCKET (LA CONNESSIONE E' STATA INTERROTTA IMPROVVISAMENTE)
+			}
+		}
+		bWrite += ret;
+
+	} while (sizeof(mail) - bWrite != 0);
+
+	return 0;
+}
+
+int testConnection_inside(int fdPipe) {
+	mail packTest;
+	packTest.mex = NULL;
+	packTest.md.dim = 0;
+	packTest.md.type = test_p;
+	strncpy(packTest.md.sender, "Server", 28);
+	strncpy(packTest.md.whoOrWhy, "testing_code", 24);
+
+	if (writePack_inside(fdPipe, &packTest) == -1) {
+		return -1;
+	}
+	return 0;
+}

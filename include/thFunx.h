@@ -82,16 +82,24 @@ void *thrServTX(thUserArg *);
 void *roomTh(thRoomArg *);
 
 /** #### TH-ROOM CON RUOLO DI RX **/
+void *thRoomRX(thRoomArg *info);
 
 /** FUNZIONI DI SUPPORTO PER TH-ROOM CON RUOLO DI RX **/
 
 
 /** #### TH-ROOM CON RUOLO DI TX **/
+void *thRoomTX(thRoomArg *info);
 
 /** FUNZIONI DI SUPPORTO PER TH-ROOM CON RUOLO DI TX **/
 
 
+/** SEND PACK_inside e WRITE PACK_inside**/
 
+int readPack_inside(int fdPipe, mail *pack);
+
+int writePack_inside(int fdPipe, mail *pack);
+
+int testConnection_inside(int fdPipe);
 //todo freeTh-s_arg
 
 #endif //CHAT_MULTILEVEL_THFUNX_H

@@ -67,8 +67,10 @@ void terminalShell() {
 		}
 
 		/// interpretazione sArgv[] ed esecuzione comandi
-		sem_wait(&screewWrite);
+		//il lock screen è all'interno
 		driverCmd(sArgc, sArgv, &exit);
+
+		sem_wait(&screewWrite);
 		wrefresh(cmdW);
 		sem_post(&screewWrite);
 
@@ -81,6 +83,8 @@ void terminalShell() {
 
 void driverCmd(int argc, char *argv[], int *exit) {
 	//la funzione deve avere il controllo esclusivo dello schermo
+
+
 	if (argc >= 1) {
 		if (strcmp(argv[0], "q") == 0) {
 			*exit = 0;
@@ -88,7 +92,10 @@ void driverCmd(int argc, char *argv[], int *exit) {
 		}
 
 		if (strcmp(argv[0], "chat") == 0) {
+			sem_wait(&screewWrite);
 			chatShowW(showPannel, 1, 0);
+			sem_post(&screewWrite);
+
 			return;
         }
         if (strcmp(argv[0], "p-avlC") == 0) {
@@ -97,7 +104,10 @@ void driverCmd(int argc, char *argv[], int *exit) {
             return;
         }
 		if (strcmp(argv[0], "user") == 0) {
+			sem_wait(&screewWrite);
 			userShowW(showPannel, 1, 0);
+			sem_post(&screewWrite);
+
 			return;
 		}
         if (strcmp(argv[0], "p-avlU") == 0) {
@@ -109,7 +119,10 @@ void driverCmd(int argc, char *argv[], int *exit) {
 			return;
 		}
 		if (strcmp(argv[0], "reset") == 0) {
+			sem_wait(&screewWrite);
 			windowSetUp();
+			sem_post(&screewWrite);
+
 			return;
 		}
 
@@ -132,23 +145,37 @@ void driverCmd(int argc, char *argv[], int *exit) {
 			nameList *user = userExist();
 			int want = idSearch(user, atoi(argv[1]));
 			if (want == -1) {
-				dprintf(STDERR_FILENO, "Id richiesto inesistente\n");
+				dprintf(STDERR_FILENO, "ID RICHIESTO INESISTENTE\n");
+				sem_wait(&screewWrite);
+				mvwprintw(showPannel, 0, 0, "");
+				wclrtobot(showPannel);
+				mvwprintw(showPannel, 1, 10, "[][][] ID RICHIESTO INESISTENTE [][][]");
+				mvwprintw(showPannel, 2, 10, "[][][] ID RICHIESTO INESISTENTE [][][]");
+				mvwprintw(showPannel, 3, 10, "[][][] ID RICHIESTO INESISTENTE [][][]");
+				wrefresh(showPannel);
+				sem_post(&screewWrite);
+
 				return;
 			}
 
 			char userDir[128];
 			sprintf(userDir, "./%s/%s", userDirName, user->names[want]);
 			nameListFree(user);
+			//dprintf(fdDebug,"sto per ottenere la openUser con userdir=%s\n",userDir);
 			infoUser *info = openUser(userDir);
 			if (info == 0) {
 				dprintf(STDERR_FILENO, "Visualizzazione tabella impossibile\n");
-				nameListFree(user);
 
 				return;
 			}
-            dprintf(fdOut, "path=%s\n", userDir);
+			/*
+			dprintf(fdOut, "path=%s\n", userDir);
 			tabPrintFile(info->tab->stream);
+			*/
+			sem_wait(&screewWrite);
 			wtabPrint(showPannel, info->tab, 0);
+			sem_post(&screewWrite);
+
 			return;
 		}
 
@@ -156,7 +183,16 @@ void driverCmd(int argc, char *argv[], int *exit) {
 			nameList *chat = chatRoomExist();
 			int want = idSearch(chat, atoi(argv[1]));
 			if (want == -1) {
-				dprintf(STDERR_FILENO, "Id richiesto inesistente\n");
+				dprintf(STDERR_FILENO, "ID RICHIESTO INESISTENTE\n");
+				sem_wait(&screewWrite);
+				mvwprintw(showPannel, 0, 0, "");
+				wclrtobot(showPannel);
+				mvwprintw(showPannel, 1, 10, "[][][] ID RICHIESTO INESISTENTE [][][]");
+				mvwprintw(showPannel, 2, 10, "[][][] ID RICHIESTO INESISTENTE [][][]");
+				mvwprintw(showPannel, 3, 10, "[][][] ID RICHIESTO INESISTENTE [][][]");
+				wrefresh(showPannel);
+				sem_post(&screewWrite);
+
 				return;
 			}
 
@@ -171,7 +207,10 @@ void driverCmd(int argc, char *argv[], int *exit) {
 			}
             dprintf(fdOut, "path=%s\n", chatDir);
 			//tabPrint(info->tab);
+			sem_wait(&screewWrite);
 			wtabPrint(showPannel, info->tab, 0);
+			sem_post(&screewWrite);
+
 			return;
 		}
 		if (strcmp(argv[0], "roomConv") == 0) {
@@ -193,8 +232,10 @@ void driverCmd(int argc, char *argv[], int *exit) {
 			}
             dprintf(fdOut, "path=%s\n", chatDir);
 
-
+			sem_wait(&screewWrite);
 			wprintConv(showPannel, info->conv, 0);
+			sem_post(&screewWrite);
+
 			return;
 		}
 	}
@@ -214,7 +255,10 @@ void driverCmd(int argc, char *argv[], int *exit) {
 			return;
 		}
 	}
+	sem_wait(&screewWrite);
 	menuHelpw(cmdW, 2, 0, argc, argv);
+	sem_post(&screewWrite);
+
 }
 
 void menuHelpw(WINDOW *w, int y_start, int x_start, int argc, char *argv[]) {

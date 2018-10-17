@@ -34,7 +34,10 @@ table *init_Tab(char *path, char *nameFirst) {
 
 table *open_Tab(char *path) {
 	FILE *f;
+	//dprintf(fdDebug,"open_Tab starting\n");
 	f = openTabF(path);
+	//dprintf(fdDebug,"open_Tab finish\n");
+
 	return makeTable(f);
 }
 
@@ -466,11 +469,14 @@ table *makeTable(FILE *tab) {
 	table *t = (table *) malloc(sizeof(table));
 	t->data = (entry *) calloc(len, sizeof(entry));
 
+	//dprintf(fdDebug,"makeTable flock\n");
 	flockfile(tab);
 	rewind(tab);
 	fread(&t->head, 1, sizeof(firstFree), tab);
 	fread(t->data, 1, sizeof(entry) * len, tab);
 	funlockfile(tab);
+	//dprintf(fdDebug,"makeTable unflock\n");
+
 	t->stream = tab;
 	return t;
 }

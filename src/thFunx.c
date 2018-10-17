@@ -5,23 +5,24 @@
 #include "../include/thFunx.h"
 
 
+/** TH-ACCEPT, GENERA TH USER IN FASE DI ACCEPT **/
 
 void *acceptTh(thAcceptArg *info) {
 
-    thUserArg *arg;
+	thUserArg *arg;
 	dprintf(fdOut, "acceptTh Creato\n");
 
 	while (1) {
-        arg = malloc(sizeof(thUserArg));
+		arg = malloc(sizeof(thUserArg));
 		//definisco gli argomenti da passare al th user come puntati da arg di thConnArg.arg
-        arg->id = -1;
+		arg->id = -1;
 		arg->conUs = info->conInfo; //copia negli argomenti del th una copia totale della connessione del server
-        arg->info = NULL;
+		arg->info = NULL;
 		arg->userName[0] = 0;
 
-        if (acceptCreate(&info->conInfo.con, userTh, arg) == -1) {
-	        dprintf(STDERR_FILENO, "errore in accept\n");
-        }
+		if (acceptCreate(&info->conInfo.con, userTh, arg) == -1) {
+			dprintf(STDERR_FILENO, "errore in accept\n");
+		}
 		dprintf(fdOut, "userTh Creato da accept,i suoi arg = %p sono stati creati.\n", arg);
 
 	}
@@ -29,6 +30,7 @@ void *acceptTh(thAcceptArg *info) {
 	return NULL;
 }
 
+/** TH-/** #### TH-USER GENERICO, prima di specializzarsi, HA IL COMPITO DI LOGIN **/
 void *userTh(thConnArg *info) {
 	thUserArg *arg = info->arg; //da impostare in base al login, l'accept lascia campi "vuoti"
 	arg->conUs.con = info->con; //copio i dati di info
@@ -82,10 +84,10 @@ void *userTh(thConnArg *info) {
 
 	insert_avl_node_S(usAvlTree_Pipe, arg->id, fdUserPipe[1]);
 
-    pthread_t tidRX, tidTX;
+	pthread_t tidRX, tidTX;
 
 	pthread_create(&tidRX, NULL, thrServRX, arg);
-    //pthread_create(&tidTX,NULL, thrServTX,info);
+	//pthread_create(&tidTX,NULL, thrServTX,info);
 	pthread_exit(-1); // todo gestione broken pipe e uscita thread
 
 	while (1) pause();
@@ -95,6 +97,7 @@ void *userTh(thConnArg *info) {
 	return NULL;
 }
 
+/** FUNZIONI PER IL TH-USER GENERICO, prima di specializzarsi **/
 int loginServerSide(mail *pack, thUserArg *data) {
 	//imposto i thUserArg correttamente
 
@@ -206,68 +209,73 @@ void *sendTab(table *t, int *len) {
 	return mex;
 }
 
+
+/** #### TH-USER SUL SERVER CON RUOLO DI RX **/
 void *thrServRX(thUserArg *argTh) {
 
-    mail packRecive;
+	mail packRecive;
 	mail packSend;
 	bool exit = true;
 	char buffRet[128];
 	while (exit) {
-        dprintf(fdOut, "thrServRx %d in attesa di messaggio da %d sock\n", argTh->id, argTh->conUs.con.ds_sock);
+		dprintf(fdOut, "thrServRx %d in attesa di messaggio da %d sock\n", argTh->id, argTh->conUs.con.ds_sock);
 
-        if (readPack(argTh->conUs.con.ds_sock, &packRecive) == -1) {
-            dprintf(STDERR_FILENO, "Read error, broken pipe\n");
-	        dprintf(STDERR_FILENO, "thrServRx %d in chiusura\n", argTh->id);
-	        sleep(1);
-	        free(argTh); //todo creare i free per ogni tipo di dato !!!!
-	        pthread_exit(-1); // todo gestione broken pipe e uscita thread
-        }
+		if (readPack(argTh->conUs.con.ds_sock, &packRecive) == -1) {
+			dprintf(STDERR_FILENO, "Read error, broken pipe\n");
+			dprintf(STDERR_FILENO, "thrServRx %d in chiusura\n", argTh->id);
+			sleep(1);
+			free(argTh); //todo creare i free per ogni tipo di dato !!!!
+			pthread_exit(-1); // todo gestione broken pipe e uscita thread
+		}
 		/*
 		dprintf(fdDebug, "thrServRx %d ricevuto type=%d\n", packRecive.md.type);
 		printPack(&packRecive);
 		 */
 
 		switch (packRecive.md.type) {
-		    case mkRoom_p:
-			    if (mkRoomSocket(&packRecive, buffRet, 128)) {
-				    dprintf(STDERR_FILENO, "mkRoom coommand from socket fail\n");
-				    fillPack(&packSend, failed_p, 0, 0, "Server", "Impossible Create room");
-				    writePack(argTh->conUs.con.ds_sock, &packSend);
-			    } else {
-				    //ho successo, aggiungo la chat alla tabella dell'utente attuale
-				    //la prima entry delle tabelle è il proprietario (come first free)
-				    addEntry(argTh->info->tab, buffRet, 0);
-				    sem_wait(&screewWrite);
-				    wtabPrint(showPannel, argTh->info->tab, 0);
-				    sem_post(&screewWrite);
+			case mkRoom_p:
+				if (mkRoomSocket(&packRecive, buffRet, 128)) {
+					dprintf(STDERR_FILENO, "mkRoom coommand from socket fail\n");
+					fillPack(&packSend, failed_p, 0, 0, "Server", "Impossible Create room");
+					writePack(argTh->conUs.con.ds_sock, &packSend);
+				} else {
+					//ho successo, aggiungo la chat alla tabella dell'utente attuale
+					//la prima entry delle tabelle è il proprietario (come first free)
+					addEntry(argTh->info->tab, buffRet, 0);
+					sem_wait(&screewWrite);
+					wtabPrint(showPannel, argTh->info->tab, 0);
+					sem_post(&screewWrite);
 
-				    fillPack(&packSend, success_p, 0, 0, "Server", buffRet);
-				    writePack(argTh->conUs.con.ds_sock, &packSend);
-			    }
-			    break;
-		    case joinRm_p:
-			    break;
-		    case mess_p:
-			    break;
+					fillPack(&packSend, success_p, 0, 0, "Server", buffRet);
+					writePack(argTh->conUs.con.ds_sock, &packSend);
+				}
+				break;
+			case joinRm_p:
+
+				break;
+			case mess_p:
+				break;
 			case logout_p:
 				exit = false;
 				continue;
 				break;
 
-		    default:
-			    dprintf(fdDebug, "thrServRx %d ricevuto type=%d, NON GESTITO\n", packRecive.md.type);
-			    printPack(&packRecive);
-			    break;
-	    }
+			default:
+				dprintf(fdDebug, "thrServRx %d ricevuto type=%d, NON GESTITO\n", packRecive.md.type);
+				printPack(&packRecive);
+				break;
+		}
 
-	    if (!packRecive.mex) free(packRecive.mex);
-    }
+		if (!packRecive.mex) free(packRecive.mex);
+	}
 	close(argTh->conUs.con.ds_sock);
 	if (!packRecive.mex) free(packRecive.mex);
 	if (!packSend.mex) free(packSend.mex);
 	free(argTh); //todo creare i free per ogni tipo di dato !!!!
-    pthread_exit(0);
+	pthread_exit(0);
 }
+
+/** FUNZIONI DI SUPPORTO PER TH-USER SUL SERVER CON RUOLO DI RX **/
 
 int mkRoomSocket(mail *pack, char *nameChatRet, int len) {
 	//nameChatRet= puntatore a un buffer dove viene salvato il nome (id:name) della chat creata
@@ -309,21 +317,44 @@ int mkRoomSocket(mail *pack, char *nameChatRet, int len) {
 
 }
 
+int joinRoomSocket(mail *pack, thUserArg *data) {
+	/*
+	 * con Data ho accesso alla tabella dell'utente in questione
+	 * e posso aggiungere alla tabella dell'utente la nuova room alla quale sono collegato
+	 *
+	 * devo anche inviare al Th-room che esiste un nuovo utente e deve essere aggiunto alla tabella
+	 *
+	 *
+	 * devo ritornare al mio utente in quale indice della tabella della room mi trovo, per settare point
+	 *
+	 */
+
+	/*
+	 * type= joinRm_p
+	 * sender=  (string) //non lo uso
+	 * who= (string)
+	 * mex= <>
+	 */
+
+
+}
+
+/** #### TH-USER SUL SERVER CON RUOLO DI TX **/
 void *thrServTX(thUserArg *argTh) {
 
-    mail packWrite;
-    //fillPack(&packWrite,);
+	mail packWrite;
+	//fillPack(&packWrite,);
 
-    while (1) {
-        //readPack() da aggiungere il selettore in ingresso di chat
+	while (1) {
+		//readPack() da aggiungere il selettore in ingresso di chat
 
 
-        if (writePack(argTh->conUs.con.ds_sock, &packWrite) == -1) {
-            dprintf(STDERR_FILENO, "Write error, broken pipe\n");
-            exit(-1);
-        }
+		if (writePack(argTh->conUs.con.ds_sock, &packWrite) == -1) {
+			dprintf(STDERR_FILENO, "Write error, broken pipe\n");
+			exit(-1);
+		}
 
-    }
+	}
 }
 
 void *roomTh(thRoomArg *info) {

@@ -26,31 +26,31 @@
 #define fflush(stdin) while(getchar() != '\n')
 
 enum typePack {
-    mess_p, login_p, logout_p, cmd_p, success_p,
-    failed_p, mkUser_p, dataUs_p, mkRoom_p, dataRm_p,
-    joinRm_p, exitRm_p
+	success_p, failed_p, mess_p,                        /** SYSTEM **/
+	login_p, logout_p, delUs_p, mkUser_p, dataUs_p,    /** USER**/
+	mkRoom_p, joinRm_p, openRm_p, dataRm_p, exitRm_p    /** ROOM**/
 };
 
 typedef struct metadata_ {
-    size_t dim;
-    int type; // dobbiamo definire dei tipi di comandi: es. 0 per il login => password in campo mex, ...
-    char sender[28];
-    char whoOrWhy[24];
+	size_t dim;
+	int type; // dobbiamo definire dei tipi di comandi: es. 0 per il login => password in campo mex, ...
+	char sender[28];
+	char whoOrWhy[24];
 } metadata;
 
 typedef struct mail_ {
-    metadata md;
-    void *mex;
+	metadata md;
+	void *mex;
 } mail;
 
 typedef struct connection_ {
-    int ds_sock;
-    struct sockaddr_in sock;
+	int ds_sock;
+	struct sockaddr_in sock;
 } connection;
 
 typedef struct thConnArg_ {
-    connection con;     //connessioni soket attuale
-    void *arg;          //possibili parametri extra
+	connection con;     //connessioni soket attuale
+	void *arg;          //possibili parametri extra
 } thConnArg;
 
 // PROTOTIPI DI FUNZIONE:

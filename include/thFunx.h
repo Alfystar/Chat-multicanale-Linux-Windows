@@ -44,26 +44,39 @@ typedef struct thRoomArg_ {
 extern int fdOut;  //pipe di uscita per lo stdOut
 
 
-/** PROTOTIPI   **/
+/** [][][][][][][][] PROTOTIPI [][][][][][][][]  **/
+
+/** TH-ACCEPT, GENERA TH USER IN FASE DI ACCEPT **/
 void *acceptTh(thAcceptArg *);
 
+/** #### TH-USER GENERICO, prima di specializzarsi, HA IL COMPITO DI LOGIN **/
 void *userTh(thConnArg *);
 
+/** FUNZIONI PER IL TH-USER GENERICO, prima di specializzarsi **/
 int loginServerSide(mail *pack, thUserArg *data);
 
 int mkUserServerSide(mail *pack, thUserArg *data);
 
 void *sendTab(table *t, int *len);
 
+/** #### TH-USER SUL SERVER CON RUOLO DI RX **/
 void *thrServRX(thUserArg *);
+
+/** FUNZIONI DI SUPPORTO PER TH-USER SUL SERVER CON RUOLO DI RX **/
 
 int mkRoomSocket(mail *pack, char *nameChatRet, int len);
 
+int joinRoomSocket(mail *pack, thUserArg *data);
+
+/** #### TH-USER SUL SERVER CON RUOLO DI TX **/
 void *thrServTX(thUserArg *);
 
+/** FUNZIONI DI SUPPORTO PER TH-USER SUL SERVER CON RUOLO DI TX **/
+
+
+/** #### TH- SUL SERVER CON RUOLO DI RX **/
 void *roomTh(thRoomArg *);
 
-void *thUserServer(thConnArg *argTh);
 
 
 void makeThRoom(int keyChat, char *roomPath, infoChat *info);

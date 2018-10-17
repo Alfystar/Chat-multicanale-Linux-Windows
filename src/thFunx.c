@@ -411,6 +411,7 @@ int joinRoomSocket(mail *pack, thUserArg *data) {
 	 * mex= <>
 	 */
 
+	//todo: usando write_inside invio i dati necessari al th-room
 
 }
 
@@ -471,6 +472,9 @@ void *roomTh(thRoomArg *info) {
 
 /** #### TH-ROOM CON RUOLO DI RX **/
 void *thRoomRX(thRoomArg *info) {
+	//todo: usando read_inside leggo i dati di comando  al th-room eseguo e rispondo
+	while (1) pause();
+
 
 }
 
@@ -479,6 +483,7 @@ void *thRoomRX(thRoomArg *info) {
 
 /** #### TH-ROOM CON RUOLO DI TX **/
 void *thRoomTX(thRoomArg *info) {
+	while (1) pause();
 
 }
 /** FUNZIONI DI SUPPORTO PER TH-ROOM CON RUOLO DI TX **/

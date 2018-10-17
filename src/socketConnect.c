@@ -187,11 +187,8 @@ int writePack(int ds_sock, mail *pack) //dentro il thArg deve essere puntato un 
 
 int testConnection(int ds_sock) {
 	mail packTest;
-	packTest.mex = NULL;
-	packTest.md.dim = 0;
-	packTest.md.type = test_p;
-	strncpy(packTest.md.sender, "Server", 28);
-	strncpy(packTest.md.whoOrWhy, "testing_code", 24);
+
+	fillPack(&packTest, test_p, 0, NULL, "SERVER", "testing_code");
 
 	if (writePack(ds_sock, &packTest) == -1) {
 		return -1;

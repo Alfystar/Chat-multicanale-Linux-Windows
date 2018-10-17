@@ -550,11 +550,7 @@ int writePack_inside(int fdPipe, mail *pack) //dentro il thArg deve essere punta
 
 int testConnection_inside(int fdPipe) {
 	mail packTest;
-	packTest.mex = NULL;
-	packTest.md.dim = 0;
-	packTest.md.type = test_p;
-	strncpy(packTest.md.sender, "Server", 28);
-	strncpy(packTest.md.whoOrWhy, "testing_code", 24);
+	fillPack(&packTest, test_p, 0, NULL, "SERVER", "testing_code");
 
 	if (writePack_inside(fdPipe, &packTest) == -1) {
 		return -1;

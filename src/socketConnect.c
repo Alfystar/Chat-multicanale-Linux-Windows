@@ -81,7 +81,6 @@ int readPack(int ds_sock, mail *pack) //todo: implementare controllo sulle read
 
 	ssize_t bRead = 0;
 	ssize_t ret = 0;
-	dprintf(fdDebug, "readPack Funx\n");
 	do {
 		ret = read(ds_sock, &pack->md + bRead, sizeof(metadata) - bRead);
 		if (ret == -1) {
@@ -188,7 +187,7 @@ int writePack(int ds_sock, mail *pack) //dentro il thArg deve essere puntato un 
 int testConnection(int ds_sock) {
 	mail packTest;
 
-	fillPack(&packTest, test_p, 0, NULL, "SERVER", "testing_code");
+	fillPack(&packTest, out_test_p, 0, NULL, "SERVER", "testing_code");
 
 	if (writePack(ds_sock, &packTest) == -1) {
 		return -1;

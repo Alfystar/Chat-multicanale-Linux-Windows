@@ -134,7 +134,7 @@ infoChat *newRoom(char *nameRoom, int adminUs) {
 	}
 	///se arrivo qui sicuramente la cartella non esisteva e posso procedere tranquillamente
 
-	strncpy(info->myName, nameChat, 128);
+	strncpy(info->myPath, chatPath, 128);
 
 	char tempFile[128];
 	sprintf(tempFile, "%s%s", chatPath, "/temp");
@@ -604,7 +604,7 @@ void infoChatPrint(infoChat *info, int fd) {
 	dprintf(fd, "########[[]][[]] infoChat contenent [[]][[]]########\n");
 	tabPrint(info->tab);
 	printConv(info->conv, STDOUT_FILENO);
-	dprintf(fd, "info->pathName= %s\n", info->myName);
+	dprintf(fd, "info->pathName= %s\n", info->myPath);
 	dprintf(fd, "----------------------------------------------------\n");
 
 }

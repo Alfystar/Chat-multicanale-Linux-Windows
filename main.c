@@ -6,6 +6,7 @@
 /** Librerie per creare la Pipe**/
 #include <fcntl.h>
 #include <limits.h>
+#include <execinfo.h>
 
 
 #include "helpFunx.h"
@@ -70,11 +71,37 @@ void pipeInit() {
 	fdDebug = FdDebugPipe[1];
 }
 
+void print_trace(int nSig) {
+	sleep(1);
+	endwin();
+
+	printf("\n\nprint_trace: got signal %d\nCurrent Thread in Scheduling are:\n", nSig);
+
+	void *array[32];    /* Array to store backtrace symbols */
+	size_t size;     /* To store the exact no of values stored */
+	char **strings;    /* To store functions from the backtrace list in ARRAY */
+	size_t nCnt;
+
+	size = backtrace(array, 32);
+
+	strings = backtrace_symbols(array, size);
+
+	/* prints each string of function names of trace*/
+	for (nCnt = 0; nCnt < size; nCnt++)
+		printf("%s\n", strings[nCnt]);
+
+
+	exit(-1);
+}
+
 int main(int argc, char *argv[]) {
     if (argc != 4) {
         helpProject();
 		exit(EXIT_FAILURE);
 	}
+
+	signal(SIGSEGV, print_trace);
+
 	pipeInit();
 
     /** fase di avvio STORAGE del server **/
@@ -108,7 +135,7 @@ int main(int argc, char *argv[]) {
 	for (int i = 0; i < chats->nMemb; i++) {
 		sprintf(roomDir, "./%s/%s", chatDirName, chats->names[i]);
 		info = openRoom(roomDir);
-		strncpy(info->myName, roomDir, 128);
+		strncpy(info->myPath, roomDir, 128);
 		//idKey è la prima parte del nome, ovvero IDKEY:XXXXX
 		makeThRoom(atoi(chats->names[i]), roomDir, info);
 	}
@@ -161,3 +188,4 @@ int main(int argc, char *argv[]) {
 
 	return 0;
 }
+

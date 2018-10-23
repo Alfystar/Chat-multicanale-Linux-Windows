@@ -16,7 +16,13 @@ l'applicazione client che per l'applicazione server._
 Per progetti misti Unix/Windows e' a scelta quale delle due applicazioni
 sviluppare per uno dei due sistemi.
 
+#CLIENT
+Il client è reperibile all'indirizzo:
+https://github.com/fil-bad/client
 
+
+
+#demo-code
 Demo-code for ad-hoc lib 
 
 Il codice di demo per l'implementazione delle tabelle su file è ragiungibile a questo repository:

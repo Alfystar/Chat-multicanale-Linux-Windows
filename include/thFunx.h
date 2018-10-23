@@ -30,15 +30,24 @@ typedef struct thAcceptArg_ {
 typedef struct thUserArg_ {
     int id;             //idKey dell'user definito in fase di login
 	char userName[50];  // Nome dell'user (dopo :)
-    infoUser *info;     // contiene tabella e nome per esteso, fase login
+	infoUser *info;     // contiene tabella e nome per esteso (path), assegnato in fase di login
 	thConnArg conUs;    //contiene Tab e path dir dell'user
+	int fdPipe[2];      //contiene i valori delle pipe per parlare alla room, Definita da thRoom-generico
+
 } thUserArg;
 
 typedef struct thRoomArg_ {
 	int id;
-	char roomPath[50];
-	infoChat *info;
+	char roomName[50];  // Nome della room idKey:<Name>
+	infoChat *info;     // contiene tabella,Conversazione e nome per esteso (path), assegnato in fase di creazione
+	int fdPipe[2];      //contiene i valori delle pipe per parlare alla room, Definita da thRoom-generico
 } thRoomArg;
+
+
+enum insidePack {
+	in_join_p = 1000, in_entryIndex_p, in_mess_p
+};
+
 
 ///GLOBAL VARIABLE
 extern int fdOut;  //pipe di uscita per lo stdOut
@@ -85,7 +94,7 @@ void *roomTh(thRoomArg *);
 void *thRoomRX(thRoomArg *info);
 
 /** FUNZIONI DI SUPPORTO PER TH-ROOM CON RUOLO DI RX **/
-
+int joinRoom_inside(mail *pack, thRoomArg *data);
 
 /** #### TH-ROOM CON RUOLO DI TX **/
 void *thRoomTX(thRoomArg *info);

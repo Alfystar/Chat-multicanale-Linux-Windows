@@ -48,7 +48,7 @@ typedef struct serverStat_ {
 typedef struct infoChat_ {
 	table *tab;
 	conversation *conv;
-    char myName[128];   //path della mia chat
+	char myPath[128];   //path della mia chat
     int fdTemp;         //file temporaneo, probabilemente non serve più
 } infoChat;
 

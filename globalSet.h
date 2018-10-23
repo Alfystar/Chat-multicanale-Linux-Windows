@@ -4,7 +4,7 @@
 #ifndef CHAT_MULTILEVEL_GLOBALSETS_H
 #define CHAT_MULTILEVEL_GLOBALSETS_H
 
-#define firmwareVersion "0.05"
+#define firmwareVersion "0.06"
 #define userDirName "Users"
 #define chatDirName "Chats_ROOM"
 #define serverConfFile "serverStat.conf"
@@ -34,6 +34,10 @@ int portProces; //port of process
  * a un thread per farla visualizzare quando serve, mentre se si vuole printare a schermo delle informazioni normali
  * si deve usare la pipe Stdout la quale ha dietro un thread che si occupa di visualizzare la cosa
  */
+
+#define readPipe 0
+#define writePipe 1
+
 int FdStdOutPipe[2];  // dal manuale: FdStdOutPipe[0] refers to the read end of the pipe. FdStdOutPipe[1] refers to the write end of the pipe.
 int FdStdErrPipe[2];
 int FdDebugPipe[2];

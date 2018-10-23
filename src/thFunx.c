@@ -19,6 +19,8 @@ void *acceptTh(thAcceptArg *info) {
 		arg->conUs = info->conInfo; //copia negli argomenti del th una copia totale della connessione del server
 		arg->info = NULL;
 		arg->userName[0] = 0;
+		arg->fdPipe[0] = -1;
+		arg->fdPipe[1] = -1;
 
 		if (acceptCreate(&info->conInfo.con, userTh, arg) == -1) {
 			dprintf(STDERR_FILENO, "errore in accept\n");
@@ -44,27 +46,27 @@ void *userTh(thConnArg *info) {
 	readPack(arg->conUs.con.ds_sock, pack);        //ottengo il primo pack per capire il da fare.
 	///in base al tipo di connessione si riepe arg con i giusti dati
 	switch (pack->md.type) {
-		case login_p:
+		case out_login_p:
 			if (loginServerSide(pack, arg)) {
 				perror("login fase fail :");
 				dprintf(STDERR_FILENO, "Shutdown Th %d\n", arg->id);
-				fillPack(&responde, failed_p, 0, 0, "Server", "Impossibile loggare");
+				fillPack(&responde, out_failed_p, 0, 0, "Server", "Impossibile loggare");
 				writePack(arg->conUs.con.ds_sock, &responde);
 				pthread_exit(NULL);
 			}
 			break;
-		case mkUser_p:
+		case out_mkUser_p:
 			if (mkUserServerSide(pack, arg)) {
 				perror("make New User fase fail :");
 				dprintf(STDERR_FILENO, "Shutdown Th %d\n", arg->id);
-				fillPack(&responde, failed_p, 0, 0, "Server", "Can't create user");
+				fillPack(&responde, out_failed_p, 0, 0, "Server", "Can't create user");
 				writePack(arg->conUs.con.ds_sock, &responde);
 				pthread_exit(NULL);
 			}
 			break;
 		default:
 			dprintf(STDERR_FILENO, "Pack rivevuto inadatto a instaurazione com\n");
-			fillPack(pack, failed_p, 0, NULL, "SERVER", "User Not yet Created");
+			fillPack(pack, out_failed_p, 0, NULL, "SERVER", "User Not yet Created");
 			writePack(arg->conUs.con.ds_sock, pack);
 			//todo in caso salvare possibili file (FUNX saveOnExit)
 			pthread_exit(NULL);
@@ -73,16 +75,15 @@ void *userTh(thConnArg *info) {
 
 	dprintf(fdDebug, "Login success\nTx-th & Rx-th of %d now Create", arg->id);
 
-	int fdUserPipe[2];
-	int errorRet = pipe2(fdUserPipe,
-	                     O_DIRECT); // dal manuale: fd[0] refers to the read end of the pipe. fd[1] refers to the write end of the pipe.
+	// dal manuale: fd[0] refers to the read end of the pipe. fd[1] refers to the write end of the pipe.
+	int errorRet = pipe2(arg->fdPipe, O_DIRECT);
 	if (errorRet != 0) {
 		printErrno("La creazione della pipe per il Th-room ha dato l'errore", errorRet);
 		exit(-1);
 	}
 
 
-	insert_avl_node_S(usAvlTree_Pipe, arg->id, fdUserPipe[1]);
+	insert_avl_node_S(usAvlTree_Pipe, arg->id, arg->fdPipe[writePipe]);
 
 	pthread_t tidRX, tidTX;
 	//i thUser condividono lo stesso oggetto thUserArg arg, quindi stare attenti !!!!
@@ -104,7 +105,7 @@ int loginServerSide(mail *pack, thUserArg *data) {
 	        pack->md.type);
 	/*
 	 * Login:
-	 * type=login_p
+	 * type=out_login_p
 	 * Sender=xxxx
 	 * whoOrWhy=idKey (string)
 	 * dim=0
@@ -114,7 +115,7 @@ int loginServerSide(mail *pack, thUserArg *data) {
 
 	if (setUpThUser(atoi(pack->md.whoOrWhy), data)) {
 		perror("Impossible to create new ThUser of register User :");
-		fillPack(&response, failed_p, 0, NULL, "Server", "setUpThUser error");
+		fillPack(&response, out_failed_p, 0, NULL, "Server", "setUpThUser error");
 
 		return -1;
 	}
@@ -143,7 +144,7 @@ int loginServerSide(mail *pack, thUserArg *data) {
 	void *mex = sendTab(data->info->tab, &len);
 
 	/// Invio risposta affermativa
-	fillPack(&response, dataUs_p, len, mex, "Server", NULL);
+	fillPack(&response, out_dataUs_p, len, mex, "Server", NULL);
 	writePack(data->conUs.con.ds_sock, &response);
 	free(mex);
 
@@ -210,7 +211,7 @@ int mkUserServerSide(mail *pack, thUserArg *data) {
 	dprintf(fdDebug, "LOGIN FASE, create user\n");
 	/*
 	 * mkUser:
-	 * type=mkUser_p
+	 * type=out_mkUser_p
 	 * Sender=Name new (string)
 	 * whoOrWhy= null
 	 * dim=0
@@ -240,7 +241,7 @@ int mkUserServerSide(mail *pack, thUserArg *data) {
 	/// Invio dataSend
 	char idSend[16];
 	sprintf(idSend, "%d", data->id);
-	fillPack(&response, dataUs_p, len, mex, "Server", idSend);
+	fillPack(&response, out_dataUs_p, len, mex, "Server", idSend);
 	writePack(data->conUs.con.ds_sock, &response);
 
 	free(mex);
@@ -281,15 +282,14 @@ void *thrServRX(thUserArg *argTh) {
 			pthread_exit(-1); // todo gestione broken pipe e uscita thread
 		}
 		/*
-		dprintf(fdDebug, "thrServRx %d ricevuto type=%d\n", packRecive.md.type);
+		dprintf(fdDebug, "thrServRx %d ricevuto packetto\n", argTh->id);
 		printPack(&packRecive);
-		 */
-
+		*/
 		switch (packRecive.md.type) {
-			case mkRoom_p:
+			case out_mkRoom_p:
 				if (mkRoomSocket(&packRecive, buffRet, 128)) {
 					dprintf(STDERR_FILENO, "mkRoom coommand from socket fail\n");
-					fillPack(&packSend, failed_p, 0, 0, "Server", "Impossible Create room");
+					fillPack(&packSend, out_failed_p, 0, 0, "Server", "Impossible Create room");
 					writePack(argTh->conUs.con.ds_sock, &packSend);
 				} else {
 					//ho successo, aggiungo la chat alla tabella dell'utente attuale
@@ -299,16 +299,18 @@ void *thrServRX(thUserArg *argTh) {
 					wtabPrint(showPannel, argTh->info->tab, 0);
 					sem_post(&screewWrite);
 
-					fillPack(&packSend, success_p, 0, 0, "Server", buffRet);
+					fillPack(&packSend, out_success_p, 0, 0, "Server", buffRet);
 					writePack(argTh->conUs.con.ds_sock, &packSend);
 				}
 				break;
-			case joinRm_p:
-
+			case out_joinRm_p:
+				if (joinRoomSocket(&packRecive, argTh)) {
+					dprintf(STDERR_FILENO, "joinRoomSocket take error, just send fail\n");
+				}
 				break;
-			case mess_p:
+			case out_mess_p:
 				break;
-			case logout_p:
+			case out_logout_p:
 				exit = false;
 				continue;
 				break;
@@ -333,7 +335,7 @@ void *thrServRX(thUserArg *argTh) {
 int mkRoomSocket(mail *pack, char *nameChatRet, int len) {
 	//nameChatRet= puntatore a un buffer dove viene salvato il nome (id:name) della chat creata
 	/*
-	 * type= mkRoom_p
+	 * type= out_mkRoom_p
 	 * sender= user (string) //non lo uso
 	 * who=id (string)
 	 * mex="<nameRoom>
@@ -356,15 +358,20 @@ int mkRoomSocket(mail *pack, char *nameChatRet, int len) {
 		return -1;
 	}
 
-	strncpy(nameChatRet, info->myName, len);
+	int idKeyChat;
+	char chatDir[64];
+	char nameRoom[64];
+	dprintf(fdDebug, "info->myPath = %s\n", info->myPath);
+	sscanf(info->myPath, "./%[^/]/%ld:%s", chatDir, &idKeyChat, nameRoom);
 
-	char roomDir[128];
-	sprintf(roomDir, "./%s/%s", chatDirName, info->myName);
+	dprintf(fdDebug, "sscanf ha identificato:\n chatDir= %s\nidKeyChat= %d\nnameRoom =%s\n", chatDir, idKeyChat,
+	        nameRoom);
+	char nameChat[64];
+	sprintf(nameChat, "%ld:%s", idKeyChat, nameRoom);
+	strncpy(nameChatRet, nameChat, len);
 
-
-	//info->myName = idKeyChat:name
-	makeThRoom(atoi(info->myName), roomDir, info);
-	dprintf(fdDebug, "ROOM-th by idKeyUser=%d\n", idKeyUser);
+	makeThRoom(idKeyChat, info->myPath, info);
+	dprintf(fdDebug, "ROOM-th %d by idKeyUser=%d\n", idKeyChat, idKeyUser);
 
 	return 0;
 
@@ -379,7 +386,7 @@ void makeThRoom(int keyChat, char *roomPath, infoChat *info) {
 	thRoomArg *arg = malloc(sizeof(thRoomArg));
 	arg->id = keyChat;
 
-	strncpy(arg->roomPath, roomPath, 50);
+	strncpy(arg->roomName, roomPath, 50);
 	arg->info = info;
 
 	int errorRet;
@@ -405,13 +412,91 @@ int joinRoomSocket(mail *pack, thUserArg *data) {
 	 */
 
 	/*
-	 * type= joinRm_p
-	 * sender=  (string) //non lo uso
-	 * who= (string)
-	 * mex= <>
+	 * type= out_joinRm_p
+	 * sender=  userName(string) //non lo uso
+	 * who= id_Chat_to_Join(string)
+	 * mex= <Null>
 	 */
+	///ricerca room nell'avl
+	mail respond;
+	int idChatJoin = atoi(pack->md.whoOrWhy);
+	int pipeRm = search_BFS_avl_S(rmAvlTree_Pipe, idChatJoin);
+	if (pipeRm == -1) {
+		dprintf(STDERR_FILENO, "Cercare la pipe ha creato un errore\nJoin Abortita");
+		fillPack(&respond, out_failed_p, 0, 0, "Server", "Error in search room");
+		writePack(data->conUs.con.ds_sock, &respond);
+		return -1;
+	} else if (pipeRm == -2) {
+		dprintf(STDERR_FILENO, "Room id not found\nJoin Abortita");
+		fillPack(&respond, out_failed_p, 0, 0, "Server", "Room id not found");
+		writePack(data->conUs.con.ds_sock, &respond);
+		return -1;
+	}
 
-	//todo: usando write_inside invio i dati necessari al th-room
+	///invio alla room che mi deve aggiungere alla sua tabella
+
+	mail roomPack;
+	/*
+	 * Join lato inside
+	 * type= in_join_p
+	 * sender=  userNameThread idkey:name (string)
+	 * who= firstFree_EntryIndex(string) //la posizione in cui viene aggiunto nella mia tabella la room
+	 * mex= <myPipe> (int)
+	 */
+	char firstIndex[16];
+	sprintf(firstIndex, "%d", data->info->tab->head.nf_id);
+	dprintf(fdDebug, "Join th-User send in_join_p, at %d pipe\n", pipeRm);
+	int *fdUsWritePipe = malloc(sizeof(int));
+	*fdUsWritePipe = data->fdPipe[writePipe];
+	fillPack(&roomPack, in_join_p, sizeof(int), fdUsWritePipe, data->userName, firstIndex);
+	writePack_inside(pipeRm, &roomPack);
+
+
+
+	///aspetto come risposta la posizione nella tabella della room del'user
+	/*
+	 * Join lato inside risposta
+	 * type= in_entryIndex_p
+	 * sender=  roomNameThread idkey:name (string)
+	 * who= addPos(string)
+	 * mex= <Null>
+	 */
+	///aggiungo alla mia tabella la nuova room
+	RITENTA:
+	readPack_inside(data->fdPipe[readPipe], &roomPack);
+	switch (roomPack.md.type) {
+		case in_entryIndex_p:
+
+			break;
+		case out_failed_p:
+			dprintf(STDERR_FILENO, "Room take error\nJoin Abortita");
+			fillPack(&respond, out_failed_p, 0, 0, "Server", "Room th take error");
+			writePack(data->conUs.con.ds_sock, &respond);
+			return -1;
+			break;
+		default:
+			//pacchetto da chissà dove, ignoro e ritento
+			goto RITENTA;
+			break;
+	}
+
+	///la room mi ha inviato dove ha agiunto me stesso, ora la aggiungo alla mia tabella
+	int addPos = addEntry(data->info->tab, roomPack.md.sender, atoi(roomPack.md.whoOrWhy));
+	if (addPos == -1) {
+		dprintf(STDERR_FILENO, "Add Entry for join take error\n");
+		fillPack(&respond, out_failed_p, 0, 0, "ROOM", "addEntry fail");
+		writePack(data->conUs.con.ds_sock, &respond);
+		return -1;
+	}
+	///invio risposta positiva con i dati corretti
+	entry enToSend;
+	memcpy(&enToSend, &data->info->tab->data[addPos], sizeof(entry));
+
+	fillPack(&respond, out_dataRm_p, sizeof(entry), &enToSend, "Server", 0);
+	writePack(data->conUs.con.ds_sock, &respond);
+
+
+	return 0;
 
 }
 
@@ -443,18 +528,16 @@ void *roomTh(thRoomArg *info) {
 
 	///creo le pipe con cui venir ragiunto
 
-	int fdRoomPipe[2];
 	// dal manuale: fd[0] refers to the read end of the pipe. fd[1] refers to the write end of the pipe.
-	int errorRet = pipe2(fdRoomPipe, O_DIRECT);
+	int errorRet = pipe2(info->fdPipe, O_DIRECT);
 	if (errorRet != 0) {
 		printErrno("La creazione della pipe per il Th-room ha dato l'errore", errorRet);
 		exit(-1);
 	}
-	insert_avl_node_S(rmAvlTree_Pipe, info->id, fdRoomPipe[1]);
+	insert_avl_node_S(rmAvlTree_Pipe, info->id, info->fdPipe[writePipe]);
 
-	dprintf(fdOut, "Ciao sono Un Tr-ROOM\n\tsono la %d\tmi chiamo %s\n\tmi ragiungi da %d\n", info->id, info->roomPath,
-	        fdRoomPipe[1]);
-
+	dprintf(fdOut, "Ciao sono Un Tr-ROOM\n\tsono la %d\tmi chiamo %s\n\tmi ragiungi da %d\n", info->id, info->roomName,
+	        info->fdPipe[writePipe]);
 
 	pthread_t tidRX, tidTX;
 	//i thRoom condividono lo stesso oggetto thRoomArg info, quindi stare attenti
@@ -473,17 +556,114 @@ void *roomTh(thRoomArg *info) {
 /** #### TH-ROOM CON RUOLO DI RX **/
 void *thRoomRX(thRoomArg *info) {
 	//todo: usando read_inside leggo i dati di comando  al th-room eseguo e rispondo
+	mail packRecive;
+	mail packSend;
+	bool exit = true;
+	char buffRet[128];
+	while (exit) {
+		dprintf(fdOut, "th-RoomRx %d in attesa di messaggio da [%d] pipe\n", info->id, info->fdPipe[readPipe]);
+
+		if (readPack_inside(info->fdPipe[readPipe], &packRecive) == -1) {
+			dprintf(STDERR_FILENO, "Read error, broken pipe\n");
+			dprintf(STDERR_FILENO, "th-RoomRx %d in chiusura\n", info->id);
+			sleep(1);
+			free(info); //todo creare i free per ogni tipo di dato !!!!
+			pthread_exit(-1); // todo gestione broken pipe e uscita thread
+		}
+
+
+		switch (packRecive.md.type) {
+			case in_join_p:
+				if (joinRoom_inside(&packRecive, info)) {
+					dprintf(STDERR_FILENO, "Impossible Join for Th-room\n");
+				}
+				break;
+			case in_mess_p:
+
+				break;
+
+			default:
+				dprintf(fdDebug, "th-RoomRx %d ricevuto type=%d, NON GESTITO\n", info->id, packRecive.md.type);
+				printPack(&packRecive);
+				break;
+		}
+
+		if (!packRecive.mex) free(packRecive.mex);
+	}
+	delete_avl_node_S(rmAvlTree_Pipe, info->id);
+	close(info->fdPipe[0]);
+	close(info->fdPipe[1]);
+
+	if (!packRecive.mex) free(packRecive.mex);
+	if (!packSend.mex) free(packSend.mex);
+	free(info); //todo creare i free per ogni tipo di dato !!!!
+	pthread_exit(0);
+
 	while (1) pause();
 
 
 }
 
 /** FUNZIONI DI SUPPORTO PER TH-ROOM CON RUOLO DI RX **/
+int joinRoom_inside(mail *pack, thRoomArg *data) {
+	/*
+	 * con Data ho accesso alla tabella della room in questione
+	 * e posso aggiungere alla tabella della room il nuovo user appena connesso
+	 *
+	 * Dal Th-user che capisco il nuovo utente da aggiungere alla tabella
+	 *
+	 *
+	 * devo ritornare come risposta la posizione nella mia tabella, del'user appena collegato
+	 *
+	 */
 
+	/*
+	 * Join lato inside
+	 * type= in_join_p
+	 * sender=  userNameThread idkey:name (string)
+	 * who= firstFree_EntryIndex(string)    //la posizione in cui viene aggiunto nella tabella del'user
+	 * mex= <Null>
+	 */
+
+
+
+	mail respond;
+	int pipeUser = *((int *) pack->mex);
+	free(pack->mex);
+
+	dprintf(fdDebug, "Join th-Room recive in_join_p, and pipe user is %d pipe\n", pipeUser);
+	///aggiungo alla mia tabella la nuova room
+	int addPos = addEntry(data->info->tab, pack->md.sender, atoi(pack->md.whoOrWhy));
+	if (addPos == -1) {
+		dprintf(STDERR_FILENO, "Add Entry for join side room take error\n");
+		fillPack(&respond, out_failed_p, 0, 0, "ROOM", "addEntry fail");
+		writePack_inside(pipeUser, &respond);
+		return -1;
+	}
+
+	///invio risposta positiva con i dati corretti all'userTh
+	/*
+	 * Join lato inside risposta
+	 * type= in_entryIndex_p
+	 * sender=  roomNameThread idkey:name (string)
+	 * who= addPos(string)
+	 * mex= <Null>
+	 */
+	char addPosBuf[16];
+	sprintf(addPosBuf, "%d", addPos);
+
+	fillPack(&respond, in_entryIndex_p, 0, 0, data->roomName, addPosBuf);
+	writePack_inside(pipeUser, &respond);
+
+
+	return 0;
+
+}
 
 /** #### TH-ROOM CON RUOLO DI TX **/
 void *thRoomTX(thRoomArg *info) {
 	while (1) pause();
+
 
 }
 /** FUNZIONI DI SUPPORTO PER TH-ROOM CON RUOLO DI TX **/
@@ -504,8 +684,11 @@ int readPack_inside(int fdPipe, mail *pack) {
 	ssize_t bRead = 0;
 	ssize_t ret = 0;
 	dprintf(fdDebug, "readPack_inside Funx\n");
+	int iterazione;
 	do {
-		ret = read(fdPipe, &pack->md + bRead, sizeof(mail) - bRead);
+		dprintf(fdDebug, "reedPack_inside Funx [%d] e scrivo sulla pipe %d\n", iterazione, fdPipe);
+		iterazione++;
+		ret = read(fdPipe, pack + bRead, sizeof(mail) - bRead);
 		if (ret == -1) {
 			perror("Read error; cause:");
 			return -1;
@@ -536,26 +719,42 @@ int writePack_inside(int fdPipe, mail *pack) //dentro il thArg deve essere punta
 	/// la funzione si aspetta che il buffer non sia modificato durante l'invio
 	ssize_t bWrite = 0;
 	ssize_t ret = 0;
+	int iterazione = 0;
 
+	/*
+	mail *test=malloc(sizeof(mail));
+	fillPack(test,in_join_p,0,0,"test","test");
+	*/
+	//signal(SIGPIPE,SIG_IGN);
 	do {
-		ret = send(fdPipe, pack + bWrite, sizeof(mail) - bWrite, MSG_NOSIGNAL);
+		dprintf(fdDebug, "writePack_inside Funx [%d] e scrivo sulla pipe %d\n", iterazione, fdPipe);
+		iterazione++;
+		printPack(pack);
+
+		ret = write(fdPipe, pack + bWrite, sizeof(mail) - bWrite);
 		if (ret == -1) {
-			if (errno == EPIPE) {
-				dprintf(STDERR_FILENO, "write pack pipe break 1\n");
-				return -1;
-				//GESTIRE LA CHIUSURA DEL SOCKET (LA CONNESSIONE E' STATA INTERROTTA IMPROVVISAMENTE)
+			switch (errno) {
+				case EPIPE:
+					dprintf(STDERR_FILENO, "writePack_inside pipe break 1\n");
+					return -1;
+					//GESTIRE LA CHIUSURA DEL SOCKET (LA CONNESSIONE E' STATA INTERROTTA IMPROVVISAMENTE)
+				default:
+					perror("writePack_inside take error:\n");
+					return -1;
+					break;
 			}
 		}
 		bWrite += ret;
 
 	} while (sizeof(mail) - bWrite != 0);
-
+	//signal(SIGPIPE,SIG_DFL);
+	dprintf(fdDebug, "writePack_inside Funx send sulla pipe %d\n", iterazione, fdPipe);
 	return 0;
 }
 
 int testConnection_inside(int fdPipe) {
 	mail packTest;
-	fillPack(&packTest, test_p, 0, NULL, "SERVER", "testing_code");
+	fillPack(&packTest, out_test_p, 0, NULL, "SERVER", "testing_code");
 
 	if (writePack_inside(fdPipe, &packTest) == -1) {
 		return -1;

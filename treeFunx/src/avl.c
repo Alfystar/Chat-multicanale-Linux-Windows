@@ -776,6 +776,8 @@ bool delete_avl_node_S(avl_pp_S head, int key) {
 }
 
 int search_BFS_avl_S(avl_pp_S root, int key) {
+	//return -1 is error
+	//return -2 is not Found
 	int ret;
 	lockReadSem(root.semId);
 	ret = search_BFS_avl(root.avlRoot, key);

@@ -26,9 +26,9 @@
 #define fflush(stdin) while(getchar() != '\n')
 
 enum typePack {
-	success_p, failed_p, mess_p, test_p,               /** SYSTEM **/
-	login_p, logout_p, delUs_p, mkUser_p, dataUs_p,    /** USER**/
-	mkRoom_p, joinRm_p, openRm_p, dataRm_p, exitRm_p   /** ROOM**/
+	/** SYSTEM **/    out_success_p = 0, out_failed_p, out_mess_p, out_test_p,
+	/**  USER  **/    out_login_p, out_logout_p, out_delUs_p, out_mkUser_p, out_dataUs_p,
+	/**  ROOM  **/    out_mkRoom_p, out_joinRm_p, out_openRm_p, out_dataRm_p, out_leaveRm_, out_delRm_p, out_exitRm_p
 };
 
 typedef struct metadata_ {

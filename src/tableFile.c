@@ -9,7 +9,7 @@
 /** La funzione ha lo scopo di creare una tabella completamente nuova in memoria **/
 table *init_Tab(char *path, char *nameFirst) {
 	//path è l'indirizzo della cartella/NOME_FILE sulla quale creare la tabella
-	//roomPath è il nome scritto in first-Free
+	//roomName è il nome scritto in first-Free
 	//nameFirst = nome del scritto in first free
 	table *t;
 	FILE *f;
@@ -42,12 +42,18 @@ table *open_Tab(char *path) {
 }
 
 int addEntry(table *t, char *name, int data) {
+	//-1 errore
+	//>=0 posizione
+
 	//name= nome inserito nella nuova cella idKey:name
 	//data= il pointer della tabella all'altra tabella
 	if (addEntryTabF(t->stream, name, data)) {
         //Aggiunta non avvenuta conInfo successo
 		return -1;
 	}
+
+	int addPosition = t->head.nf_id;
+
 	firstFree *first = &t->head;
 	entry *freeData = &t->data[t->head.nf_id];
 	if (isLastEntry(freeData))        //se è la fine si cambiano i valori e si crea un nuovo last-entry
@@ -77,7 +83,7 @@ int addEntry(table *t, char *name, int data) {
 		strncpy(freeData->name, name, nameEntrySize);
 	}
 	//tabPrint(t);
-	return 0;
+	return addPosition;
 }
 
 int delEntry(table *t, int index) {

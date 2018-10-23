@@ -247,7 +247,7 @@ void driverCmd(int argc, char *argv[], int *exit) {
 				dprintf(STDERR_FILENO, "creazione della chat impossibile");
 				return;
 			}
-			long idKey = atoi(info->myName);       //essendo myname xx:TEXT, la funzione termina ai : e ottengo la key
+			long idKey = atoi(info->myPath);       //essendo myname xx:TEXT, la funzione termina ai : e ottengo la key
 			char roomDir[128];
 			sprintf(roomDir, "./%s/%ld:%s", chatDirName, idKey, argv[1]);
 			makeThRoom(idKey, roomDir, info);

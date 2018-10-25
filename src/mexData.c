@@ -76,7 +76,7 @@ mex *makeMex(char *text, int usId) {
 	return m;
 }
 
-int endConv(conversation *c) {
+int freeConv(conversation *c) {
 
 	//libero tutti i messaggi
 	for (int i = 0; i < c->head.nMex; i++) {
@@ -197,6 +197,12 @@ conversation *loadConvF(FILE *stream) {
 ///Funzioni di supporto
 
 int fWriteF(FILE *f, size_t sizeElem, int nelem, void *dat) {
+	//signal Free
+	sigset_t newSet, oltSet;
+	sigfillset(&newSet);
+	sigprocmask(SIG_SETMASK, &newSet, &oltSet);
+	fflush(f);   /// NECESSARIO SE I USA LA MODALITA +, serve a garantire la sincronia tra R/W
+
 	fflush(f);   /// NECESSARIO SE I USA LA MODALITA +, serve a garantire la sincronia tra R/W
 	size_t cont = 0;
 	while (cont != sizeElem * nelem) {
@@ -209,11 +215,16 @@ int fWriteF(FILE *f, size_t sizeElem, int nelem, void *dat) {
         //dprintf(fdOut,"prima fwrite; dat=%p\n",dat);
 		cont += fwrite(dat + cont, 1, sizeElem * nelem - cont, f);
 	}
+	sigprocmask(SIG_SETMASK, &oltSet, &newSet);   //restora tutto
 	return 0;
 }
 
 int fReadF(FILE *f, size_t sizeElem, int nelem, void *save) {
-	//todo signal free
+	//signal Free
+	sigset_t newSet, oltSet;
+	sigfillset(&newSet);
+	sigprocmask(SIG_SETMASK, &newSet, &oltSet);
+
 	fflush(f);   /// NECESSARIO SE I USA LA MODALITA +, serve a garantire la sincronia tra R/W
 	size_t cont = 0;
 	while (cont != sizeElem * nelem) {
@@ -225,6 +236,7 @@ int fReadF(FILE *f, size_t sizeElem, int nelem, void *save) {
 		}
 		cont += fread(save + cont, 1, sizeElem * nelem - cont, f);
 	}
+	sigprocmask(SIG_SETMASK, &oltSet, &newSet);   //restora tutto
 	return 0;
 }
 

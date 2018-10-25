@@ -39,7 +39,7 @@ typedef struct firstFree_ {
 
 typedef struct entry_ {
 	char name[nameEntrySize];      //nomi da 27 caratteri
-	int point;          //se roomName='\0' indica la sucessiva entry libera, se roomName="xxx" indica in quel file l'attuale file dove si trova
+	int point;          //se roomPath='\0' indica la sucessiva entry libera, se roomPath="xxx" indica in quel file l'attuale file dove si trova
 } entry;
 
 typedef struct table_ {
@@ -102,6 +102,8 @@ table *makeTable(FILE *fdTable);
 
 void freeTable(table *table);
 
+void closeTable(table *table);
+
 #endif //FILETAB_DEMO_TABLEFILE_H
 
 
@@ -113,14 +115,14 @@ void freeTable(table *table);
  *
  *          ||||-- Entry parameter documentation --||||
  *
- * 1)   Il parametro "roomName" contiene il nome dell'utente/chat
+ * 1)   Il parametro "roomPath" contiene il nome dell'utente/chat
  * 2)   Il parametro "point" contiene l'indice della entry in cui ci si trova l'utente/chat nella tabella della chat/utente
- * 3)   Se "roomName" è nullo allora "point" indica nell'attuale tabella la prossima entry libera
- * 4)   Se "roomName" è nullo e  "point" a -1 allora si tratta di LAST-Entry
+ * 3)   Se "roomPath" è nullo allora "point" indica nell'attuale tabella la prossima entry libera
+ * 4)   Se "roomPath" è nullo e  "point" a -1 allora si tratta di LAST-Entry
  *
  *       ||||-- Firts-Free parameter documentation --||||
  *
- * 1)   Il parametro "roomName" contiene il nome dell'utente/chat a cui è riferita la tabella
+ * 1)   Il parametro "roomPath" contiene il nome dell'utente/chat a cui è riferita la tabella
  * 2)   Il parametro "counter" contiene il numero di caselle vuote nel file (utile a decidere quando compattare il file)
  * 3)   Il parametro "len" è il numero di caselle totali presenti nel file
  * 4)   Il parametro "nf_id" i contiene l'indice della entry in cui ci si trova la prima casella libera

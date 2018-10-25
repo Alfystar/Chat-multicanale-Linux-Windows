@@ -52,6 +52,7 @@ typedef struct infoChat_ {
     int fdTemp;         //file temporaneo, probabilemente non serve più
 } infoChat;
 
+
 typedef struct infoUser_ {
 	table *tab;         //struttura tab
 	char pathName[128];   //path name of dir user ./USER_PATH_DIR/
@@ -123,9 +124,10 @@ void infoChatPrint(infoChat *info, int fdOut);
 
 int idSearch(nameList *nl, int idSearch);
 
+void freeInfoChat(infoChat *p);
 
+void freeInfoUser(infoUser *p);
 
-//todo freeInfoUser
 
 #endif //CHAT_MULTILEVEL_FILESYSTEMUTYLITY_H
 

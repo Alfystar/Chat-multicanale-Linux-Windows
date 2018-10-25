@@ -4,6 +4,12 @@
 #ifndef CHAT_MULTILEVEL_GLOBALSETS_H
 #define CHAT_MULTILEVEL_GLOBALSETS_H
 
+
+/*GLOBAL INCLUDE*/
+#include <signal.h>
+
+/*GLOBAL DEFINE*/
+
 #define firmwareVersion "0.06"
 #define userDirName "Users"
 #define chatDirName "Chats_ROOM"
@@ -16,12 +22,14 @@
 
 
 /** Define di setup delle funx **/
-#define nAcceptTh 1
+#define nAcceptTh 2
 
 enum colorText {
     Titoli = 1, Comandi, ViewPan, StdoutPrint, ErrorPrint, DebugPrint
 };
 
+/** SERVER STORAGE PATH **/
+char *storagePathServer;
 
 /** SERVER CONNECT IP AND PORT**/
 int portProces; //port of process

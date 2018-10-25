@@ -9,18 +9,16 @@ include_directories(src include)
 
 #However, the file(GLOB...) allows for wildcard additions:
 
-#file(GLOB HEADER treeFunx/include/*)
+file(GLOB HEADER include/*)
+file(GLOB HEADER_TREE treeFunx/include/*)
 
-#file(GLOB SOURCE src/*)
-#file(GLOB SOURCE treeFunx/src/*)
+file(GLOB SOURCE src/*)
+file(GLOB SOURCE_TREE treeFunx/src/*)
 
-
-set(SOURCE src/fileSystemUtylity.c src/terminalShell.c src/mexData.c src/tableFile.c helpFunx.c src/thFunx.c src/socketConnect.c treeFunx/src/avl.c treeFunx/src/dlist.c treeFunx/src/log.c treeFunx/src/queue.c treeFunx/src/stack.c treeFunx/src/tree.c)
-
-set(HEADER include/fileSystemUtylity.h include/terminalShell.h include/mexData.h include/tableFile.h helpFunx.h include/thFunx.h include/socketConnect.h treeFunx/include/avl.h treeFunx/include/common.h treeFunx/include/dlist.h treeFunx/include/log.h treeFunx/include/queue.h treeFunx/include/stack.h treeFunx/include/tree.h)
+set(MAIN_DIR_INCLUDE globalSet.h helpFunx.h helpFunx.c)
 
 
-add_executable(Chat_MultiLevel main.c globalSet.h ${HEADER} ${SOURCE})
+add_executable(Chat_MultiLevel main.c ${MAIN_DIR_INCLUDE} ${HEADER} ${HEADER_TREE} ${SOURCE} ${SOURCE_TREE})
 
 target_link_libraries(${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT})
 include_directories(${CURSES_INCLUDE_DIR})

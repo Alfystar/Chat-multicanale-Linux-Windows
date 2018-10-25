@@ -24,8 +24,8 @@
  * Create a new Stack
  * Alocate a head node
  */
-stack_p get_stack(void) {
-	stack_p stack = calloc(1, sizeof(stack_t));
+d_stack_p get_stack(void) {
+	d_stack_p stack = calloc(1, sizeof(d_stack_t));
 
 	stack->head = calloc(1, sizeof(dlist_pp));
 	return stack;
@@ -35,7 +35,7 @@ stack_p get_stack(void) {
  * Push a value to Stack
  * Allocates a new dlist node and inserts value
  */
-bool push(stack_p stack, void *val) {
+bool push(d_stack_p stack, void *val) {
 	dlist_p nodeptr = calloc(1, sizeof(dlist_t));
 
 	nodeptr->data = val;
@@ -50,7 +50,7 @@ bool push(stack_p stack, void *val) {
  * Pop a value from Stack
  * Deallocates the dlist node holding the value
  */
-void *pop(stack_p stack) {
+void *pop(d_stack_p stack) {
 	void *data = get_head_dlist(stack->head); /* First out */
 
 	if (delete_head_dlist(stack->head) == -1)
@@ -62,7 +62,7 @@ void *pop(stack_p stack) {
 /*
  * Check if a stack has any elements
  */
-bool isStackEmpty(stack_p stack) {
+bool isStackEmpty(d_stack_p stack) {
 	if (get_head_dlist(stack->head))
 		return TRUE;
 
@@ -73,7 +73,7 @@ bool isStackEmpty(stack_p stack) {
  * Deallocate all dlist nodes
  * Destroy Stack
  */
-bool destroy_stack(stack_p stack) {
+bool destroy_stack(d_stack_p stack) {
 	if (destroy_dlist(stack->head) == -1)
 		return FALSE;
 

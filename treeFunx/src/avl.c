@@ -126,7 +126,7 @@ avl_p RightLeft(avl_p node) {
 /*
  * Rebalance subtree tmp based on balance factor & skew
  */
-bool rebalance(stack_p stack, avl_pp head, avl_p tmp, int data) {
+bool rebalance(d_stack_p stack, avl_pp head, avl_p tmp, int data) {
 	nodedata_p p = NULL;
 	int direction;
 	avl_p parent = NULL;
@@ -405,7 +405,7 @@ bool insert_avl_node(avl_pp head, int key, int data) {
 	nodedata_p n = NULL;
 	bool modified;
 	/* Stack to rebalance each subtree bottom-up after insertion */
-	stack_p stack = get_stack();
+	d_stack_p stack = get_stack();
 
 	if (!head) {
         dprintf(STDERR_FILENO, "Initialize AVL tree first\n");

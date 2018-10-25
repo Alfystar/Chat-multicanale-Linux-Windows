@@ -10,6 +10,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <fts.h>
+#include <errno.h>
 #include "globalSet.h"
 
 
@@ -22,6 +24,8 @@ void printAllEnv();
 void printDublePointeChar(char **);
 
 void freeDublePointerArr(void **, int);
+
+int recursive_delete(const char *dir);
 
 
 #endif //CHAT_MULTILEVEL_HELPFUNX_H

@@ -349,7 +349,7 @@ bool search_BFS(tree_pp root, int val, bool stop) {
 bool search_DFS(tree_pp root, int val, bool stop) {
 	int ret = FALSE;
 	tree_p node = NULL;
-	stack_p stack = NULL;
+	d_stack_p stack = NULL;
 
 	if (!root || !*root) {
         dprintf(STDERR_FILENO, "tree or root node is NULL.\n");

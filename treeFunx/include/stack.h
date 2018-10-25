@@ -25,19 +25,19 @@
 /* Stack ADT using a circular doubly linked list */
 typedef struct {
 	dlist_pp head;
-} stack_t, *stack_p;
+} d_stack_t, *d_stack_p;
 
 /* Create a new Stack */
-stack_p get_stack(void);
+d_stack_p get_stack(void);
 
 /* Push a value to Stack */
-bool push(stack_p stack, void *val);
+bool push(d_stack_p stack, void *val);
 
 /* Pop a value from Stack */
-void *pop(stack_p stack);
+void *pop(d_stack_p stack);
 
 /* Check if a stack is empty */
-bool isStackEmpty(stack_p stack);
+bool isStackEmpty(d_stack_p stack);
 
 /* Clean up Stack */
-bool destroy_stack(stack_p stack);
+bool destroy_stack(d_stack_p stack);

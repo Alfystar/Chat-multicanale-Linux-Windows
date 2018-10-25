@@ -9,7 +9,7 @@
 /** La funzione ha lo scopo di creare una tabella completamente nuova in memoria **/
 table *init_Tab(char *path, char *nameFirst) {
 	//path è l'indirizzo della cartella/NOME_FILE sulla quale creare la tabella
-	//roomName è il nome scritto in first-Free
+	//roomPath è il nome scritto in first-Free
 	//nameFirst = nome del scritto in first free
 	table *t;
 	FILE *f;
@@ -376,7 +376,11 @@ size_t lenTabF(FILE *tab) {
 }
 
 int fileWrite(FILE *f, size_t sizeElem, int nelem, void *dat) {
-	//todo signal free
+	//signal Free
+	sigset_t newSet, oltSet;
+	sigfillset(&newSet);
+	sigprocmask(SIG_SETMASK, &newSet, &oltSet);
+
 	fflush(f);   /// NECESSARIO SE I USA LA MODALITA +, serve a garantire la sincronia tra R/W
 	size_t cont = 0;
 	while (cont != sizeElem * nelem) {
@@ -388,6 +392,7 @@ int fileWrite(FILE *f, size_t sizeElem, int nelem, void *dat) {
 		}
 		cont += fwrite(dat + cont, 1, sizeElem * nelem - cont, f);
 	}
+	sigprocmask(SIG_SETMASK, &oltSet, &newSet);   //restora tutto
 	return 0;
 }
 
@@ -490,4 +495,9 @@ table *makeTable(FILE *tab) {
 void freeTable(table *t) {
 	free(t->data);
 	free(t);
+}
+
+void closeTable(table *t) {
+	fclose(t->stream);
+	freeTable(t);
 }

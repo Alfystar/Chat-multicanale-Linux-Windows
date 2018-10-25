@@ -18,9 +18,10 @@
 #include "mexData.h"
 #include "tableFile.h"
 #include "socketConnect.h"
+#include "terminalShell.h"
+
 #include "../treeFunx/include/avl.h"
 #include "../globalSet.h"
-#include "terminalShell.h"
 
 typedef struct thAcceptArg_ {
 	int id;
@@ -30,28 +31,30 @@ typedef struct thAcceptArg_ {
 typedef struct thUserArg_ {
     int id;             //idKey dell'user definito in fase di login
 	char userName[50];  // Nome dell'user (dopo :)
+	char idNameUs[50];
 	infoUser *info;     // contiene tabella e nome per esteso (path), assegnato in fase di login
 	thConnArg conUs;    //contiene Tab e path dir dell'user
 	int fdPipe[2];      //contiene i valori delle pipe per parlare alla room, Definita da thRoom-generico
-
+	pthread_t tidRx, tidTx;
 } thUserArg;
 
 typedef struct thRoomArg_ {
 	int id;
-	char roomName[50];  // Nome della room idKey:<Name>
+	char roomName[50];  // Nome dell'user (dopo :)
+	char idNameRm[50];
+	char roomPath[50];  // Path completo room  ("./%s/%s", chatDirName, chats->names[i]); e chats->names = %d:%s
 	infoChat *info;     // contiene tabella,Conversazione e nome per esteso (path), assegnato in fase di creazione
 	int fdPipe[2];      //contiene i valori delle pipe per parlare alla room, Definita da thRoom-generico
+	pthread_t tidRx, tidTx;
 } thRoomArg;
 
 
 enum insidePack {
-	in_join_p = 1000, in_entryIndex_p, in_mess_p
+	in_join_p = 1000, in_entryIndex_p, in_delRm_p, in_mess_p
 };
 
 
 ///GLOBAL VARIABLE
-extern int fdOut;  //pipe di uscita per lo stdOut
-
 
 /** [][][][][][][][] PROTOTIPI [][][][][][][][]  **/
 
@@ -61,7 +64,7 @@ void *acceptTh(thAcceptArg *);
 /** [][][] TH-USER GENERICO, prima di specializzarsi, HA IL COMPITO DI LOGIN **/
 void *userTh(thConnArg *);
 
-/** FUNZIONI PER IL TH-USER GENERICO, prima di specializzarsi **/
+/* FUNZIONI PER IL TH-USER GENERICO, prima di specializzarsi */
 int loginServerSide(mail *pack, thUserArg *data);
 
 int setUpThUser(int keyId, thUserArg *argUs);
@@ -71,20 +74,23 @@ int mkUserServerSide(mail *pack, thUserArg *data);
 void *sendTab(table *t, int *len);
 
 /** #### TH-USER SUL SERVER CON RUOLO DI RX **/
-void *thrServRX(thUserArg *);
+void *thUs_ServRX(thUserArg *);
 
-/** FUNZIONI DI SUPPORTO PER TH-USER SUL SERVER CON RUOLO DI RX **/
+/* FUNZIONI DI SUPPORTO PER TH-USER SUL SERVER CON RUOLO DI RX */
 
-int mkRoomSocket(mail *pack, char *nameChatRet, int len);
+int mkRoomSocket(mail *pack, thUserArg *data);
 
 void makeThRoom(int keyChat, char *roomPath, infoChat *info);
 
 int joinRoomSocket(mail *pack, thUserArg *data);
 
-/** #### TH-USER SUL SERVER CON RUOLO DI TX **/
-void *thrServTX(thUserArg *);
+int delRoomSocket(mail *pack, thUserArg *data);
 
-/** FUNZIONI DI SUPPORTO PER TH-USER SUL SERVER CON RUOLO DI TX **/
+
+/** #### TH-USER SUL SERVER CON RUOLO DI TX **/
+void *thUs_ServTX(thUserArg *);
+
+/* FUNZIONI DI SUPPORTO PER TH-USER SUL SERVER CON RUOLO DI TX */
 
 
 /** [][][] TH-ROOM GENERICO, prima di specializzarsi, HA IL COMPITO DI creare le strutture **/
@@ -93,8 +99,10 @@ void *roomTh(thRoomArg *);
 /** #### TH-ROOM CON RUOLO DI RX **/
 void *thRoomRX(thRoomArg *info);
 
-/** FUNZIONI DI SUPPORTO PER TH-ROOM CON RUOLO DI RX **/
+/* FUNZIONI DI SUPPORTO PER TH-ROOM CON RUOLO DI RX */
 int joinRoom_inside(mail *pack, thRoomArg *data);
+
+int delRoom_inside(mail *pack, thRoomArg *data);
 
 /** #### TH-ROOM CON RUOLO DI TX **/
 void *thRoomTX(thRoomArg *info);
@@ -109,6 +117,10 @@ int readPack_inside(int fdPipe, mail *pack);
 int writePack_inside(int fdPipe, mail *pack);
 
 int testConnection_inside(int fdPipe);
-//todo freeTh-s_arg
+
+void freeUserArg(thUserArg *p);
+
+void freeRoomArg(thRoomArg *p);
+
 
 #endif //CHAT_MULTILEVEL_THFUNX_H

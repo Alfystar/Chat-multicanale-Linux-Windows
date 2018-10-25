@@ -26,7 +26,7 @@
 #define fflush(stdin) while(getchar() != '\n')
 
 enum typePack {
-	/** SYSTEM **/    out_success_p = 0, out_failed_p, out_mess_p, out_test_p,
+	/** SYSTEM **/    success_p = 0, failed_p, out_mess_p, out_test_p,
 	/**  USER  **/    out_login_p, out_logout_p, out_delUs_p, out_mkUser_p, out_dataUs_p,
 	/**  ROOM  **/    out_mkRoom_p, out_joinRm_p, out_openRm_p, out_dataRm_p, out_leaveRm_, out_delRm_p, out_exitRm_p
 };
@@ -85,20 +85,6 @@ int initClient(connection *c);
 
 #endif //SOCKETDEMO_SOCKETCONNECT_H
 
-/* todo: creazione di due thread, uno che stara' in invio dati dal client, (threadFromClient)
- *       e l'altro che stara' in ricezione dati verso il client; (threadToClient)
- *       ognuno di essi processa i pacchetti che arrivano (o delega il lavoro a un terzo thread)
- *       il ToC parte dopo il FromC (che si occupa della fase di login inizialmente);
- *       vediamo se possiamo far spawnare un thread ad un altro thread, altrimenti usiamo un semaforo;
- */
-
-/* TIPI PACCHETTO
- * type = 0 : LOGIN, mex non esiste (dim = 0)
- * type = 1 :
- *
- *
- *
- */
 
 
 /// ### DOCUMENTAZIONE ### ///

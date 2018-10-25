@@ -136,13 +136,6 @@ infoChat *newRoom(char *nameRoom, int adminUs) {
 
 	strncpy(info->myPath, chatPath, 128);
 
-	char tempFile[128];
-	sprintf(tempFile, "%s%s", chatPath, "/temp");
-	info->fdTemp = lockDirFile(tempFile);
-	if (info->fdTemp == -2) {
-		//se ritorna null la creazione del thread è da annullare!!
-		return NULL;
-	}
 	///Creo tabella e conversazione
 	char tabNamePath[128];
 	sprintf(tabNamePath, "%s/%s", chatPath, chatTable);
@@ -172,15 +165,6 @@ infoChat *openRoom(char *pathDir) {
 		perror("infoChat malloc() take error: ");
 		return info;
 	}
-	//todo verificare creazione del file temporaneo
-	/*
-	char tempFile[128];
-	sprintf(tempFile, "%s%s", pathDir, "/temp");
-	info->fdTemp = lockDirFile(tempFile);
-	if (info->fdTemp == -1) {
-		return -1;
-	}
-	*/
 
 	///Creo tabella e conversazione
 	char tabNamePath[128];
@@ -621,4 +605,15 @@ int idSearch(nameList *nl, int idSearch) {
 		}
 	}
 	return want;
+}
+
+void freeInfoChat(infoChat *p) {
+	closeTable(p->tab);
+	freeConv(p->conv);
+	free(p);
+}
+
+void freeInfoUser(infoUser *p) {
+	closeTable(p->tab);
+	free(p);
 }

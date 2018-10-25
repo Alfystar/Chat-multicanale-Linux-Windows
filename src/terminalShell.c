@@ -91,7 +91,7 @@ void driverCmd(int argc, char *argv[], int *exit) {
 			return;
 		}
 
-		if (strcmp(argv[0], "chat") == 0) {
+		if (strcmp(argv[0], "room") == 0) {
 			sem_wait(&screewWrite);
 			chatShowW(showPannel, 1, 0);
 			sem_post(&screewWrite);
@@ -132,7 +132,7 @@ void driverCmd(int argc, char *argv[], int *exit) {
 
 	if (argc >= 2) //seleziona comando
 	{
-
+		/*
 		if (strcmp(argv[0], "mkUs") == 0) {
 			infoUser *info = newUser(argv[1]);
 			if (info == NULL) {
@@ -141,6 +141,7 @@ void driverCmd(int argc, char *argv[], int *exit) {
 			}
 			return;
 		}
+		*/
 		if (strcmp(argv[0], "usTab") == 0) {
 			nameList *user = userExist();
 			int want = idSearch(user, atoi(argv[1]));
@@ -239,9 +240,9 @@ void driverCmd(int argc, char *argv[], int *exit) {
 			return;
 		}
 	}
+	/*
 	if (argc >= 3) {
 		if (strcmp(argv[0], "mkRm") == 0) {
-			//todo l'admin us è da richiedere e da verificare se è valido. da spostare da argc=2 a -> argc=3
 			infoChat *info = newRoom(argv[1], atoi(argv[2]));
 			if (info == 0) {
 				dprintf(STDERR_FILENO, "creazione della chat impossibile");
@@ -255,6 +256,7 @@ void driverCmd(int argc, char *argv[], int *exit) {
 			return;
 		}
 	}
+	 */
 	sem_wait(&screewWrite);
 	menuHelpw(cmdW, 2, 0, argc, argv);
 	sem_post(&screewWrite);
@@ -289,7 +291,7 @@ void menuHelpw(WINDOW *w, int y_start, int x_start, int argc, char *argv[]) {
 			wprintw(w, "->p-avlU\t-> Printa l'avl degli User\n");
 
 			wprintw(w, "\t(1)arg\n");
-			wprintw(w, "->mkUs [Us Name]\t-> Crea un user nel file system\n");
+			//wprintw(w, "->mkUs [Us Name]\t-> Crea un user nel file system\n");
 			wprintw(w, "->usTab [Us id]\t\t-> Visualizza tabella user\n");
 
 			//wprintw(w, "\t(2)arg\n");
@@ -297,22 +299,21 @@ void menuHelpw(WINDOW *w, int y_start, int x_start, int argc, char *argv[]) {
 		}
 		if (strcmp(argv[1], "room") == 0) {
 			wprintw(w, "\t(0)arg\n");
-			wprintw(w, "->chat\t-> Chat Archiviate\n");
+			wprintw(w, "->room\t-> Chat Archiviate\n");
 			wprintw(w, "->p-avlC\t-> Printa l'avl delle chat\n");
 
 			wprintw(w, "\t(1)arg\n");
 			wprintw(w, "->roomTab [Rm id]\t-> Visualizza tabella Room\n");
 			wprintw(w, "->roomConv [Rm id]\t-> Visualizza conversazione Room\n");
-
+			/*
 			wprintw(w, "\t(2)arg\n");
 			wprintw(w, "->mkRm [Room Name] [id Admin]\t-> Crea una nuova Room\n");
+			 */
 			return;
 		}
 
 	}
 
-
-	//todo print infoChat of specific chat
 }
 
 
@@ -335,7 +336,8 @@ void windowSetUp() {
 
 
 	/** Main windows print **/
-	mvprintw(LINES - 1, 1, "Versione del server: %s  Port-Proces: %d", firmwareVersion, portProces);
+	mvprintw(LINES - 1, 1, "Versione del server: %s\tPort-Proces: %d\tServerStore :%s", firmwareVersion, portProces,
+	         storagePathServer);
 	refresh();
 
 	/** Finestra Titolo setUp **/

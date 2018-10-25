@@ -17,6 +17,8 @@
 #include <fcntl.h>
 #include <malloc.h>
 
+#include "../globalSet.h"
+
 extern int fdOut;  //pipe di uscita per lo stdOut
 
 
@@ -58,7 +60,7 @@ int addMex(conversation *conversation, mex *message);
 
 mex *makeMex(char *text, int usId);
 
-int endConv(conversation *c);
+int freeConv(conversation *c);
 
 
 ///Funzioni verso File

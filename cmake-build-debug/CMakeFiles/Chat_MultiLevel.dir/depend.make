@@ -31,8 +31,12 @@ CMakeFiles/Chat_MultiLevel.dir/src/fileSystemUtylity.c.o: ../treeFunx/include/av
 CMakeFiles/Chat_MultiLevel.dir/src/fileSystemUtylity.c.o: ../treeFunx/include/common.h
 CMakeFiles/Chat_MultiLevel.dir/src/fileSystemUtylity.c.o: ../treeFunx/include/log.h
 
+CMakeFiles/Chat_MultiLevel.dir/src/mexData.c.o: ../globalSet.h
 CMakeFiles/Chat_MultiLevel.dir/src/mexData.c.o: ../include/mexData.h
 CMakeFiles/Chat_MultiLevel.dir/src/mexData.c.o: ../src/mexData.c
+CMakeFiles/Chat_MultiLevel.dir/src/mexData.c.o: ../treeFunx/include/avl.h
+CMakeFiles/Chat_MultiLevel.dir/src/mexData.c.o: ../treeFunx/include/common.h
+CMakeFiles/Chat_MultiLevel.dir/src/mexData.c.o: ../treeFunx/include/log.h
 
 CMakeFiles/Chat_MultiLevel.dir/src/socketConnect.c.o: ../globalSet.h
 CMakeFiles/Chat_MultiLevel.dir/src/socketConnect.c.o: ../include/socketConnect.h

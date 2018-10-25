@@ -100,7 +100,7 @@ int main(int argc, char *argv[]) {
 		exit(EXIT_FAILURE);
 	}
 
-	signal(SIGSEGV, print_trace);
+	signal(SIGSEGV, print_trace);   //catturo sigSegv per potermi printare info varie
 
 	pipeInit();
 
@@ -109,26 +109,29 @@ int main(int argc, char *argv[]) {
 		perror("\n!! Il server non è stato in grado di essere inizializato\nEXIT_FAILURE :");
 		exit(EXIT_FAILURE);
 	}
-    printf("SERVER STORAGE AVVIATO\n");
+	storagePathServer = argv[1];
+	printf("\t#### SERVER STORAGE AVVIATO ####\n\n");
 
 	/** INIT GLOBAL AVL TREE**/
-/*
-	destroy_avl(usAvlTree_Pipe.avlRoot);
-	destroy_avl(rmAvlTree_Pipe.avlRoot);
- */
+	printf("[3]---> Fase 3 Inizializzare alberi & SEMAFORI AVL avl dove verranno posizionate le pipe dei thread Room e User\n");
 
 	usAvlTree_Pipe = init_avl_S();
 	rmAvlTree_Pipe = init_avl_S();
-	printf("SEMAFORI AVL INIZIALIZZATI\n");
+	if (!(usAvlTree_Pipe.avlRoot != NULL && rmAvlTree_Pipe.avlRoot != NULL)) {
+		printf("[3]---> Fase 3: FALLITA\n");
+		exit(-1);
+	}
+	printf("[3]---> success\n\n");
+
 
 
 	/** Spawn dei thread ROOM **/
 	// Necessario prima delle connessioni perche' le room sono intrinseche al server
-	// I thread user sono invece instanziati ad-hoc
-
+	// I th-User sono invece instanziati ad-hoc
+	printf("[4]---> Fase 4 Spawning Th-room salvati nello storage\n");
 	nameList *chats = chatRoomExist();
 	/** Visualizzazione chat già presenti all'avvio**/
-	printf("Current nameList created:\n");
+	printf("Current chatRoom created:\n");
 	nameListPrint(chats, STDOUT_FILENO);
 	char roomDir[128];
 	infoChat *info;
@@ -140,26 +143,24 @@ int main(int argc, char *argv[]) {
 		makeThRoom(atoi(chats->names[i]), roomDir, info);
 	}
 	nameListFree(chats);
-	printf("ROOM-th start-Up creati\n");
-
-	printf("connessione\n");
+	printf("[4]---> Fase 4 Spawning ROOM-th (GENERAL) success\n\n");
 
 	/** fase di avvio CONNESSIONE del server **/
+	printf("[5]---> Fase 5 Inizializzazione connessione e creazione Thread-accept\n");
 	portProces = atoi(argv[2]);   //save global port data
 	connection *serverCon = initSocket((u_int16_t) portProces, "INADDR_ANY");
 	if (serverCon == NULL) {
 		exit(-1);
 	}
 
-	printf("Socket inizializzato\n");
+	printf("\t1)Socket inizializzato\n");
 	if (initServer(serverCon, (int) strtol(argv[3], NULL, 10)) == -1) {
 		exit(-1);
 	}
-	printf("Server CONNESSIONE avviato\n");
-
+	printf("\t2)Server CONNECTION ONLINE\n");
+	printf("\t3)Spawning n°=%d accept-th\n", nAcceptTh);
 	/** Spawn dei thread accetta user **/
 	int errorRet;
-	// precedente implementazione, todo: farle convergere
 	acceptArray = malloc(nAcceptTh * sizeof(pthread_t));
 	thAcceptArg *acceptArg;
 	for (int i = 0; i < nAcceptTh; i++) {
@@ -174,6 +175,9 @@ int main(int argc, char *argv[]) {
 			exit(-1);
 		}
 	}
+	printf("[5]---> Fase 5 Success\n");
+	printf("\t#### SERVER CONNECTION ALL ONLINE ####\n\n");
+
 
 
 
@@ -185,6 +189,8 @@ int main(int argc, char *argv[]) {
 	usleep(500000);
 
 	terminalShell();
+
+	printf("\n\nServer Terminato da shell, senza presenza di errori\n\n");
 
 	return 0;
 }

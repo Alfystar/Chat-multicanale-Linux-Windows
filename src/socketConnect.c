@@ -73,7 +73,7 @@ int keepAlive(int *ds_sock) {
 	return 0;
 }
 
-int readPack(int ds_sock, mail *pack) //todo: implementare controllo sulle read
+int readPack(int ds_sock, mail *pack)
 {
 	//se mex è presente DEVE essere Free fuori
 	int iterContr = 0; // vediamo se la read fallisce
@@ -101,9 +101,6 @@ int readPack(int ds_sock, mail *pack) //todo: implementare controllo sulle read
 		} else {
 			iterContr = 0;
 		}
-		//todo read in caso di  broken pipe entra in while perpetuo qui
-		// SOLUZIONE STUPIDA: vedere se i byte letti dopo un certo numero di cicli (es: 10)
-		//                    sono sempre 0; in tal caso interrompiamo la read
 		bRead += ret;
 	} while (sizeof(metadata) - bRead != 0);
 

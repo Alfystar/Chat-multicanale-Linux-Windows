@@ -353,14 +353,14 @@ int mkRoomSocket(mail *pack, thUserArg *data) {
 	dprintf(fdDebug, "info->myPath = %s\n", info->myPath);
 	sscanf(info->myPath, "./%[^/]/%ld:%s", chatDir, &idKeyChat, nameRoom);
 
-	dprintf(fdDebug, "sscanf ha identificato:\n chatDir= %s\nidKeyChat= %d\nnameRoom =%s\n", chatDir, idKeyChat,
+	dprintf(fdDebug, "sscanf ha identificato:\n\tchatDir= %s\n\tidKeyChat= %d\n\tnameRoom =%s\n", chatDir, idKeyChat,
 	        nameRoom);
 	char nameChat[64];
 	sprintf(nameChat, "%ld:%s", idKeyChat, nameRoom);
 	//==============================================
 
-	int addIndex = addEntry(data->info->tab, nameChat,
-	                        0);     //segno che il primo elemento della tabella ROOM sono io, l'admin
+	//segno che il primo elemento della tabella ROOM sono io, l'admin
+	int addIndex = addEntry(data->info->tab, nameChat, 0);
 
 	addEntry(info->tab, data->idNameUs, addIndex);      //aggiunge alla tabella della ROOM l'admin com primo elemento
 
@@ -499,6 +499,7 @@ int joinRoomSocket(mail *pack, thUserArg *data) {
 
 
 	///la room mi ha inviato dove ha agiunto me stesso, ora la aggiungo alla mia tabella
+	printPack(&roomPack);
 	int addPos = addEntry(data->info->tab, roomPack.md.sender, atoi(roomPack.md.whoOrWhy));
 	if (addPos == -1) {
 		dprintf(STDERR_FILENO, "Add Entry for join take error\n");
@@ -648,7 +649,7 @@ void *roomTh(thRoomArg *info) {
 	char chatDir[40];
 	int id;
 	char name[40];
-	sscanf(info->roomPath, "%[^/]/%[^/]/%d/%s", inizio, chatDir, &id, name);
+	sscanf(info->roomPath, "%[^/]/%[^/]/%d:%s", inizio, chatDir, &id, name);
 	strncpy(info->roomName, name, 50);
 	sprintf(info->idNameRm, "%d:%s", id, name);
 
@@ -772,7 +773,7 @@ int joinRoom_inside(mail *pack, thRoomArg *data) {
 	char addPosBuf[16];
 	sprintf(addPosBuf, "%d", addPos);
 
-	fillPack(&respond, in_entryIndex_p, 0, 0, data->roomPath, addPosBuf);
+	fillPack(&respond, in_entryIndex_p, 0, 0, data->roomName, addPosBuf);
 	writePack_inside(pipeUser, &respond);
 
 

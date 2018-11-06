@@ -227,7 +227,7 @@ int mkUserServerSide(mail *pack, thUserArg *data) {
 
 	// dentro infoNewUs pathName è  => ./%s/%ld:%s
 	char userDir[64];   // non mi serve, ma devo tenere i dati di appoggio
-	sscanf(infoNewUs->pathName, "./%[^/]/%ld:%s", userDir, &data->id, data->userName);
+	sscanf(infoNewUs->pathName, "./%[^/]/%d:%s", userDir, &data->id, data->userName);
 
 	dprintf(fdDebug, "infoNewUs->pathName = %s\n", infoNewUs->pathName);
 	dprintf(fdDebug, "sscanf ha identificato:\n userDir= %s\ndata->id= %d\ndata->userName =%s\n", userDir, data->id,
@@ -361,12 +361,12 @@ int mkRoomSocket(mail *pack, thUserArg *data) {
 	char chatDir[64];
 	char nameRoom[64];
 	dprintf(fdDebug, "info->myPath = %s\n", info->myPath);
-	sscanf(info->myPath, "./%[^/]/%ld:%s", chatDir, &idKeyChat, nameRoom);
+	sscanf(info->myPath, "./%[^/]/%d:%s", chatDir, &idKeyChat, nameRoom);
 
 	dprintf(fdDebug, "sscanf ha identificato:\n\tchatDir= %s\n\tidKeyChat= %d\n\tnameRoom =%s\n", chatDir, idKeyChat,
 	        nameRoom);
 	char nameChat[64];
-	sprintf(nameChat, "%ld:%s", idKeyChat, nameRoom);
+	sprintf(nameChat, "%d:%s", idKeyChat, nameRoom);
 	//==============================================
 
 	//segno che il primo elemento della tabella ROOM sono io, l'admin

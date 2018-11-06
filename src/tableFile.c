@@ -430,10 +430,10 @@ void tabPrint(table *tab) {
 	size_t lenFile = lenTabF(tab->stream);
 
     dprintf(fdOut, "-------------------------------------------------------------\n");
-    dprintf(fdOut, "\tLa tabella ha le seguenti caratteristiche:\n\tsize=%d\n\tlenFile=%d\tlenFirst=%d\n",
+    dprintf(fdOut, "\tLa tabella ha le seguenti caratteristiche:\n\tsize=%ld\n\tlenFile=%ld\tlenFirst=%d\n",
 	        tabInfo.st_size,
 	       lenFile, tab->head.len);
-    dprintf(fdOut, "\tsizeof(entry)=%d\tsizeof(firstFree)=%d\n", sizeof(entry), sizeof(firstFree));
+    dprintf(fdOut, "\tsizeof(entry)=%ld\tsizeof(firstFree)=%ld\n", sizeof(entry), sizeof(firstFree));
     dprintf(fdOut, "\n\t[][]La tabella contenuta nel file contiene:[][]\n\n");
 	firstPrint(&tab->head);
     dprintf(fdOut, "##########\n\n");

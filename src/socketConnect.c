@@ -84,7 +84,7 @@ int readPack(int ds_sock, mail *pack)
 	do {
 		ret = read(ds_sock, &pack->md + bRead, sizeof(metadata) - bRead);
 		if (ret == -1) {
-			perror("Read error; cause:");
+			perror("Read_out md error; cause:");
 			return -1;
 		}
 		if (ret == 0) {
@@ -119,13 +119,13 @@ int readPack(int ds_sock, mail *pack)
 	do {
 		ret = read(ds_sock, pack->mex + bRead, dimMex - bRead);
 		if (ret == -1) {
-			perror("Read error; cause:");
+			perror("Read_out mex error; cause:");
 			return -1;
 		}
 		if (ret == 0) {
 			iterContr++;
 			if (iterContr > 4) {
-				dprintf(STDERR_FILENO, "Seems Read MEX can't go further; test connection... [%d]\n", iterContr);
+				dprintf(STDERR_FILENO, "Seems Read_out MEX can't go further; test connection... [%d]\n", iterContr);
 				if (testConnection(ds_sock) == -1) {
 					dprintf(STDERR_FILENO, "test Fail\n");
 					return -1;
@@ -152,7 +152,7 @@ int writePack(int ds_sock, mail *pack) //dentro il thArg deve essere puntato un 
 		ret = send(ds_sock, pack + bWrite, sizeof(metadata) - bWrite, MSG_NOSIGNAL);
 		if (ret == -1) {
 			if (errno == EPIPE) {
-				dprintf(STDERR_FILENO, "write pack pipe break 1\n");
+				dprintf(STDERR_FILENO, "write_out pack pipe break 1\n");
 				return -1;
 				//GESTIRE LA CHIUSURA DEL SOCKET (LA CONNESSIONE E' STATA INTERROTTA IMPROVVISAMENTE)
 			}
@@ -167,7 +167,7 @@ int writePack(int ds_sock, mail *pack) //dentro il thArg deve essere puntato un 
 		ret = send(ds_sock, pack->mex + bWrite, pack->md.dim - bWrite, MSG_NOSIGNAL);
 		if (ret == -1) {
 			if (errno == EPIPE) {
-				dprintf(STDERR_FILENO, "write pack pipe break 2\n");
+				dprintf(STDERR_FILENO, "write_out pack pipe break 2\n");
 				return -1;
 				//GESTIRE LA CHIUSURA DEL SOCKET (LA CONNESSIONE E' STATA INTERROTTA IMPROVVISAMENTE)
 			}
@@ -210,11 +210,17 @@ int fillPack(mail *pack, int type, int dim, void *mex, char *sender, char *whoOr
 	if (dim == 0)pack->mex = NULL;
 	else pack->mex = mex;
 
-	if (sender == NULL)strncpy(pack->md.sender, "", 28);
-	else strncpy(pack->md.sender, sender, 28);
+	if (sender == NULL) strncpy(pack->md.sender, "", 28);
+	else {
+		strncpy(pack->md.sender, sender, 27);
+		pack->md.sender[27] = '\0'; // sono sicuro che possa venir letto come una stringa
+	}
 
-	if (whoOrWhy == NULL)strncpy(pack->md.whoOrWhy, "", 24);
-	else strncpy(pack->md.whoOrWhy, whoOrWhy, 24);
+	if (whoOrWhy == NULL) strncpy(pack->md.whoOrWhy, "", 24);
+	else {
+		strncpy(pack->md.whoOrWhy, whoOrWhy, 23);
+		pack->md.whoOrWhy[23] = '\0'; // sono sicuro che possa venir letto come una stringa
+	}
 
 	return 0;
 }

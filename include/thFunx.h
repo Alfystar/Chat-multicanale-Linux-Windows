@@ -50,7 +50,7 @@ typedef struct thRoomArg_ {
 
 
 enum insidePack {
-	in_join_p = 1000, in_entryIndex_p, in_delRm_p, in_mess_p
+	in_join_p = 1000, in_entryIndex_p, in_delRm_p, in_leave_p, in_mess_p
 };
 
 
@@ -86,6 +86,7 @@ int joinRoomSocket(mail *pack, thUserArg *data);
 
 int delRoomSocket(mail *pack, thUserArg *data);
 
+int leaveRoomSocket(mail *pack, thUserArg *data);
 
 /** #### TH-USER SUL SERVER CON RUOLO DI TX **/
 void *thUs_ServTX(thUserArg *);
@@ -103,6 +104,8 @@ void *thRoomRX(thRoomArg *info);
 int joinRoom_inside(mail *pack, thRoomArg *data);
 
 int delRoom_inside(mail *pack, thRoomArg *data);
+
+int leaveRoom_inside(mail *pack, thRoomArg *data);
 
 /** #### TH-ROOM CON RUOLO DI TX **/
 void *thRoomTX(thRoomArg *info);

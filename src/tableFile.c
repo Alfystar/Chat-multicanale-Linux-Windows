@@ -146,9 +146,18 @@ table *compressTable(table *t) {
 	return t;
 }
 
-int searchOneOccurence(table *t, char *search) {
+int searchFirstOccurence(table *t, char *search) {
 	for (int i = 0; i < t->head.len; i++) {
 		if (strcmp(t->data[i].name, search) == 0) {
+			return i;
+		}
+	}
+	return -1;
+}
+
+int searchFirstOccurenceKey(table *t, int key) {
+	for (int i = 0; i < t->head.len; i++) {
+		if (atoi(t->data[i].name) == key) {
 			return i;
 		}
 	}

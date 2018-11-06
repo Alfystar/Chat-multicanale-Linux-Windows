@@ -10,7 +10,7 @@
 
 /*GLOBAL DEFINE*/
 
-#define firmwareVersion "0.06"
+#define firmwareVersion "0.07"
 #define userDirName "Users"
 #define chatDirName "Chats_ROOM"
 #define serverConfFile "serverStat.conf"
@@ -43,8 +43,8 @@ int portProces; //port of process
  * si deve usare la pipe Stdout la quale ha dietro un thread che si occupa di visualizzare la cosa
  */
 
-#define readPipe 0
-#define writePipe 1
+#define readEndPipe 0
+#define writeEndPipe 1
 
 int FdStdOutPipe[2];  // dal manuale: FdStdOutPipe[0] refers to the read end of the pipe. FdStdOutPipe[1] refers to the write end of the pipe.
 int FdStdErrPipe[2];

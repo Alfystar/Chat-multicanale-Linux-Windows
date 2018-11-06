@@ -105,7 +105,7 @@ int joinRoom_inside(mail *pack, thRoomArg *data);
 
 int delRoom_inside(mail *pack, thRoomArg *data);
 
-int leaveRoom_inside(mail *pack, thRoomArg *data);
+int leaveRoom_inside(mail *pack, thRoomArg *data, int *exit);
 
 /** #### TH-ROOM CON RUOLO DI TX **/
 void *thRoomTX(thRoomArg *info);

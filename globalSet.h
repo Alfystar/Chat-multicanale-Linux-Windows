@@ -10,7 +10,7 @@
 
 /*GLOBAL DEFINE*/
 
-#define firmwareVersion "0.07"
+#define firmwareVersion "0.10"
 #define userDirName "Users"
 #define chatDirName "Chats_ROOM"
 #define serverConfFile "serverStat.conf"

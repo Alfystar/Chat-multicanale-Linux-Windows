@@ -38,8 +38,10 @@ WINDOW *monitor; //schermo autonomo che si occupa di visualizzare i printf gener
 
 sem_t screewWrite;
 
+bool debugView; //start true in thPrintDebug
+
 /** Extern Global **/
-extern int fdOut;  //pipe di uscita per lo stdOut
+//extern int fdOut;  //pipe di uscita per lo stdOut
 
 
 /** Funzioni generali e mainTh **/

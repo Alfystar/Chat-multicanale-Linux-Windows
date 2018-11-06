@@ -90,6 +90,14 @@ void driverCmd(int argc, char *argv[], int *exit) {
 			*exit = 0;
 			return;
 		}
+		if (strcmp(argv[0], "d") == 0) {
+			debugView=true;
+			return;
+		}
+		if (strcmp(argv[0], "!d") == 0) {
+			debugView=false;
+			return;
+		}
 
 		if (strcmp(argv[0], "room") == 0) {
 			sem_wait(&screewWrite);
@@ -257,6 +265,7 @@ void driverCmd(int argc, char *argv[], int *exit) {
 		}
 	}
 	 */
+	dprintf(STDERR_FILENO,"Coomand not Reconize\n");
 	sem_wait(&screewWrite);
 	menuHelpw(cmdW, 2, 0, argc, argv);
 	sem_post(&screewWrite);
@@ -278,6 +287,8 @@ void menuHelpw(WINDOW *w, int y_start, int x_start, int argc, char *argv[]) {
 			wprintw(w, "\t(0)arg\n");
 			wprintw(w, "->h\t-> Visualizza lista classi di help\n");
 			wprintw(w, "->q\t-> termina server\n");
+			wprintw(w, "->d\t-> Attiva visualizzazione DebugMonitor\n");
+			wprintw(w, "->!d\t-> Disattiva visualizzazione DebugMonitor\n");
 			wprintw(w, "->sstat\t-> Mostra servStat sul monitor\n");
 			wprintw(w, "->reset\t-> restart Interface\n");
 
@@ -579,6 +590,7 @@ void shellThStdErr(thShellArg *info) {
 void shellThDebug(thShellArg *info) {
     sleep(1);       //piccolo ritardo per permettere la sincronizzazione della main windows e dei thread
     sem_wait(&screewWrite);
+	debugView=true;
     wattron(monitor, COLOR_PAIR(DebugPrint));
     wprintw(monitor, "Monitor debug attivo\n");
     wrefresh(monitor);
@@ -591,11 +603,11 @@ void shellThDebug(thShellArg *info) {
         sem_wait(&screewWrite);
         if (byteRead == -1) {
             wattron(monitor, COLOR_PAIR(ErrorPrint));
-            mvwprintw(monitor, 2, 1, "byteRead error %s\n", strerror(byteRead));
+	        mvwprintw(monitor, 2, 1, "byteRead error %s\n", strerror(byteRead));
         } else {
             fdBuf[byteRead] = '\0';
             wattron(monitor, COLOR_PAIR(DebugPrint));
-            wprintw(monitor, "%s", fdBuf);
+	        if(debugView) wprintw(monitor, "%s", fdBuf);
         }
         wclrtobot(monitor);
         wrefresh(monitor);

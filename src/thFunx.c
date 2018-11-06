@@ -456,7 +456,7 @@ int joinRoomSocket(mail *pack, thUserArg *data) {
 	}
 
 	//check room just join
-	if (searchFirstOccurenceKey(data->info->tab, idChatJoin) == -1) {
+	if (searchFirstOccurenceKey(data->info->tab, idChatJoin) != -1) {
 		//sono già joinato nella room
 		dprintf(STDERR_FILENO, "Just Join inRoom %d\n", idChatJoin);
 		fillPack(&respond, failed_p, 0, 0, "Server", "Room id just Join");
@@ -796,7 +796,7 @@ void *thRoomRX(thRoomArg *info) {
 				}
 				break;
 			case in_leave_p:
-				if (leaveRoom_inside(&packRecive, info)) {
+				if (leaveRoom_inside(&packRecive, info, &exit)) {
 					dprintf(STDERR_FILENO, "Impossible leave user %s of this Th-room\n", packRecive.md.sender);
 				}
 				break;
@@ -970,7 +970,7 @@ int delRoom_inside(mail *pack, thRoomArg *data) {
 }
 
 
-int leaveRoom_inside(mail *pack, thRoomArg *data) {
+int leaveRoom_inside(mail *pack, thRoomArg *data, int *exit) {
 	/*
 	 * type= in_leave_p
 	 * sender=  idNameUs(string)
@@ -981,8 +981,12 @@ int leaveRoom_inside(mail *pack, thRoomArg *data) {
 	int indexTabRoom, pipeUs;
 	sscanf(pack->md.whoOrWhy, "%d:%d", &indexTabRoom, &pipeUs);
 	dprintf(fdDebug, "leaveRoom_inside check id user\n");
-	if (atoi(pack->md.sender) == atoi(data->info->tab->data[indexTabRoom].name)) {
-		//l'eliminazione avviene dall'utente salvato in quella linea
+
+	//check utente da leavare è quello che lo sta chiedendo
+	if (atoi(pack->md.sender) == atoi(data->info->tab->data[indexTabRoom].name))
+	{
+		///l'eliminazione avviene dall'utente salvato in quella linea
+
 		if (delEntry(data->info->tab, indexTabRoom)) {
 			dprintf(STDERR_FILENO, "(rm-TH) Impossible remove entry\n");
 			fillPack(&respond, failed_p, 0, 0, data->idNameRm, "Impossible remove");
@@ -992,7 +996,8 @@ int leaveRoom_inside(mail *pack, thRoomArg *data) {
 		dprintf(fdDebug, "(rm-TH) leave user Do\n");
 		fillPack(&respond, success_p, 0, 0, data->idNameRm, "Entry remove");
 		writePack_inside(pipeUs, &respond);
-		return 0;
+		//todo quando ci sarà la lista dei connessi, cancellare uno ad uno i nodi freeando memoria
+
 	} else {
 		//utente errato
 		dprintf(STDERR_FILENO, "(rm-TH) user not the same (id):\n%s != %s\n", pack->md.sender,
@@ -1001,6 +1006,34 @@ int leaveRoom_inside(mail *pack, thRoomArg *data) {
 		writePack_inside(pipeUs, &respond);
 		return -1;
 	}
+
+	//check se l'uscito era l'amministratore, devo rinominare  un nuovo l'amministratore
+	if(strcmp(data->info->tab->head.name,pack->md.sender)==0)
+	{
+		firstFree *fr=&data->info->tab->head;
+		entry *en;
+		//sono l'amministratore, devo rinominare un nuovo amministratore:
+		for (int i = 0; i < fr->len; ++i)
+		{
+			en=&data->info->tab->data[i];
+			if(!isEmptyEntry(en) && !isLastEntry(en)) //il primo non vuoto nuovo e non lastFree è il nuovo admin
+			{
+				strncpy(fr->name,en->name,nameFirstFreeSize);
+				dprintf(STDERR_FILENO,"Admin in room '%s' is now Change to %s\n",data->idNameRm,fr->name);
+				return 0;
+				break;
+			}
+		}
+		///se arrivo qui significa che la tabella non ha più utenti, e va quindi eliminata
+		dprintf(STDERR_FILENO,"New Admin not Found for room %s\nROOM DELETING",data->idNameRm);
+		delete_avl_node_S(rmAvlTree_Pipe, data->id); //mi tolgo dalle room ragiungibili
+		sleep(1);   //aspetto per dare tempo di parlare a chi ancora avesse il mio recapito
+		pthread_cancel(data->tidTx);    //per ora state e type di defoult, meditare se modificare il type
+		recursive_delete(data->roomPath);
+		*exit = false;
+		return 0;
+	}
+	return 0;
 }
 
 

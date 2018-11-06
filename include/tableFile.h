@@ -63,7 +63,7 @@ table *compressTable(table *table);
 
 int searchFirstOccurence(table *tabel, char *search);
 
-int searchFirstOccurenceKey(table *t, int key);
+int searchFirstOccurenceKey(table *t, int ID);
 
 
 int searchEntryBy(table *tabel, char *search, int startIndex);

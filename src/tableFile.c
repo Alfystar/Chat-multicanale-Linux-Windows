@@ -155,9 +155,9 @@ int searchFirstOccurence(table *t, char *search) {
 	return -1;
 }
 
-int searchFirstOccurenceKey(table *t, int key) {
+int searchFirstOccurenceKey(table *t, int ID) {
 	for (int i = 0; i < t->head.len; i++) {
-		if (atoi(t->data[i].name) == key) {
+		if (atoi(t->data[i].name) == ID) {
 			return i;
 		}
 	}

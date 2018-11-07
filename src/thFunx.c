@@ -122,6 +122,7 @@ int loginServerSide(mail *pack, thUserArg *data) {
 	firstFree *head = &data->info->tab->head;
 	entry *cell = data->info->tab->data;
 
+	//todo STA PARTE NON FUNZIONA DA CORREGGERE!!!!!!
 	//for per eliminare room non più esistenti
 	for (int i = 0; i < head->len; i++) {
 		if ((isEmptyEntry(&cell[i]) || isLastEntry(&cell[i])) == true) {
@@ -131,10 +132,10 @@ int loginServerSide(mail *pack, thUserArg *data) {
 			//name:= keyRoom:NAME  se key non è trovata nell'avl allora la room non esiste più
 			dprintf(fdDebug, "Room %s not found in Avl-Room. Deleting from userTab\n", cell[i].name);
 			if (delEntry(data->info->tab, i)) {
-				dprintf(fdDebug, "Deleting from userTab FAIL\n");
+				dprintf(STDERR_FILENO, "Deleting from userTab FAIL\n");
 			}
 		} else {
-			dprintf(fdDebug, "room %s trovata\n", cell[i].name);
+			dprintf(fdOut, "room %s trovata\n", cell[i].name);
 		}
 
 	}
@@ -566,8 +567,9 @@ int delRoomSocket(mail *pack, thUserArg *data) {
 		writePack(data->conUs.con.ds_sock, &respond);
 		return -1;
 	} else if (pipeRm == -2) {
+		//se arrivo qua allora SICURAMENTE è già scomparso dalla mia tabella, comunico al client di eliminarlo anche dalla sua
 		dprintf(STDERR_FILENO, "Room id not found\nDel Abortita");
-		fillPack(&respond, failed_p, 0, 0, "Server", "Room id not found");
+		fillPack(&respond, out_delRm_p, 0, 0, "Server", "Room id delete");
 		writePack(data->conUs.con.ds_sock, &respond);
 		return -1;
 	}
@@ -622,9 +624,18 @@ int leaveRoomSocket(mail *pack, thUserArg *data) {
 	 * who= idKeyRoom:IndexOfMyTable(string)
 	 * mex= <Null>
 	 */
+	mail respondUser;
 	int idRoom, indexTabUs;
 	sscanf(pack->md.whoOrWhy, "%d:%d", &idRoom, &indexTabUs);
 	int pipeRm = search_BFS_avl_S(rmAvlTree_Pipe, idRoom);
+
+	if (pipeRm == -2) {
+		//se arrivo qua allora SICURAMENTE è già scomparso dalla mia tabella (altri metodi), comunico al client di eliminarlo anche dalla sua
+		dprintf(STDERR_FILENO, "Room id not found\njoin Abortita");
+		fillPack(&respondUser, out_delRm_p, 0, 0, "Server", "Room id delete");
+		writePack(data->conUs.con.ds_sock, &respondUser);
+		return -1;
+	}
 
 	///Invio al thRoom i dati necessari
 	/*
@@ -641,9 +652,9 @@ int leaveRoomSocket(mail *pack, thUserArg *data) {
 	writePack_inside(pipeRm, &roomPack);
 
 	///aspetto risposta dalla room
+
 	READ_ROOM_LEAVE:
 	readPack_inside(data->fdPipe[readEndPipe], &roomPack);
-	mail respondUser;
 	switch (roomPack.md.type) {
 		case success_p:
 			delEntry(data->info->tab, indexTabUs);
@@ -1018,8 +1029,12 @@ int leaveRoom_inside(mail *pack, thRoomArg *data, int *exit) {
 			en=&data->info->tab->data[i];
 			if(!isEmptyEntry(en) && !isLastEntry(en)) //il primo non vuoto nuovo e non lastFree è il nuovo admin
 			{
-				strncpy(fr->name,en->name,nameFirstFreeSize);
-				dprintf(STDERR_FILENO,"Admin in room '%s' is now Change to %s\n",data->idNameRm,fr->name);
+				if (renameFirstEntry(data->info->tab, en->name)) {
+					dprintf(STDERR_FILENO, "Admin in room '%s' can't be Change to %s\n", data->idNameRm, fr->name);
+					perror("cause of fail is:");
+					return -1;
+				}
+				dprintf(fdOut, "Admin in room '%s' is now Change to %s\n", data->idNameRm, fr->name);
 				return 0;
 				break;
 			}

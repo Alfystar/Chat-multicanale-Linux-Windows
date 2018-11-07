@@ -86,6 +86,26 @@ int addEntry(table *t, char *name, int data) {
 	return addPosition;
 }
 
+int renameFirstEntry(table *t, char *name) {
+	//preparo quello da sovrascrivere su fileSystem
+	firstFree newFr;
+	memcpy(&newFr, &t->head, sizeof(firstFree));
+	strncpy(newFr.name, name, nameFirstFreeSize);
+
+	flockfile(t->stream);
+	fseek(t->stream, 0, SEEK_SET);
+	if (fileWrite(t->stream, sizeof(firstFree), 1, &newFr)) {
+		perror("Override FirstFree take error:");
+		return -1;
+	}
+	funlockfile(t->stream);
+
+	//se arrivo qua allora il file è stato correttamente modificato
+	//rinomino anche quello su ram
+	strncpy(t->head.name, name, nameFirstFreeSize);
+	return 0;
+}
+
 int delEntry(table *t, int index) {
 	if (delEntryTabF(t->stream, index)) {
         //Eliminazione non avvenuta conInfo successo

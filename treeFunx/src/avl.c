@@ -635,7 +635,7 @@ int search_BFS_avl(avl_pp root, int key) {
 
 	if (!root || !*root) {
         dprintf(STDERR_FILENO, "avl tree or root node is NULL!\n");
-		return -1;
+		return -2;
 	}
 
 	/* Check for a match in root node */

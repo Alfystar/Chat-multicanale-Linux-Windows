@@ -39,7 +39,7 @@ pthread_t *acceptArray;
 void helpProject(void) {
     printf("I parametri inseribili sono:\n");
     printf("\tServer command:\n");
-    printf("\t[storage] [port] [coda]\nCreo il server nella cartella, porta, e per {coda} persone specificate\n");
+	printf("\t[storage] [coda] [port]\nCreo il server nella cartella, porta, e per {coda} persone specificate\n");
 
 }
 
@@ -147,14 +147,14 @@ int main(int argc, char *argv[]) {
 
 	/** fase di avvio CONNESSIONE del server **/
 	printf("[5]---> Fase 5 Inizializzazione connessione e creazione Thread-accept\n");
-	portProces = atoi(argv[2]);   //save global port data
+	portProces = atoi(argv[3]);   //save global port data
 	connection *serverCon = initSocket((u_int16_t) portProces, "INADDR_ANY");
 	if (serverCon == NULL) {
 		exit(-1);
 	}
 
 	printf("\t1)Socket inizializzato\n");
-	if (initServer(serverCon, (int) strtol(argv[3], NULL, 10)) == -1) {
+	if (initServer(serverCon, (int) strtol(argv[2], NULL, 10)) == -1) {
 		exit(-1);
 	}
 	printf("\t2)Server CONNECTION ONLINE\n");

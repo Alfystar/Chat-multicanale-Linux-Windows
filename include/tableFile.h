@@ -57,6 +57,9 @@ table *open_Tab(char *path_file);
 
 int addEntry(table *table, char *name, int data);
 
+int renameFirstEntry(table *t, char *name);
+
+
 int delEntry(table *table, int index);
 
 table *compressTable(table *table);

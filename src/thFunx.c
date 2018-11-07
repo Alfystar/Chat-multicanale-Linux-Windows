@@ -122,7 +122,6 @@ int loginServerSide(mail *pack, thUserArg *data) {
 	firstFree *head = &data->info->tab->head;
 	entry *cell = data->info->tab->data;
 
-	//todo STA PARTE NON FUNZIONA DA CORREGGERE!!!!!!
 	//for per eliminare room non più esistenti
 	for (int i = 0; i < head->len; i++) {
 		if ((isEmptyEntry(&cell[i]) || isLastEntry(&cell[i])) == true) {
@@ -269,21 +268,15 @@ void *thUs_ServRX(thUserArg *argTh) {
 	mail packRecive;
 	mail packSend;
 	bool exit = true;
-	char buffRet[128];
-	int addIndex;
+	int retTh = 0;
 	while (exit) {
 		dprintf(fdOut, "thrServRx %d in attesa di messaggio da %d sock\n", argTh->id, argTh->conUs.con.ds_sock);
 
 		if (readPack(argTh->conUs.con.ds_sock, &packRecive) == -1) {
 			dprintf(STDERR_FILENO, "Read error, broken pipe\n");
 			dprintf(STDERR_FILENO, "thrServRx and Tx %d in chiusura\n", argTh->id);
-			delete_avl_node_S(usAvlTree_Pipe, argTh->id);
-			sleep(1);
-			pthread_cancel(argTh->tidTx);
-			close(argTh->fdPipe[0]);
-			close(argTh->fdPipe[1]);
-			freeUserArg(argTh);
-			pthread_exit(-1);
+			retTh = -1;
+			break;
 		}
 		/*
 		dprintf(fdDebug, "thrServRx %d ricevuto packetto\n", argTh->id);
@@ -321,7 +314,6 @@ void *thUs_ServRX(thUserArg *argTh) {
 				break;
 			case out_logout_p:
 				exit = false;
-				continue;
 				break;
 
 			default:
@@ -332,11 +324,17 @@ void *thUs_ServRX(thUserArg *argTh) {
 
 		if (!packRecive.mex) free(packRecive.mex);
 	}
-	close(argTh->conUs.con.ds_sock);
+
+	delete_avl_node_S(usAvlTree_Pipe, argTh->id);   //mi levo dall'avl e inizio la pulizia
+	sleep(1);
+	pthread_cancel(argTh->tidTx);
+	close(argTh->fdPipe[0]);
+	close(argTh->fdPipe[1]);
+	freeUserArg(argTh);
 	if (!packRecive.mex) free(packRecive.mex);
 	if (!packSend.mex) free(packSend.mex);
 	freeUserArg(argTh);
-	pthread_exit(0);
+	pthread_exit(retTh);
 }
 
 /** FUNZIONI DI SUPPORTO PER TH-USER SUL SERVER CON RUOLO DI RX **/
@@ -778,15 +776,15 @@ void *thRoomRX(thRoomArg *info) {
 	mail packRecive;
 	mail packSend;
 	bool exit = true;
+	int retTh = 0;
 	while (exit) {
 		dprintf(fdOut, "th-RoomRx %d in attesa di messaggio da [%d] pipe\n", info->id, info->fdPipe[readEndPipe]);
 		dprintf(fdDebug, "(TH-rm-rx) reed pack\n");
 		if (readPack_inside(info->fdPipe[readEndPipe], &packRecive) == -1) {
 			dprintf(STDERR_FILENO, "Read error, broken pipe\n");
 			dprintf(STDERR_FILENO, "th-RoomRx %d in chiusura\n", info->id);
-			sleep(1);
-			freeRoomArg(info);
-			pthread_exit(-1);
+			retTh = -1;
+			break;
 		}
 
 
@@ -799,7 +797,7 @@ void *thRoomRX(thRoomArg *info) {
 			case in_delRm_p:
 				if (delRoom_inside(&packRecive, info) == 0) {
 					//devo chiudere tutti i th-collegari a questo
-					pthread_cancel(info->tidTx);    //per ora state e type di defoult, meditare se modificare il type
+					pthread_cancel(info->tidTx);    //per ora state e type di default, meditare se modificare il type
 					recursive_delete(info->roomPath);
 					exit = false;
 				} else {
@@ -823,15 +821,15 @@ void *thRoomRX(thRoomArg *info) {
 
 		if (!packRecive.mex) free(packRecive.mex);
 	}
-	delete_avl_node_S(rmAvlTree_Pipe, info->id);
-
+	delete_avl_node_S(usAvlTree_Pipe, info->id);   //mi levo dall'avl e inizio la pulizia
+	sleep(1);
+	pthread_cancel(info->tidTx);
 	close(info->fdPipe[0]);
 	close(info->fdPipe[1]);
 	if (!packRecive.mex) free(packRecive.mex);
 	if (!packSend.mex) free(packSend.mex);
 	freeRoomArg(info);
-	pthread_exit(0);
-
+	pthread_exit(retTh);
 }
 
 /** FUNZIONI DI SUPPORTO PER TH-ROOM CON RUOLO DI RX **/
@@ -979,7 +977,6 @@ int delRoom_inside(mail *pack, thRoomArg *data) {
 	return 0;
 
 }
-
 
 int leaveRoom_inside(mail *pack, thRoomArg *data, int *exit) {
 	/*

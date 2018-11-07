@@ -10,7 +10,7 @@
 void *acceptTh(thAcceptArg *info) {
 
 	thUserArg *arg;
-	dprintf(fdOut, "acceptTh Creato\n");
+	dprintf(fdOut, "acceptTh %d Creato\n", info->id);
 
 	while (1) {
 		arg = malloc(sizeof(thUserArg));
@@ -1115,7 +1115,7 @@ int writePack_inside(int fdPipe, mail *pack) //dentro il thArg deve essere punta
 	mail *test=malloc(sizeof(mail));
 	fillPack(test,in_join_p,0,0,"test","test");
 	*/
-	//signal(SIGPIPE,SIG_IGN);
+	signal(SIGPIPE, SIG_IGN);
 	do {
 		dprintf(fdDebug, "writePack_inside Funx [%d] e scrivo sulla pipe %d\n", iterazione, fdPipe);
 		iterazione++;
@@ -1135,7 +1135,7 @@ int writePack_inside(int fdPipe, mail *pack) //dentro il thArg deve essere punta
 		bWrite += ret;
 
 	} while (sizeof(mail) - bWrite != 0);
-	//signal(SIGPIPE,SIG_DFL);
+	signal(SIGPIPE, SIG_DFL);
 	dprintf(fdDebug, "writePack_inside Funx send sulla pipe %d\n", iterazione, fdPipe);
 	return 0;
 }

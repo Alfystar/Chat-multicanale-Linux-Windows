@@ -23,13 +23,22 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-#include <stdlib.h>
 #include "log.h"
+
+
+#include <stdlib.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <stdbool.h>
-#include "../../globalSet.h"
 
+#include <errno.h>
+#include <sys/types.h>
+#include <sys/ipc.h>
+#include <sys/sem.h>
+
+//#include "../../globalSet.h"
+extern int fdDebug;
+extern int fdOut;
 
 #define LEFT  0
 #define RIGHT 1
@@ -37,5 +46,18 @@
 #define TRUE true
 #define FALSE false
 
+enum semName {
+	wantWrite = 0, readWorking = 1, writeWorking = 2
+};
+
+void semInfo(int semId);
+
+int lockWriteSem(int semId);
+
+int unlockWriteSem(int semId);
+
+int lockReadSem(int semId);
+
+int unlockReadSem(int semId);
 
 #endif

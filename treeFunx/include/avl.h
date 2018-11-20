@@ -19,12 +19,12 @@
  * along with dslib.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "common.h"
-#include <sys/types.h>
-#include <sys/ipc.h>
-#include <sys/sem.h>
-
 #pragma once
+
+#include "common.h"
+#include "stack.h"
+#include "queue.h"
+
 
 typedef struct avl {
 	int keyNode;
@@ -34,9 +34,6 @@ typedef struct avl {
 	int height;
 } avl_t, *avl_p, **avl_pp;
 
-enum semName {
-	wantWrite = 0, readWorking = 1, writeWorking = 2
-};
 
 typedef struct avlThSafe {
 	avl_pp avlRoot;
@@ -75,14 +72,3 @@ int print_avl(avl_p root, avl_p parent);
 int search_BFS_avl(avl_pp root, int key);
 
 int search_BFS_avl_S(avl_pp_S root, int key);
-
-void semInfo(int semId);
-
-int lockWriteSem(int semId);
-
-int unlockWriteSem(int semId);
-
-int lockReadSem(int semId);
-
-int unlockReadSem(int semId);
-

@@ -57,6 +57,7 @@ int fdDebug;
 ///i nodi a livello informativo possiedono:
 /// key :=keyId
 /// data := Fd of Pipe to write at the thread same-things
+
 #include "treeFunx/include/avl.h"
 
 avl_pp_S usAvlTree_Pipe;

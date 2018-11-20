@@ -18,11 +18,12 @@
  * along with dslib.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "../include/avl.h"
+/*
 #include "../include/common.h"
-#include <errno.h>
 #include "../include/stack.h"
 #include "../include/queue.h"
-#include "../include/avl.h"
+ */
 
 /*
  * Struct to hold an AVL node and traversal
@@ -195,7 +196,7 @@ int delete_avl_nodes(avl_p root) {
 	int count = 0;
 
 	if (!root) {
-        dprintf(STDERR_FILENO, "root invalid.\n");
+		dprintf(STDERR_FILENO, "[avl]root invalid.\n");
 		return 0;
 	}
 
@@ -211,152 +212,6 @@ int delete_avl_nodes(avl_p root) {
 	return ++count;
 }
 
-int lockWriteSem(int semId) {
-	struct sembuf sem;
-	sem.sem_flg = SEM_UNDO;
-
-	//increase counter wantWrite
-	sem.sem_num = wantWrite;
-	sem.sem_op = +1;
-	SEM_wantWrite:
-	if (semop(semId, &sem, 1)) {
-		switch (errno) {
-			case EINTR:
-				goto SEM_wantWrite;
-				break;
-			default:
-				perror("increase wantWrite semCount error:");
-				return -1;
-				break;
-		}
-	}
-
-	//wait until =0 readerWork
-	sem.sem_num = readWorking;
-	sem.sem_op = 0;
-	SEM_waitReaders:
-	if (semop(semId, &sem, 1)) {
-		switch (errno) {
-			case EINTR:
-				goto SEM_waitReaders;
-				break;
-			default:
-				perror("wait until 0 readWorking take error:");
-				return -1;
-				break;
-		}
-	}
-	//wait noThread already work
-	sem.sem_num = writeWorking;
-	sem.sem_op = -1;
-	SEM_writeWorking:
-	if (semop(semId, &sem, 1)) {
-		switch (errno) {
-			case EINTR:
-				goto SEM_writeWorking;
-				break;
-			default:
-				perror("lock writeWorking error:");
-				return -1;
-				break;
-		}
-	}
-	return 0;
-}
-
-int unlockWriteSem(int semId) {
-	struct sembuf sem;
-	sem.sem_flg = SEM_UNDO;
-
-	//signal finish writing work
-	sem.sem_num = writeWorking;
-	sem.sem_op = 1;
-	SEM_writeWorking:
-	if (semop(semId, &sem, 1)) {
-		switch (errno) {
-			case EINTR:
-				goto SEM_writeWorking;
-				break;
-			default:
-				perror("unlock writeWorking error:");
-				return -1;
-				break;
-		}
-	}
-	//reduce counter of wantWrite
-	sem.sem_num = wantWrite;
-	sem.sem_op = -1;
-	SEM_wantWrite:
-	if (semop(semId, &sem, 1)) {
-		switch (errno) {
-			case EINTR:
-				goto SEM_wantWrite;
-				break;
-			default:
-				perror("decrease wantWrite semCount error:");
-				return -1;
-				break;
-		}
-	}
-	return 0;
-}
-
-
-int lockReadSem(int semId) {
-	struct sembuf sem[2];
-	sem[0].sem_num = wantWrite;
-	sem[0].sem_flg = SEM_UNDO;
-	sem[1].sem_num = readWorking;
-	sem[1].sem_flg = SEM_UNDO;
-
-	//to be sure not concurrency problem, read Thread must be wait until no writes works, and instantly increase his counter
-	sem[0].sem_op = 0;
-	sem[1].sem_op = +1;
-	SEM_wantWrite_readWorking:
-	if (semop(semId, sem, 2)) {
-		switch (errno) {
-			case EINTR:
-				goto SEM_wantWrite_readWorking;
-				break;
-			default:
-				perror("lockRead sem take error:");
-				return -1;
-				break;
-		}
-	}
-
-	return 0;
-}
-
-int unlockReadSem(int semId) {
-	struct sembuf sem;
-	sem.sem_flg = SEM_UNDO;
-	sem.sem_num = readWorking;
-	sem.sem_op = -1;
-	SEM_readWorking:
-	if (semop(semId, &sem, 1)) {
-		switch (errno) {
-			case EINTR:
-				goto SEM_readWorking;
-				break;
-			default:
-				perror("unlockRead sem take error:");
-				return -1;
-				break;
-		}
-	}
-	return 0;
-}
-
-void semInfo(int semId) {
-	unsigned short semInfo[3];
-	semctl(semId, 0, GETALL, semInfo);
-	//enum semName {wantWrite=0,readWorking=1,writeWorking=2};
-
-	printf("\nsem (mutex)writeWorking=%d\n", semInfo[writeWorking]);
-	printf("sem readWorking=%d\n", semInfo[readWorking]);
-	printf("sem wantWrite=%d\n", semInfo[wantWrite]);
-}
 
 /*=======================================================*/
 /*            Library exposed APIs start here            */
@@ -370,14 +225,14 @@ avl_pp generate_avl(int *arr, int len) {
 	avl_pp head = NULL;
 
 	if (!arr || !len) {
-        dprintf(STDERR_FILENO, "Invalid array.\n");
+		dprintf(STDERR_FILENO, "[avl]Invalid array.\n");
 		return NULL;
 	}
 
 	head = init_avl();
 	for (; i < len; i++) {
 		if (insert_avl_node(head, i, arr[i]) == FALSE) {
-            dprintf(STDERR_FILENO, "Insertion failed.\n");
+			dprintf(STDERR_FILENO, "[avl]Insertion failed.\n");
 			destroy_avl(head);
 			return NULL;
 		}
@@ -408,7 +263,7 @@ bool insert_avl_node(avl_pp head, int key, int data) {
 	d_stack_p stack = get_stack();
 
 	if (!head) {
-        dprintf(STDERR_FILENO, "Initialize AVL tree first\n");
+		dprintf(STDERR_FILENO, "[avl]Initialize AVL tree first\n");
 		return FALSE;
 	}
 
@@ -508,7 +363,7 @@ bool delete_avl_node(avl_pp head, int key) {
 
 	node = *head;
 	if (!node) {
-        dprintf(STDERR_FILENO, "No nodes to delete\n");
+		dprintf(STDERR_FILENO, "[avl]No nodes to delete\n");
 		return FALSE;
 	}
 
@@ -572,7 +427,7 @@ int destroy_avl(avl_pp head) {
 	int count = 0;
 
 	if (!head) {
-        dprintf(STDERR_FILENO, "head invalid.\n");
+		dprintf(STDERR_FILENO, "[avl]head invalid.\n");
 		return -1;
 	}
 
@@ -593,7 +448,7 @@ int print_avl(avl_p root, avl_p parent) {
 	int count = 0;
 
 	if (!root) {
-        dprintf(STDERR_FILENO, "root invalid.\n");
+		dprintf(STDERR_FILENO, "[avl]root invalid.\n");
 		return -1;
 	}
 
@@ -634,7 +489,7 @@ int search_BFS_avl(avl_pp root, int key) {
 	int ret = 0;
 
 	if (!root || !*root) {
-        dprintf(STDERR_FILENO, "avl tree or root node is NULL!\n");
+		dprintf(STDERR_FILENO, "[avl]avl tree or root node is NULL!\n");
 		return -2;
 	}
 
@@ -648,7 +503,7 @@ int search_BFS_avl(avl_pp root, int key) {
 
 	/* Add root node to Queue */
 	if (!enqueue(queue, *root)) {
-        dprintf(STDERR_FILENO, "enqueue failed!\n");
+		dprintf(STDERR_FILENO, "[avl]enqueue failed!\n");
 		destroy_queue(queue);
 		return -1;
 	}
@@ -665,7 +520,7 @@ int search_BFS_avl(avl_pp root, int key) {
 
 			/* Add left child to Queue */
 			if (!enqueue(queue, node->left)) {
-                dprintf(STDERR_FILENO, "enqueue failed!\n");
+				dprintf(STDERR_FILENO, "[avl]enqueue failed!\n");
 				destroy_queue(queue);
 				return -1;
 			}
@@ -680,7 +535,7 @@ int search_BFS_avl(avl_pp root, int key) {
 
 			/* Add right child to Queue */
 			if (!enqueue(queue, node->right)) {
-                dprintf(STDERR_FILENO, "enqueue failed!\n");
+				dprintf(STDERR_FILENO, "[avl]enqueue failed!\n");
 				destroy_queue(queue);
 				return FALSE;
 			}
@@ -707,7 +562,7 @@ avl_pp_S generate_avl_S(int *arr, int len) {
 	avl_pp_S head;
 
 	if (!arr || !len) {
-        dprintf(STDERR_FILENO, "Invalid array.\n");
+		dprintf(STDERR_FILENO, "[avl]Invalid array.\n");
 		head.avlRoot = NULL;
 		return head;
 	}
@@ -716,7 +571,7 @@ avl_pp_S generate_avl_S(int *arr, int len) {
 
 	for (; i < len; i++) {
 		if (insert_avl_node(head.avlRoot, i, arr[i]) == FALSE) {
-            dprintf(STDERR_FILENO, "Insertion failed.\n");
+			dprintf(STDERR_FILENO, "[avl]Insertion failed.\n");
 			destroy_avl(head.avlRoot);
 			head.avlRoot = NULL;
 			return head;

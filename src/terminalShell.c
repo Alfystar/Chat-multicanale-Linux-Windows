@@ -106,7 +106,7 @@ void driverCmd(int argc, char *argv[], int *exit) {
 
 			return;
         }
-        if (strcmp(argv[0], "p-avlC") == 0) {
+		if (strcmp(argv[0], "p-avlR") == 0) {
 	        dprintf(fdOut, "Legend id:pipe\n");
 	        print_avl(*rmAvlTree_Pipe.avlRoot, *rmAvlTree_Pipe.avlRoot);
             return;
@@ -311,7 +311,7 @@ void menuHelpw(WINDOW *w, int y_start, int x_start, int argc, char *argv[]) {
 		if (strcmp(argv[1], "room") == 0) {
 			wprintw(w, "\t(0)arg\n");
 			wprintw(w, "->room\t-> Chat Archiviate\n");
-			wprintw(w, "->p-avlC\t-> Printa l'avl delle chat\n");
+			wprintw(w, "->p-avlR\t-> Printa l'avl delle chat\n");
 
 			wprintw(w, "\t(1)arg\n");
 			wprintw(w, "->roomTab [Rm id]\t-> Visualizza tabella Room\n");

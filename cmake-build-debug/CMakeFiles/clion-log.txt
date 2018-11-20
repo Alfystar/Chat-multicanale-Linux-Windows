@@ -1,4 +1,4 @@
-/opt/clion-2017.3.4/bin/cmake/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" /home/alfylinux/CLionProjects/Chat-MultiChannel
+/home/alfylinux/.local/share/JetBrains/Toolbox/apps/CLion/ch-0/182.5107.21/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" /home/alfylinux/CLionProjects/Chat-MultiChannel
 -- Configuring done
 -- Generating done
 -- Build files have been written to: /home/alfylinux/CLionProjects/Chat-MultiChannel/cmake-build-debug

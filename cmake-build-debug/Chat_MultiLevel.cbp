@@ -154,6 +154,9 @@
 		<Unit filename="/home/alfylinux/CLionProjects/Chat-MultiChannel/treeFunx/src/avl.c">
 			<Option target="Chat_MultiLevel"/>
 		</Unit>
+		<Unit filename="/home/alfylinux/CLionProjects/Chat-MultiChannel/treeFunx/src/common.c">
+			<Option target="Chat_MultiLevel"/>
+		</Unit>
 		<Unit filename="/home/alfylinux/CLionProjects/Chat-MultiChannel/treeFunx/src/dlist.c">
 			<Option target="Chat_MultiLevel"/>
 		</Unit>

@@ -200,7 +200,7 @@ int fWriteF(FILE *f, size_t sizeElem, int nelem, void *dat) {
 	//signal Free
 	sigset_t newSet, oltSet;
 	sigfillset(&newSet);
-	sigprocmask(SIG_SETMASK, &newSet, &oltSet);
+	pthread_sigmask(SIG_SETMASK, &newSet, &oltSet);
 	fflush(f);   /// NECESSARIO SE I USA LA MODALITA +, serve a garantire la sincronia tra R/W
 
 	fflush(f);   /// NECESSARIO SE I USA LA MODALITA +, serve a garantire la sincronia tra R/W
@@ -215,7 +215,7 @@ int fWriteF(FILE *f, size_t sizeElem, int nelem, void *dat) {
         //dprintf(fdOut,"prima fwrite; dat=%p\n",dat);
 		cont += fwrite(dat + cont, 1, sizeElem * nelem - cont, f);
 	}
-	sigprocmask(SIG_SETMASK, &oltSet, &newSet);   //restora tutto
+	pthread_sigmask(SIG_SETMASK, &oltSet, &newSet);   //restora tutto
 	return 0;
 }
 
@@ -223,7 +223,7 @@ int fReadF(FILE *f, size_t sizeElem, int nelem, void *save) {
 	//signal Free
 	sigset_t newSet, oltSet;
 	sigfillset(&newSet);
-	sigprocmask(SIG_SETMASK, &newSet, &oltSet);
+	pthread_sigmask(SIG_SETMASK, &newSet, &oltSet);
 
 	fflush(f);   /// NECESSARIO SE I USA LA MODALITA +, serve a garantire la sincronia tra R/W
 	size_t cont = 0;
@@ -236,7 +236,7 @@ int fReadF(FILE *f, size_t sizeElem, int nelem, void *save) {
 		}
 		cont += fread(save + cont, 1, sizeElem * nelem - cont, f);
 	}
-	sigprocmask(SIG_SETMASK, &oltSet, &newSet);   //restora tutto
+	pthread_sigmask(SIG_SETMASK, &oltSet, &newSet);   //restora tutto
 	return 0;
 }
 

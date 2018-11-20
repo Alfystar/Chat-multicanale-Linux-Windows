@@ -192,6 +192,7 @@ int main(int argc, char *argv[]) {
 
 	printf("\n\nServer Terminato da shell, senza presenza di errori\n\n");
 
+	while (1) pause();
 	return 0;
 }
 

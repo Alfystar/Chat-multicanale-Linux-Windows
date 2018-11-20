@@ -21,6 +21,7 @@
 #include "terminalShell.h"
 
 #include "../treeFunx/include/avl.h"
+#include "../treeFunx/include/dlist.h"
 #include "../globalSet.h"
 
 typedef struct thAcceptArg_ {
@@ -46,12 +47,18 @@ typedef struct thRoomArg_ {
 	infoChat *info;     // contiene tabella,Conversazione e nome per esteso (path), assegnato in fase di creazione
 	int fdPipe[2];      //contiene i valori delle pipe per parlare alla room, Definita da thRoom-generico
 	pthread_t tidRx, tidTx;
+	listHead_S mailList;  // è la coda dove viene segnato a chi si deve inoltrare i messaggi in arrivo
 } thRoomArg;
 
 
 enum insidePack {
 	in_join_p = 1000, in_entryIndex_p, in_delRm_p, in_leave_p, in_mess_p
 };
+
+typedef struct listData_ {
+	int keyId;
+	int fdPipeSend;
+} listData, *listData_p;
 
 
 ///GLOBAL VARIABLE
@@ -88,6 +95,9 @@ int delRoomSocket(mail *pack, thUserArg *data);
 
 int leaveRoomSocket(mail *pack, thUserArg *data);
 
+int openRoomSocket(mail *pack, thUserArg *data);
+
+
 /** #### TH-USER SUL SERVER CON RUOLO DI TX **/
 void *thUs_ServTX(thUserArg *);
 
@@ -107,6 +117,11 @@ int delRoom_inside(mail *pack, thRoomArg *data);
 
 int leaveRoom_inside(mail *pack, thRoomArg *data, int *exit);
 
+int openRoom_inside(mail *pack, thUserArg *data);
+
+
+//todo le funzioni IN_EXIT_RM e IN_OPEN_RM che servono a entrare e uscire dalla lista di inoltro
+
 /** #### TH-ROOM CON RUOLO DI TX **/
 void *thRoomTX(thRoomArg *info);
 
@@ -124,6 +139,13 @@ int testConnection_inside(int fdPipe);
 void freeUserArg(thUserArg *p);
 
 void freeRoomArg(thRoomArg *p);
+
+
+/** List utility**/
+
+dlist_p nodeSearchKey(listHead_S head, int key);
+
+int deleteNodeByList(listHead_S head, dlist_p nodeDel);
 
 
 #endif //CHAT_MULTILEVEL_THFUNX_H

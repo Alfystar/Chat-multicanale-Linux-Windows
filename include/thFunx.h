@@ -29,21 +29,24 @@ typedef struct thAcceptArg_ {
     thConnArg conInfo;
 } thAcceptArg;
 
+#define stringLen 50
+
 typedef struct thUserArg_ {
     int id;             //idKey dell'user definito in fase di login
-	char userName[50];  // Nome dell'user (dopo :)
-	char idNameUs[50];
+	char userName[stringLen];  // Nome dell'user (dopo :)
+	char idNameUs[stringLen];
 	infoUser *info;     // contiene tabella e nome per esteso (path), assegnato in fase di login
 	thConnArg conUs;    //contiene Tab e path dir dell'user
 	int fdPipe[2];      //contiene i valori delle pipe per parlare alla room, Definita da thRoom-generico
 	pthread_t tidRx, tidTx;
 } thUserArg;
 
+
 typedef struct thRoomArg_ {
 	int id;
-	char roomName[50];  // Nome dell'user (dopo :)
-	char idNameRm[50];
-	char roomPath[50];  // Path completo room  ("./%s/%s", chatDirName, chats->names[i]); e chats->names = %d:%s
+	char roomName[stringLen];  // Nome dell'user (dopo :)
+	char idNameRm[stringLen];
+	char roomPath[stringLen];  // Path completo room  ("./%s/%s", chatDirName, chats->names[i]); e chats->names = %d:%s
 	infoChat *info;     // contiene tabella,Conversazione e nome per esteso (path), assegnato in fase di creazione
 	int fdPipe[2];      //contiene i valori delle pipe per parlare alla room, Definita da thRoom-generico
 	pthread_t tidRx, tidTx;
@@ -52,7 +55,10 @@ typedef struct thRoomArg_ {
 
 
 enum insidePack {
-	in_join_p = 1000, in_entryIndex_p, in_delRm_p, in_leave_p, in_mess_p
+	in_join_p = 1000, in_delRm_p, in_leave_p,
+	in_entryIndex_p,
+	in_open_p, in_exit_p,
+	in_kConv_p, in_mess_p,
 };
 
 typedef struct listData_ {
@@ -97,6 +103,8 @@ int leaveRoomSocket(mail *pack, thUserArg *data);
 
 int openRoomSocket(mail *pack, thUserArg *data);
 
+int exitRoomSocket(mail *pack, thUserArg *data);
+
 
 /** #### TH-USER SUL SERVER CON RUOLO DI TX **/
 void *thUs_ServTX(thUserArg *);
@@ -118,6 +126,8 @@ int delRoom_inside(mail *pack, thRoomArg *data);
 int leaveRoom_inside(mail *pack, thRoomArg *data, int *exit);
 
 int openRoom_inside(mail *pack, thUserArg *data);
+
+int exitRoom_inside(mail *pack, thUserArg *data);
 
 
 //todo le funzioni IN_EXIT_RM e IN_OPEN_RM che servono a entrare e uscire dalla lista di inoltro

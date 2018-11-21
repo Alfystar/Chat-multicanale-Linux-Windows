@@ -27,15 +27,17 @@
 
 enum typePack {
 	/** SYSTEM **/    success_p = 0, failed_p, out_mess_p, out_test_p,
-	/**  USER  **/    out_login_p, out_logout_p, out_delUs_p, out_mkUser_p, out_dataUs_p,
+	/**  USER  **/    out_login_p, out_logout_p, out_delUs_p, out_mkUser_p, out_dataUs_p, out_kConv_p,
 	/**  ROOM  **/    out_mkRoom_p, out_joinRm_p, out_openRm_p, out_dataRm_p, out_leaveRm_p, out_delRm_p, out_exitRm_p
 };
+#define sendDim 40
+#define wowDim 44
 
 typedef struct metadata_ {
 	size_t dim;
 	int type; // dobbiamo definire dei tipi di comandi: es. 0 per il login => password in campo mex, ...
-	char sender[28];
-	char whoOrWhy[24];
+	char sender[sendDim];
+	char whoOrWhy[wowDim];
 } metadata;
 
 typedef struct mail_ {

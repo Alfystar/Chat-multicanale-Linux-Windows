@@ -197,7 +197,7 @@ int setUpThUser(int keyId, thUserArg *argUs) {
 		sArgv[sArgc] = strtok_r(NULL, ":", &savePoint);
 	}
 
-	strncpy(argUs->userName, sArgv[1], 50);   //serve a prendere solo il nome dell'utente
+	strncpy(argUs->userName, sArgv[1], stringLen);   //serve a prendere solo il nome dell'utente
 	nameListFree(user);
 
 	return 0;
@@ -407,7 +407,7 @@ void makeThRoom(int keyChat, char *roomPath, infoChat *info) {
 	thRoomArg *arg = malloc(sizeof(thRoomArg));
 	arg->id = keyChat;
 
-	strncpy(arg->roomPath, roomPath, 50);
+	strncpy(arg->roomPath, roomPath, stringLen);
 	arg->info = info;
 
 	int errorRet;
@@ -733,6 +733,15 @@ int leaveRoomSocket(mail *pack, thUserArg *data) {
 	return 0;
 }
 
+int openRoomSocket(mail *pack, thUserArg *data) {
+
+}
+
+int exitRoomSocket(mail *pack, thUserArg *data) {
+
+}
+
+
 /** #### TH-USER SUL SERVER CON RUOLO DI TX **/
 void *thUs_ServTX(thUserArg *argTh) {
 
@@ -814,14 +823,14 @@ void *roomTh(thRoomArg *info) {
 	}
 	insert_avl_node_S(rmAvlTree_Pipe, info->id, info->fdPipe[writeEndPipe]);
 
-	//char roomPath[50];  // Path completo room  ("./%s/%s", chatDirName, chats->names[i]); e chats->names = %d:%s
+	//char roomPath[stringLen];  // Path completo room  ("./%s/%s", chatDirName, chats->names[i]); e chats->names = %d:%s
 	// room path  ./%s/%d:%s  chatDirName id name
 	char inizio[40];
 	char chatDir[40];
 	int id;
 	char name[40];
 	sscanf(info->roomPath, "%[^/]/%[^/]/%d:%s", inizio, chatDir, &id, name);
-	strncpy(info->roomName, name, 50);
+	strncpy(info->roomName, name, stringLen);
 	sprintf(info->idNameRm, "%d:%s", id, name);
 
 	init_listHead(&info->mailList);  //all'avvio della room la coda di inoltro è nulla
@@ -1205,6 +1214,21 @@ int leaveRoom_inside(mail *pack, thRoomArg *data, int *exit) {
 	return 0;
 }
 
+int openRoom_inside(mail *pack, thUserArg *data) {
+	/*  RICEVO DAL TH-User
+	 * type= in_openRm_p
+	 * sender=  userName(string) ID:NAME
+	 * who= pipeRespond(string)
+	 * mex= <Null>
+	 */
+
+
+
+}
+
+int exitRoom_inside(mail *pack, thUserArg *data) {
+
+}
 
 /** #### TH-ROOM CON RUOLO DI TX **/
 void *thRoomTX(thRoomArg *info) {

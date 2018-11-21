@@ -210,16 +210,16 @@ int fillPack(mail *pack, int type, int dim, void *mex, char *sender, char *whoOr
 	if (dim == 0)pack->mex = NULL;
 	else pack->mex = mex;
 
-	if (sender == NULL) strncpy(pack->md.sender, "", 28);
+	if (sender == NULL) strncpy(pack->md.sender, "", sendDim);
 	else {
-		strncpy(pack->md.sender, sender, 27);
-		pack->md.sender[27] = '\0'; // sono sicuro che possa venir letto come una stringa
+		strncpy(pack->md.sender, sender, sendDim);
+		pack->md.sender[sendDim - 1] = '\0'; // sono sicuro che possa venir letto come una stringa
 	}
 
-	if (whoOrWhy == NULL) strncpy(pack->md.whoOrWhy, "", 24);
+	if (whoOrWhy == NULL) strncpy(pack->md.whoOrWhy, "", wowDim);
 	else {
-		strncpy(pack->md.whoOrWhy, whoOrWhy, 23);
-		pack->md.whoOrWhy[23] = '\0'; // sono sicuro che possa venir letto come una stringa
+		strncpy(pack->md.whoOrWhy, whoOrWhy, wowDim);
+		pack->md.whoOrWhy[wowDim - 1] = '\0'; // sono sicuro che possa venir letto come una stringa
 	}
 
 	return 0;

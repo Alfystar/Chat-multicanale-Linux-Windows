@@ -50,6 +50,52 @@ conversation *openConf(char *convPath) {
 	return loadConvF(f);
 }
 
+convRam *copyConv(conversation *c) {
+	convRam *cR = calloc(1, sizeof(convRam));
+	if (!cR) {
+		return NULL;
+	}
+	memcpy(&cR->head, &c->head, sizeof(convInfo));
+	cR->mexList = calloc(c->head.nMex, sizeof(mex *));
+	if (!cR->mexList) {
+		free(cR);
+		return NULL;
+	}
+	mex *mexNode;
+
+	for (int i = 0; i < cR->head.nMex; i++) {
+		///genero un nuovo nodo dei messaggi in ram
+		mexNode = malloc(sizeof(mex));
+		if (!mexNode) {
+
+			for (int j = 0; j < i; j++) {
+				freeMex(cR->mexList[j]);
+			}
+			free(cR->mexList);
+			free(cR);
+
+			return NULL;
+		}
+		///Copio i metadati
+		memcpy(mexNode, &c->mexList[i]->info, sizeof(mexInfo));
+
+		///Crea in ram la stringa di dim arbitraria e mex la punta
+		mexNode->text = malloc(strlen(c->mexList[i]->text) + 1);
+		if (!mexNode->text) {
+			for (int j = 0; j < i; j++) {
+				freeMex(cR->mexList[j]);
+			}
+			free(cR->mexList);
+			free(cR);
+			return NULL;
+		}
+		strcpy(mexNode->text, c->mexList[i]->text);
+
+		cR->mexList[i] = mexNode;   //salvo il puntatore nell'array
+	}
+	return cR;
+}
+
 int addMex(conversation *c, mex *m) {
 	if (saveNewMexF(m, c->stream)) {
 		perror("error during write :");

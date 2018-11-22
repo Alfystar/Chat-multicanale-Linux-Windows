@@ -715,17 +715,7 @@ int leaveRoomSocket(mail *pack, thUserArg *data) {
 			return -1;
 			break;
 		default:
-			//todo GESTIRE IL -1 CHE PUò essere causato dalla chiusura della pipe
-			if (writePack_inside(data->fdPipe[writeEndPipe], &roomPack)) {
-				switch (errno) {
-					case EPIPE:
-						//todo avviene solo se nel frattempo il th rx chiude la pipe (può succedere?)
-						break;
-					default:
-						//todo la pipe è crollata su se stessa e l'errore è talmente grave da terminare il sistema
-						break;
-				}
-			}
+			writePack_inside(data->fdPipe[writeEndPipe], &roomPack);
 			goto READ_ROOM_LEAVE;
 			break;
 
@@ -734,10 +724,81 @@ int leaveRoomSocket(mail *pack, thUserArg *data) {
 }
 
 int openRoomSocket(mail *pack, thUserArg *data) {
+	/*
+	 * aggiunge alla lista di inoltro l'utente nella room detta nel who
+	 */
 
+	/*
+	 * type= out_openRm_p
+	 * sender=  id:name
+	 * who= idKeyRoom:IndexOfMyTable(string)
+	 * mex= <Null>
+	 */
+	mail respond;
+	int idKeyRm, indexTab;
+	sscanf(pack->md.whoOrWhy, "%d:%d", idKeyRm, indexTab);
+	//test indexTab sia nella mia room
+	if (atoi(data->info->tab->data[indexTab].name) != idKeyRm) {
+		fillPack(&respond, failed_p, 0, 0, "Server", "Not in my table");
+		writePack(data->conUs.con.ds_sock, &respond);
+		return -1;
+	}
+
+	int pipeRm = search_BFS_avl_S(rmAvlTree_Pipe, idKeyRm);
+	if (pipeRm == -1) {
+		dprintf(STDERR_FILENO, "Cercare la pipe ha creato un errore\nopenRoomSocket");
+		fillPack(&respond, failed_p, 0, 0, "Server", "Error in search room");
+		writePack(data->conUs.con.ds_sock, &respond);
+		return -1;
+	} else if (pipeRm == -2) {
+		//se arrivo qua allora SICURAMENTE è già scomparso dalla mia tabella, comunico al client di eliminarlo anche dalla sua
+		dprintf(STDERR_FILENO, "Room id not found\nDel Abortita");
+		fillPack(&respond, out_delRm_p, 0, 0, "Server", "Room id delete");
+		writePack(data->conUs.con.ds_sock, &respond);
+		return -1;
+	}
+
+	mail roomPack;
+	char buff[16];
+	sprintf(buff, "%d", data->fdPipe[writeEndPipe]);
+	fillPack(&roomPack, in_openRm_p, 0, 0, data->idNameUs, buff);
+	writePack_inside(pipeRm, &roomPack);
+
+	///Aspetto risposta
+
+	readPack_inside(data->fdPipe[readEndPipe], &roomPack);
+	READ_ROOM_OPEN:
+	switch (roomPack.md.type) {
+		case in_kConv_p:
+			fillPack(&respond, out_kConv_p, roomPack.md.dim, roomPack.mex, "Server", roomPack.md.whoOrWhy);
+			writePack(data->conUs.con.ds_sock, &respond);
+			free(roomPack.mex);
+			return 0;
+			break;
+		case failed_p:
+			fillPack(&respond, failed_p, 0, 0, "Server", "Problem in room");
+			writePack(data->conUs.con.ds_sock, &respond);
+			return -1;
+			break;
+		default:
+			writePack_inside(data->fdPipe[writeEndPipe], &roomPack);
+			goto READ_ROOM_OPEN;
+			break;
+	}
+	return -1;
 }
 
 int exitRoomSocket(mail *pack, thUserArg *data) {
+	/*
+	 * toglie dalla lista di inoltro l'utente nella room detta nel who
+	 */
+
+	/*
+	 * type= out_exitRm_p
+	 * sender=  id:name
+	 * who= idKeyRoom
+	 * mex= <Null>
+	 */
 
 }
 
@@ -1214,19 +1275,44 @@ int leaveRoom_inside(mail *pack, thRoomArg *data, int *exit) {
 	return 0;
 }
 
-int openRoom_inside(mail *pack, thUserArg *data) {
+int openRoom_inside(mail *pack, thRoomArg *data) {
 	/*  RICEVO DAL TH-User
 	 * type= in_openRm_p
 	 * sender=  userName(string) ID:NAME
 	 * who= pipeRespond(string)
 	 * mex= <Null>
 	 */
+	mail respond;
+	int pipeUsRespond = atoi(pack->md.whoOrWhy);
+	dlist_p node = makeNode(atoi(pack->md.sender), pipeUsRespond);
+	if (!node) {
+		fillPack(&respond, failed_p, 0, 0, data->idNameRm, "Errore in create node");
+		writePack_inside(pipeUsRespond, &respond);
+		return -1;
+	}
+	add_head_dlist_S(&data->mailList, node);    //se entrambi i parametri sono non nulli non può fallire
 
+	convRam *cpRam = copyConv(data->info->conv);
+
+	if (!cpRam) {
+		fillPack(&respond, failed_p, 0, 0, data->idNameRm, "Errore in copy conv");
+		writePack_inside(pipeUsRespond, &respond);
+		return -1;
+	} else {
+		/*
+		calcolo da fare quando si invia fuori
+		size_t lenCp;
+		lenCp = sizeof(cpRam->head) + cpRam->head.nMex * sizeof(mex);
+		*/
+		fillPack(&respond, in_kConv_p, sizeof(cpRam), cpRam, data->idNameRm, data->idNameRm);
+		writePack_inside(pipeUsRespond, &respond);
+		return 0;
+	}
 
 
 }
 
-int exitRoom_inside(mail *pack, thUserArg *data) {
+int exitRoom_inside(mail *pack, thRoomArg *data) {
 
 }
 
@@ -1347,6 +1433,22 @@ void freeRoomArg(thRoomArg *p) {
 }
 
 /** List utility**/
+
+dlist_p makeNode(int keyId, int fdPSend) {
+	dlist_p node = calloc(1, sizeof(dlist_t));
+	if (!node) {
+		return NULL;
+	}
+	listData_p data = calloc(1, sizeof(listData_p));
+	if (!data) {
+		free(node);
+		return NULL;
+	}
+	data->keyId = keyId;
+	data->fdPipeSend = fdPSend;
+	node->data = (void *) data;
+	return node;
+}
 
 dlist_p nodeSearchKey(listHead_S head, int key) {
 	//NULL non trovato, o per lista vuota o perchè non c'è

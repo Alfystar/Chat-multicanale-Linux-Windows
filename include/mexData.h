@@ -45,6 +45,11 @@ typedef struct conversation_ {
 	FILE *stream;
 } conversation;
 
+typedef struct conversationRam_ {
+	convInfo head;
+	mex **mexList;      //per permettere un add più semplice e variabile è gestita a liste
+} convRam;
+
 
 /**		 Prototipi 		**/
 
@@ -52,41 +57,37 @@ typedef struct conversation_ {
 
 conversation *initConv(char *path, int adminId);
 
-FILE *openConfStream(char *path);
-
 conversation *openConf(char *convPath);
 
+convRam *copyConv(conversation *c);
+FILE *openConfStream(char *path);
 int addMex(conversation *conversation, mex *message);
 
 mex *makeMex(char *text, int usId);
-
 int freeConv(conversation *c);
 
 
 ///Funzioni verso File
 int setUpConvF(int adminId, FILE *stream);
-
 int overrideHeadF(convInfo *cI, FILE *stream);
-
 int saveNewMexF(mex *m, FILE *stream);
-
 conversation *loadConvF(FILE *stream);
 
 ///Funzioni di supporto
 int fWriteF(FILE *stream, size_t sizeElem, int nelem, void *data);
 
 int fReadF(FILE *stream, size_t sizeElem, int nelem, void *save);
-
 int freeMex(mex *m);
-
 time_t currTimeSys();
 
 ///Funzioni di visualizzazione
-void printConv(conversation *c, int fdOutP);
+void printConv(conversation *c);
 
-void printMex(mex *m, int fdOutP);
+void printConvRam(convRam *c);
 
-void printConvInfo(convInfo *cI, int fdOutP);
+void printMex(mex *m);
+
+void printConvInfo(convInfo *cI);
 
 char *timeString(time_t t);
 

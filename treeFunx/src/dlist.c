@@ -42,7 +42,7 @@ int add_head_dlist(dlist_pp head, dlist_p node) {
 		node->prev = node;
 		*head = node;
 
-		return 1;
+		return 0;
 	}
 	//nodo viene messo in testa e head slitta
 	node->next = *head; /* Current head become head->next */
@@ -51,7 +51,7 @@ int add_head_dlist(dlist_pp head, dlist_p node) {
 	(*head)->prev = node;
 	*head = node;
 
-	return 1;
+	return 0;
 }
 
 /*

@@ -57,7 +57,7 @@ typedef struct thRoomArg_ {
 enum insidePack {
 	in_join_p = 1000, in_delRm_p, in_leave_p,
 	in_entryIndex_p,
-	in_open_p, in_exit_p,
+	in_openRm_p, in_exit_p,
 	in_kConv_p, in_mess_p,
 };
 
@@ -125,9 +125,9 @@ int delRoom_inside(mail *pack, thRoomArg *data);
 
 int leaveRoom_inside(mail *pack, thRoomArg *data, int *exit);
 
-int openRoom_inside(mail *pack, thUserArg *data);
+int openRoom_inside(mail *pack, thRoomArg *data);
 
-int exitRoom_inside(mail *pack, thUserArg *data);
+int exitRoom_inside(mail *pack, thRoomArg *data);
 
 
 //todo le funzioni IN_EXIT_RM e IN_OPEN_RM che servono a entrare e uscire dalla lista di inoltro
@@ -152,6 +152,7 @@ void freeRoomArg(thRoomArg *p);
 
 
 /** List utility**/
+dlist_p makeNode(int keyId, int fdPSend);
 
 dlist_p nodeSearchKey(listHead_S head, int key);
 

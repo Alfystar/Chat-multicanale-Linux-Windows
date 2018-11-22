@@ -108,7 +108,8 @@ void driverCmd(int argc, char *argv[], int *exit) {
         }
 		if (strcmp(argv[0], "p-avlR") == 0) {
 	        dprintf(fdOut, "Legend id:pipe\n");
-	        print_avl(*rmAvlTree_Pipe.avlRoot, *rmAvlTree_Pipe.avlRoot);
+			print_avl_S(rmAvlTree_Pipe);
+			//print_avl(*rmAvlTree_Pipe.avlRoot, *rmAvlTree_Pipe.avlRoot);
             return;
         }
 		if (strcmp(argv[0], "user") == 0) {
@@ -119,7 +120,8 @@ void driverCmd(int argc, char *argv[], int *exit) {
 			return;
 		}
         if (strcmp(argv[0], "p-avlU") == 0) {
-	        print_avl(*usAvlTree_Pipe.avlRoot, *usAvlTree_Pipe.avlRoot);
+	        print_avl_S(usAvlTree_Pipe);
+	        //print_avl(*usAvlTree_Pipe.avlRoot, *usAvlTree_Pipe.avlRoot);
             return;
         }
 		if (strcmp(argv[0], "sstat") == 0) {

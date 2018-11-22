@@ -21,6 +21,8 @@ void *acceptTh(thAcceptArg *info) {
 		arg->userName[0] = 0;
 		arg->fdPipe[0] = -1;
 		arg->fdPipe[1] = -1;
+		arg->keyIdRmFF = -1;
+		arg->pipeRmFF = -1;
 
 		if (acceptCreate(&info->conInfo.con, userTh, arg) == -1) {
 			dprintf(STDERR_FILENO, "errore in accept\n");
@@ -127,12 +129,17 @@ int loginServerSide(mail *pack, thUserArg *data) {
 		if ((isEmptyEntry(&cell[i]) || isLastEntry(&cell[i])) == true) {
 			continue;
 		}
-		if (search_BFS_avl_S(rmAvlTree_Pipe, atoi(cell[i].name)) == -2) {
+		int keySearch = search_BFS_avl_S(rmAvlTree_Pipe, atoi(cell[i].name));
+		if (keySearch == -2) {
 			//name:= keyRoom:NAME  se key non è trovata nell'avl allora la room non esiste più
 			dprintf(fdDebug, "Room %s not found in Avl-Room. Deleting from userTab\n", cell[i].name);
 			if (delEntry(data->info->tab, i)) {
 				dprintf(STDERR_FILENO, "Deleting from userTab FAIL\n");
 			}
+		} else if (keySearch == -1) {
+			fillPack(&response, failed_p, 0, NULL, "Server", "ERROR IN SEARCH");
+			writePack(data->conUs.con.ds_sock, &response);
+			return -1;
 		} else {
 			dprintf(fdOut, "room %s trovata\n", cell[i].name);
 		}
@@ -294,36 +301,46 @@ void *thUs_ServRX(thUserArg *argTh) {
 				//mi unisco agli iscritti a una chat
 				if (joinRoomSocket(&packRecive, argTh)) {
 					dprintf(STDERR_FILENO, "joinRoomSocket take error, just send fail\n");
+				} else {
+					dprintf(fdDebug, "Join Room success\n");
 				}
-				dprintf(fdDebug, "Join Room success\n");
 				break;
 			case out_delRm_p:
 				//cancello tutta la room se amministratore
 				if (delRoomSocket(&packRecive, argTh)) {
 					dprintf(STDERR_FILENO, "delRoomSocket take error, just send fail\n");
+				} else {
+					dprintf(fdDebug, "Del Room success\n");
 				}
-				dprintf(fdDebug, "Del Room success\n");
 				break;
 			case out_leaveRm_p:
 				if (leaveRoomSocket(&packRecive, argTh)) {
 					dprintf(STDERR_FILENO, "leaveRoomSocket take error, just send fail\n");
+				} else {
+					dprintf(fdDebug, "Leave Room success\n");
 				}
-				dprintf(fdDebug, "Leave Room success\n");
 				break;
 			case out_openRm_p:
 				if (openRoomSocket(&packRecive, argTh)) {
-					dprintf(STDERR_FILENO, "out_openRm_p take error, just send fail\n");
+					dprintf(STDERR_FILENO, "openRoomSocket take error, just send fail\n");
+				} else {
+					dprintf(fdDebug, "OpenRm success\n");
 				}
-				dprintf(fdDebug, "OpenRm success\n");
 				break;
 			case out_mess_p:
+				dprintf(fdOut, "MEX Incoming\n");
+				if (mexReciveSocket(&packRecive, argTh)) {
+					dprintf(STDERR_FILENO, "mexReciveSocket take error, just send fail\n");
+				} else {
+					dprintf(fdDebug, "Mex Forwarding success\n");
+				}
 				break;
 			case out_logout_p:
 				exit = false;
 				break;
 
 			default:
-				dprintf(fdDebug, "thrServRx %d ricevuto type=%d, NON GESTITO\n", packRecive.md.type);
+				dprintf(fdDebug, "thrServRx %d ricevuto type=%d, NON GESTITO\n", argTh->id, packRecive.md.type);
 				printPack(&packRecive);
 				break;
 		}
@@ -486,19 +503,7 @@ int joinRoomSocket(mail *pack, thUserArg *data) {
 	int *fdUsWritePipe = malloc(sizeof(int));
 	*fdUsWritePipe = data->fdPipe[writeEndPipe];
 	fillPack(&roomPack, in_join_p, sizeof(int), fdUsWritePipe, data->idNameUs, firstIndex);
-	//todo GESTIRE IL -1 CHE PUò essere causato dalla chiusura della pipe
-	if (writePack_inside(pipeRm, &roomPack)) {
-		switch (errno) {
-			case EPIPE:
-				//todo inviare fail poichè nel frattempo la room è stata cancellata
-				break;
-			default:
-				//todo fail errore interno
-				break;
-		}
-	}
-
-
+	writePack_inside(pipeRm, &roomPack);
 
 	///aspetto come risposta la posizione nella tabella della room del'user
 	/*
@@ -523,17 +528,7 @@ int joinRoomSocket(mail *pack, thUserArg *data) {
 			break;
 		default:
 			//pacchetto da chissà o in risposta a chissà dove, ignoro e rimetto in circolo ritento
-			//todo GESTIRE IL -1 CHE PUò essere causato dalla chiusura della pipe
-			if (writePack_inside(data->fdPipe[writeEndPipe], &roomPack)) {
-				switch (errno) {
-					case EPIPE:
-						//todo avviene solo se nel frattempo il th rx chiude la pipe (può succedere?)
-						break;
-					default:
-						//todo la pipe è crollata su se stessa e l'errore è talmente grave da terminare il sistema
-						break;
-				}
-			}
+			writePack_inside(data->fdPipe[writeEndPipe], &roomPack);
 			goto RITENTA;
 			break;
 	}
@@ -596,17 +591,7 @@ int delRoomSocket(mail *pack, thUserArg *data) {
 		writePack(data->conUs.con.ds_sock, &respond);
 		return -1;
 	}
-	//todo GESTIRE IL -1 CHE PUò essere causato dalla chiusura della pipe
-	if (writePack_inside(pipeRm, &sendRoom)) {
-		switch (errno) {
-			case EPIPE:
-				//todo inviare fail poichè nel frattempo la room è stata cancellata (solo da amministratore di sistema al max)
-				break;
-			default:
-				//todo fail errore interno
-				break;
-		}
-	}
+	writePack_inside(pipeRm, &sendRoom);
 	//attendo risposta dalla room
 	///...
 	///...
@@ -629,17 +614,7 @@ int delRoomSocket(mail *pack, thUserArg *data) {
 			break;
 		default:
 			//pacchetto da chissà o in risposta a chissà dove, ignoro e rimetto in circolo ritento
-			//todo GESTIRE IL -1 CHE PUò essere causato dalla chiusura della pipe
-			if (writePack_inside(data->fdPipe[writeEndPipe], &reciveRoom)) {
-				switch (errno) {
-					case EPIPE:
-						//todo avviene solo se nel frattempo il th rx chiude la pipe (può succedere?)
-						break;
-					default:
-						//todo la pipe è crollata su se stessa e l'errore è talmente grave da terminare il sistema
-						break;
-				}
-			}
+			writePack_inside(data->fdPipe[writeEndPipe], &reciveRoom);
 			goto RITENTA;
 			break;
 	}
@@ -690,17 +665,7 @@ int leaveRoomSocket(mail *pack, thUserArg *data) {
 	mail roomPack;
 	fillPack(&roomPack, in_leave_p, 0, 0, data->idNameUs, buf);
 	dprintf(fdDebug, "leaveRoomSocket write to rm\n");
-	//todo GESTIRE IL -1 CHE PUò essere causato dalla chiusura della pipe
-	if (writePack_inside(pipeRm, &roomPack)) {
-		switch (errno) {
-			case EPIPE:
-				//todo inviare fail poichè nel frattempo la room è stata cancellata (solo da amministratore di sistema al max)
-				break;
-			default:
-				//todo fail errore interno
-				break;
-		}
-	}
+	writePack_inside(pipeRm, &roomPack);
 	///aspetto risposta dalla room
 
 	READ_ROOM_LEAVE:
@@ -742,7 +707,7 @@ int openRoomSocket(mail *pack, thUserArg *data) {
 	 */
 	mail respond;
 	int idKeyRm, indexTab;
-	sscanf(pack->md.whoOrWhy, "%d:%d", idKeyRm, indexTab);
+	sscanf(pack->md.whoOrWhy, "%d:%d", &idKeyRm, &indexTab);
 	//test indexTab sia nella mia room
 	if (atoi(data->info->tab->data[indexTab].name) != idKeyRm) {
 		fillPack(&respond, failed_p, 0, 0, "Server", "Not in my table");
@@ -752,14 +717,14 @@ int openRoomSocket(mail *pack, thUserArg *data) {
 
 	int pipeRm = search_BFS_avl_S(rmAvlTree_Pipe, idKeyRm);
 	if (pipeRm == -1) {
-		dprintf(STDERR_FILENO, "Cercare la pipe ha creato un errore\nopenRoomSocket");
+		dprintf(STDERR_FILENO, "Cercare la pipe ha creato un errore\n");
 		fillPack(&respond, failed_p, 0, 0, "Server", "Error in search room");
 		writePack(data->conUs.con.ds_sock, &respond);
 		return -1;
 	} else if (pipeRm == -2) {
 		//se arrivo qua allora SICURAMENTE è già scomparso dalla mia tabella, comunico al client di eliminarlo anche dalla sua
-		dprintf(STDERR_FILENO, "Room id not found\nDel Abortita");
-		fillPack(&respond, out_delRm_p, 0, 0, "Server", "Room id delete");
+		dprintf(STDERR_FILENO, "Room id not found\nOpen Abortita");
+		fillPack(&respond, out_delRm_p, 0, 0, "Server", "Room id deleted");
 		writePack(data->conUs.con.ds_sock, &respond);
 		return -1;
 	}
@@ -784,6 +749,8 @@ int openRoomSocket(mail *pack, thUserArg *data) {
 			fillPack(&respond, out_kConv_p, lenCp, roomPack.mex, "Server", roomPack.md.whoOrWhy);
 			writePack(data->conUs.con.ds_sock, &respond);
 			free(roomPack.mex);
+			data->pipeRmFF = pipeRm;
+			data->keyIdRmFF = idKeyRm;
 			return 0;
 			break;
 		case failed_p:
@@ -814,6 +781,44 @@ int exitRoomSocket(mail *pack, thUserArg *data) {
 }
 
 
+int mexReciveSocket(mail *pack, thUserArg *data) {
+	/*
+	 * type= out_mess_p
+	 * sender=  usId:name
+	 * who= idNumber_ di controllo, da mantenere intatto
+	 * mex= testoMessaggio
+	 * dim= dime messaggio (\0 comreso)
+	 */
+	mail roomPack, respond;
+	char buf[sendDim];
+	sprintf(buf, "%d:%s", data->fdPipe[writeEndPipe], data->idNameUs);
+	fillPack(&roomPack, in_mess_p, pack->md.dim, pack->mex, buf, pack->md.whoOrWhy);
+	writePack_inside(data->pipeRmFF, &roomPack);
+
+	///attendo una success o fail per poter inoltrare il messaggio
+	readPack_inside(data->pipeRmFF, &roomPack);
+
+	READ_MEX_RECIVE:
+	switch (roomPack.md.type) {
+		case success_p:
+			fillPack(&respond, success_p, 0, 0, roomPack.md.sender, roomPack.md.whoOrWhy);
+			writePack(data->conUs.con.ds_sock, &respond);
+			return 0;
+			break;
+		case failed_p:
+			fillPack(&respond, failed_p, 0, 0, roomPack.md.sender, roomPack.md.whoOrWhy);
+			writePack(data->conUs.con.ds_sock, &respond);
+			return -1;
+			break;
+		default:
+			writePack_inside(data->fdPipe[writeEndPipe], &roomPack);
+			goto READ_MEX_RECIVE;
+			break;
+	}
+
+
+}
+
 /** #### TH-USER SUL SERVER CON RUOLO DI TX **/
 void *thUs_ServTX(thUserArg *argTh) {
 
@@ -823,7 +828,7 @@ void *thUs_ServTX(thUserArg *argTh) {
 	int exit = 1;
 	while (exit) {
 		//readPack() da aggiungere il selettore in ingresso di chat
-		dprintf(fdDebug, "(TH-US-tx) reed pack\n");
+		dprintf(fdDebug, "(TH-US-tx) read pack\n");
 		if (readPack_inside(argTh->fdPipe[readEndPipe], &packRead_in)) {
 			switch (errno) {
 				case EBADF:
@@ -860,17 +865,7 @@ void *thUs_ServTX(thUserArg *argTh) {
 
 			default:
 				//pacchetto non gestito, quindi non indirizzato a noi, lo ri infilo nella pipe
-				//todo GESTIRE IL -1 CHE PUò essere causato dalla chiusura della pipe
-				if (writePack_inside(argTh->fdPipe[writeEndPipe], &packRead_in)) {
-					switch (errno) {
-						case EPIPE:
-							//todo avviene solo se nel frattempo il th rx chiude la pipe (può succedere?)
-							break;
-						default:
-							//todo la pipe è crollata su se stessa e l'errore è talmente grave da terminare il sistema
-							break;
-					}
-				}
+				writePack_inside(argTh->fdPipe[writeEndPipe], &packRead_in);
 
 				usleep(5000);   //dorme 5ms per permettere al rx o chi per lui di prendere il pacchetto
 				break;
@@ -905,7 +900,7 @@ void *roomTh(thRoomArg *info) {
 	strncpy(info->roomName, name, stringLen);
 	sprintf(info->idNameRm, "%d:%s", id, name);
 
-	init_listHead(&info->mailList);  //all'avvio della room la coda di inoltro è nulla
+	init_listHead(&info->mailList, fdOut);  //all'avvio della room la coda di inoltro è nulla
 
 	dprintf(fdOut, "Ciao sono Un Tr-ROOM\n\tsono la %d\tmi chiamo %s\n\tmi ragiungi da %d\n", info->id, info->roomPath,
 	        info->fdPipe[writeEndPipe]);
@@ -963,9 +958,6 @@ void *thRoomRX(thRoomArg *info) {
 					dprintf(STDERR_FILENO, "Impossible add user %s at mail-List of Th-room\n", packRecive.md.sender);
 				}
 				break;
-			case in_mess_p:
-
-				break;
 
 			default:
 				dprintf(fdDebug, "th-RoomRx %d ricevuto type=%d, NON GESTITO\n", info->id, packRecive.md.type);
@@ -994,7 +986,6 @@ int joinRoom_inside(mail *pack, thRoomArg *data) {
 	 *
 	 * Dal Th-user che capisco il nuovo utente da aggiungere alla tabella
 	 *
-	 *
 	 * devo ritornare come risposta la posizione nella mia tabella, del'user appena collegato
 	 *
 	 */
@@ -1019,17 +1010,7 @@ int joinRoom_inside(mail *pack, thRoomArg *data) {
 	if (addPos == -1) {
 		dprintf(STDERR_FILENO, "Add Entry for join side room take error\n");
 		fillPack(&respond, failed_p, 0, 0, "ROOM", "addEntry fail");
-		//todo GESTIRE IL -1 CHE PUò essere causato dalla chiusura della pipe
-		if (writePack_inside(pipeUser, &respond)) {
-			switch (errno) {
-				case EPIPE:
-					//todo avviene solo se nel frattempo il thUser è stato chiuso e non ha senso parlargli
-					break;
-				default:
-					//todo la pipe è crollata su se stessa e l'errore è talmente grave da terminare il sistema
-					break;
-			}
-		}
+		writePack_inside(pipeUser, &respond);
 		return -1;
 	}
 
@@ -1045,17 +1026,7 @@ int joinRoom_inside(mail *pack, thRoomArg *data) {
 	sprintf(addPosBuf, "%d", addPos);
 
 	fillPack(&respond, in_entryIndex_p, 0, 0, data->idNameRm, addPosBuf);
-	//todo GESTIRE IL -1 CHE PUò essere causato dalla chiusura della pipe
-	if (writePack_inside(pipeUser, &respond))
-		switch (errno) {
-			case EPIPE:
-				//todo avviene solo se nel frattempo il thUser è stato chiuso e non ha senso parlargli
-				break;
-			default:
-				//todo la pipe è crollata su se stessa e l'errore è talmente grave da terminare il sistema
-				break;
-		}
-
+	writePack_inside(pipeUser, &respond);
 	return 0;
 
 }
@@ -1079,16 +1050,7 @@ int delRoom_inside(mail *pack, thRoomArg *data) {
 		//non ero amministratore
 		dprintf(STDERR_FILENO, "Utente %d non amministratore, è AMMINISTRATORE :%d\n", data->id, chatAdmin);
 		fillPack(&respondThUs, failed_p, 0, 0, data->idNameRm, "Non hai il diritto");
-		//todo GESTIRE IL -1 CHE PUò essere causato dalla chiusura della pipe
-		if (writePack_inside(pipeUserCallMe, &respondThUs))
-			switch (errno) {
-				case EPIPE:
-					//todo avviene solo se nel frattempo il thUser è stato chiuso e non ha senso parlargli
-					break;
-				default:
-					//todo la pipe è crollata su se stessa e l'errore è talmente grave da terminare il sistema
-					break;
-			}
+		writePack_inside(pipeUserCallMe, &respondThUs);
 		return -1;
 	}
 
@@ -1100,8 +1062,6 @@ int delRoom_inside(mail *pack, thRoomArg *data) {
 	//se sono collegati gli invio un messaggio via pipe, altrimenti la cancello a mano
 	mail respond;
 	entry *en = data->info->tab->data;
-	char userDir[64];
-	table *usTabOffline;
 
 	char pointStr[32];//string di en->point
 	int idUserScr;
@@ -1118,50 +1078,16 @@ int delRoom_inside(mail *pack, thRoomArg *data) {
 			case -1:    //errore
 				dprintf(STDERR_FILENO, "Search avl create error, abort\n");
 				fillPack(&respond, failed_p, 0, 0, "ROOM", "search user take error");
-				//todo GESTIRE IL -1 CHE PUò essere causato dalla chiusura della pipe
-				if (writePack_inside(pipeUserCallMe, &respond))
-					switch (errno) {
-						case EPIPE:
-							//todo avviene solo se nel frattempo il thUser è stato chiuso e non ha senso parlargli
-							break;
-						default:
-							//todo la pipe è crollata su se stessa e l'errore è talmente grave da terminare il sistema
-							break;
-					}
+				writePack_inside(pipeUserCallMe, &respond);
 				return -1;
 				break;
 			case -2:    //non trovato, utente offline
 				///non faccio nulla, al suo successivo login lo elimina da solo
-				/*
-				//elimino la room dalla tabella di questo utente offline
-				sprintf(userDir,"./%s/%s",userDirName,en->name);
-				usTabOffline=open_Tab(userDir);
-				delEntry(usTabOffline,en->point);
-				closeTable(usTabOffline);
-				*/
-
 				break;
-			default:    // >=0 trovato
-				//invio un messaggio al tx di quel th-user per dirgli di eliminare la tabella
-				//se il th-user è anche collegato ora alla room, è suo compito dimenticarsi di noi
-				/*  INVIO AL TH-User_tx
-				 * type= in_delRm_p
-				 * sender=  roomName(string) ID:NAME //non lo uso
-				 * who= point of entry(string)
-				 * mex= <Null>
-				 */
+			default:
 				sprintf(pointStr, "%d", en->point);
 				fillPack(&respond, in_delRm_p, 0, 0, data->idNameRm, pointStr);
-				//todo GESTIRE IL -1 CHE PUò essere causato dalla chiusura della pipe
-				if (writePack_inside(pipeUserScr, &respond))
-					switch (errno) {
-						case EPIPE:
-							//todo avviene solo se nel frattempo il thUser è stato chiuso e non ha senso parlargli
-							break;
-						default:
-							//todo la pipe è crollata su se stessa e l'errore è talmente grave da terminare il sistema
-							break;
-					}
+				writePack_inside(pipeUserScr, &respond);
 				break;
 		}
 
@@ -1169,16 +1095,8 @@ int delRoom_inside(mail *pack, thRoomArg *data) {
 	///ho eliminato da tutti i miei inscritti questa room dalla tabella
 	//elimino la room sul fileSistem
 	fillPack(&respond, success_p, 0, 0, data->idNameRm, "chiusura della room");
-	//todo GESTIRE IL -1 CHE PUò essere causato dalla chiusura della pipe
-	if (writePack_inside(pipeUserCallMe, &respond))
-		switch (errno) {
-			case EPIPE:
-				//todo avviene solo se nel frattempo il thUser è stato chiuso e non ha senso parlargli
-				break;
-			default:
-				//todo la pipe è crollata su se stessa e l'errore è talmente grave da terminare il sistema
-				break;
-		}
+
+	writePack_inside(pipeUserCallMe, &respond);
 
 	destroy_dlist_S(&data->mailList);
 	//fuori chiudo l'altro thread room fuori
@@ -1208,16 +1126,7 @@ int leaveRoom_inside(mail *pack, thRoomArg *data, int *exit) {
 		if (delEntry(data->info->tab, indexTabRoom)) {
 			dprintf(STDERR_FILENO, "(rm-TH) Impossible remove entry\n");
 			fillPack(&respond, failed_p, 0, 0, data->idNameRm, "Impossible remove");
-			//todo GESTIRE IL -1 CHE PUò essere causato dalla chiusura della pipe
-			if (writePack_inside(pipeUs, &respond))
-				switch (errno) {
-					case EPIPE:
-						//todo avviene solo se nel frattempo il thUser è stato chiuso e non ha senso parlargli
-						break;
-					default:
-						//todo la pipe è crollata su se stessa e l'errore è talmente grave da terminare il sistema
-						break;
-				}
+			writePack_inside(pipeUs, &respond);
 			return -1;
 		}
 		dprintf(fdDebug, "(rm-TH) leave user Do\n");
@@ -1228,33 +1137,14 @@ int leaveRoom_inside(mail *pack, thRoomArg *data, int *exit) {
 			deleteNodeByList(data->mailList, usNode);
 		}
 		fillPack(&respond, success_p, 0, 0, data->idNameRm, "Entry remove");
-		//todo GESTIRE IL -1 CHE PUò essere causato dalla chiusura della pipe
-		if (writePack_inside(pipeUs, &respond))
-			switch (errno) {
-				case EPIPE:
-					//todo avviene solo se nel frattempo il thUser è stato chiuso e non ha senso parlargli
-					break;
-				default:
-					//todo la pipe è crollata su se stessa e l'errore è talmente grave da terminare il sistema
-					break;
-			}
-
+		writePack_inside(pipeUs, &respond);
 
 	} else {
 		//utente errato
 		dprintf(STDERR_FILENO, "(rm-TH) user not the same (id):\n%s != %s\n", pack->md.sender,
 		        data->info->tab->data[indexTabRoom].name);
 		fillPack(&respond, failed_p, 0, 0, data->idNameRm, "You aren't user");
-		//todo GESTIRE IL -1 CHE PUò essere causato dalla chiusura della pipe
-		if (writePack_inside(pipeUs, &respond))
-			switch (errno) {
-				case EPIPE:
-					//todo avviene solo se nel frattempo il thUser è stato chiuso e non ha senso parlargli
-					break;
-				default:
-					//todo la pipe è crollata su se stessa e l'errore è talmente grave da terminare il sistema
-					break;
-			}
+		writePack_inside(pipeUs, &respond);
 		return -1;
 	}
 
@@ -1330,13 +1220,84 @@ int exitRoom_inside(mail *pack, thRoomArg *data) {
 
 /** #### TH-ROOM CON RUOLO DI TX **/
 void *thRoomTX(thRoomArg *info) {
-	//todo se pthread_close fallisce tramite read pack si nota che il FD è chiuso, allora termino
-	while (1) pause();
+	mail packRead_in;
+	mail sendClient;
+
+	int exit = 1;
+
+	while (exit) {
+		//readPack() da aggiungere il selettore in ingresso di chat
+		dprintf(fdDebug, "(TH-RM-tx) read pack\n");
+		if (readPack_inside(info->fdPipe[readEndPipe], &packRead_in)) {
+			switch (errno) {
+				case EBADF:
+					dprintf(STDERR_FILENO, "readEndPipe=%d now is close\nClose Th\n", info->fdPipe[readEndPipe]);
+					pthread_exit(NULL);  //uccide il th (il pthread_close ha fallito)
+					break;
+				default:
+					break;
+			}
+		}
+
+		switch (packRead_in.md.type) {
+			case in_mess_p:
+				if (mexRecive_inside(&packRead_in, info)) {
+					dprintf(STDERR_FILENO, "[Th-Rx-Rm]PROBLEM to Forwarding mex from %s\n", packRead_in.md.sender);
+				}
+				break;
+
+			default:
+				//pacchetto non gestito, quindi non indirizzato a noi, lo ri infilo nella pipe
+				writePack_inside(info->fdPipe[writeEndPipe], &packRead_in);
+				usleep(5000);   //dorme 5ms per permettere al rx o chi per lui di prendere il pacchetto
+				break;
+		}
+
+	}
 
 
 }
 /** FUNZIONI DI SUPPORTO PER TH-ROOM CON RUOLO DI TX **/
 
+int mexRecive_inside(mail *pack, thRoomArg *data) {
+	/*  RICEVO DAL TH-User
+	 * type= in_mess_p
+	 * sender=  usPipe:IDKey:NAME [%d:%d:%s]
+	 * who= idNumber_ di controllo, da mantenere intatto
+	 * mex= testoMessaggio
+	 * dim= dime messaggio (\0 comreso)
+	 */
+	mail usRespond;
+	int usPipe, idkeyUs;
+	sscanf(pack->md.sender, "%d:%d", &usPipe, &idkeyUs);
+	dlist_p senderMexNode = nodeSearchKey(data->mailList, atoi(pack->md.sender));
+	if (!senderMexNode) {
+		fillPack(&usRespond, failed_p, 0, 0, data->idNameRm, "Not in Room forwarding List");
+		writePack_inside(usPipe, &usRespond);
+		return -1;
+	}
+
+	mex *newMex = makeMex(pack->mex, idkeyUs);
+	if (!newMex) {
+		fillPack(&usRespond, failed_p, 0, 0, data->idNameRm, "Error in make Message tipe");
+		writePack_inside(usPipe, &usRespond);
+		return -1;
+	}
+
+	if (addMex(data->info->conv, newMex)) {
+		fillPack(&usRespond, failed_p, 0, 0, data->idNameRm, "Error in adding mex on conv (maybe saved)");
+		writePack_inside(usPipe, &usRespond);
+		return -1;
+	}
+	fillPack(&usRespond, success_p, 0, 0, data->idNameRm, pack->md.whoOrWhy);
+	writePack_inside(usPipe, &usRespond);
+	///a questo punto il TH inviante sa che il suo messaggio è stato salvato nella conv in persistenza e per lui è un successo
+
+	//inizio a inoltrare a tutti gli elementi della lista di inoltro:
+	//todo: inoltrare ai client connessi
+
+
+}
 
 /** SEND PACK_inside e WRITE PACK_inside**/
 
@@ -1499,14 +1460,6 @@ int deleteNodeByList(listHead_S head, dlist_p nodeDel) {
 
 	if (!nodeDel) {
 		dprintf(STDERR_FILENO, "INVALID NODE\n");
-		switch (errno) {
-			case EPIPE:
-				//todo avviene solo se nel frattempo il thUser è stato chiuso e non ha senso parlargli
-				break;
-			default:
-				//todo la pipe è crollata su se stessa e l'errore è talmente grave da terminare il sistema
-				break;
-		}
 		return -1;
 	}
 

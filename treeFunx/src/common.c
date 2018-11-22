@@ -140,12 +140,14 @@ int unlockReadSem(int semId) {
 	return 0;
 }
 
-void semInfo(int semId) {
+void semInfo(int semId, int fd) {
 	unsigned short semInfo[3];
 	semctl(semId, 0, GETALL, semInfo);
 	//enum semName {wantWrite=0,readWorking=1,writeWorking=2};
+	char buf[3][4096];
+	sprintf(buf[0], "\nsem (mutex)writeWorking=%d\n", semInfo[writeWorking]);
+	sprintf(buf[1], "sem readWorking=%d\n", semInfo[readWorking]);
+	sprintf(buf[2], "sem wantWrite=%d\n", semInfo[wantWrite]);
+	dprintf(fd, "%s%s%s", buf[0], buf[1], buf[2]);
 
-	printf("\nsem (mutex)writeWorking=%d\n", semInfo[writeWorking]);
-	printf("sem readWorking=%d\n", semInfo[readWorking]);
-	printf("sem wantWrite=%d\n", semInfo[wantWrite]);
 }

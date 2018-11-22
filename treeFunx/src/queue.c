@@ -43,9 +43,9 @@ bool enqueue(queue_p queue, void *val) {
 	nodeptr->data = val;
 
 	if (add_head_dlist(queue->head, nodeptr)) /* Last In */
-        return true;
-	else
         return false;
+	else
+		return true;
 }
 
 /*

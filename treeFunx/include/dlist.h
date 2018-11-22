@@ -76,6 +76,6 @@ int destroy_dlist_S(listHead_S_p head);
 /* Count total nodes in list */
 int count_nodes_dlist_S(listHead_S_p head);
 
-int init_listHead(listHead_S_p head);
+int init_listHead(listHead_S_p head, int fd);
 
 

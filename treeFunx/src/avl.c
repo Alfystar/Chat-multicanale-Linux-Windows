@@ -605,7 +605,7 @@ avl_pp_S init_avl_S(void) {
 	}
 
 	//dprintf(fdDebug, "SEMAFORO Avl CREATO\n");
-	semInfo(head.semId);
+	semInfo(head.semId, STDOUT_FILENO);
 
 
 	return head;
@@ -628,6 +628,12 @@ bool delete_avl_node_S(avl_pp_S head, int key) {
     dprintf(fdDebug, "Node %d removed\n", key);
 
 	return ret;
+}
+
+void print_avl_S(avl_pp_S root) {
+	lockReadSem(root.semId);
+	print_avl(*root.avlRoot, *root.avlRoot);
+	unlockReadSem(root.semId);
 }
 
 int search_BFS_avl_S(avl_pp_S root, int key) {

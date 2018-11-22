@@ -39,6 +39,7 @@ typedef struct thUserArg_ {
 	thConnArg conUs;    //contiene Tab e path dir dell'user
 	int fdPipe[2];      //contiene i valori delle pipe per parlare alla room, Definita da thRoom-generico
 	pthread_t tidRx, tidTx;
+	int keyIdRmFF, pipeRmFF; //parametri della room a cui inoltrare mex incoming
 } thUserArg;
 
 
@@ -105,6 +106,7 @@ int openRoomSocket(mail *pack, thUserArg *data);
 
 int exitRoomSocket(mail *pack, thUserArg *data);
 
+int mexReciveSocket(mail *pack, thUserArg *data);
 
 /** #### TH-USER SUL SERVER CON RUOLO DI TX **/
 void *thUs_ServTX(thUserArg *);
@@ -130,13 +132,12 @@ int openRoom_inside(mail *pack, thRoomArg *data);
 int exitRoom_inside(mail *pack, thRoomArg *data);
 
 
-//todo le funzioni IN_EXIT_RM e IN_OPEN_RM che servono a entrare e uscire dalla lista di inoltro
-
 /** #### TH-ROOM CON RUOLO DI TX **/
 void *thRoomTX(thRoomArg *info);
 
 /** FUNZIONI DI SUPPORTO PER TH-ROOM CON RUOLO DI TX **/
 
+int mexRecive_inside(mail *pack, thRoomArg *data);
 
 /** SEND PACK_inside e WRITE PACK_inside**/
 

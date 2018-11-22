@@ -254,7 +254,7 @@ int count_nodes_dlist_S(listHead_S_p head) {
 }
 
 
-int init_listHead(listHead_S_p head) {
+int init_listHead(listHead_S_p head, int fd) {
 	// -1 error: see errno
 	// -2 just inizialize
 
@@ -282,7 +282,7 @@ int init_listHead(listHead_S_p head) {
 	}
 
 	//dprintf(fdDebug, "SEMAFORO Avl CREATO\n");
-	semInfo(head->semId);
+	semInfo(head->semId, fd);
 
 	return 0;
 }

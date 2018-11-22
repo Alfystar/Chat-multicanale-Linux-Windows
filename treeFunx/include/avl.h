@@ -68,6 +68,8 @@ int destroy_avl(avl_pp head);
 /* Print a tree in preorder */
 int print_avl(avl_p root, avl_p parent);
 
+void print_avl_S(avl_pp_S root);
+
 /* Traverse tree in BFS to find a given value */
 int search_BFS_avl(avl_pp root, int key);
 

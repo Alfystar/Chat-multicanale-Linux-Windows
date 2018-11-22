@@ -50,7 +50,7 @@ enum semName {
 	wantWrite = 0, readWorking = 1, writeWorking = 2
 };
 
-void semInfo(int semId);
+void semInfo(int semId, int fd);
 
 int lockWriteSem(int semId);
 

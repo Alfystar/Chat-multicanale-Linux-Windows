@@ -310,6 +310,12 @@ void *thUs_ServRX(thUserArg *argTh) {
 				}
 				dprintf(fdDebug, "Leave Room success\n");
 				break;
+			case out_openRm_p:
+				if (openRoomSocket(&packRecive, argTh)) {
+					dprintf(STDERR_FILENO, "out_openRm_p take error, just send fail\n");
+				}
+				dprintf(fdDebug, "OpenRm success\n");
+				break;
 			case out_mess_p:
 				break;
 			case out_logout_p:
@@ -950,6 +956,11 @@ void *thRoomRX(thRoomArg *info) {
 			case in_leave_p:
 				if (leaveRoom_inside(&packRecive, info, &exit)) {
 					dprintf(STDERR_FILENO, "Impossible leave user %s of this Th-room\n", packRecive.md.sender);
+				}
+				break;
+			case in_openRm_p:
+				if (openRoom_inside(&packRecive, info)) {
+					dprintf(STDERR_FILENO, "Impossible add user %s at mail-List of Th-room\n", packRecive.md.sender);
 				}
 				break;
 			case in_mess_p:

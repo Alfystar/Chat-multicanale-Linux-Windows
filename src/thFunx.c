@@ -767,16 +767,21 @@ int openRoomSocket(mail *pack, thUserArg *data) {
 	///Aspetto risposta
 
 	readPack_inside(data->fdPipe[readEndPipe], &roomPack);
+	convRam *cpRam;
 	READ_ROOM_OPEN:
 	switch (roomPack.md.type) {
+
 		case in_kConv_p:
-			fillPack(&respond, out_kConv_p, roomPack.md.dim, roomPack.mex, "Server", roomPack.md.whoOrWhy);
+
+			cpRam = roomPack.mex;
+			size_t lenCp = sizeof(cpRam->head) + cpRam->head.nMex * sizeof(mex);
+			fillPack(&respond, out_kConv_p, lenCp, roomPack.mex, "Server", roomPack.md.whoOrWhy);
 			writePack(data->conUs.con.ds_sock, &respond);
 			free(roomPack.mex);
 			return 0;
 			break;
 		case failed_p:
-			fillPack(&respond, failed_p, 0, 0, "Server", "Problem in room");
+			fillPack(&respond, failed_p, 0, 0, "Server", roomPack.md.whoOrWhy);
 			writePack(data->conUs.con.ds_sock, &respond);
 			return -1;
 			break;
@@ -1299,11 +1304,7 @@ int openRoom_inside(mail *pack, thRoomArg *data) {
 		writePack_inside(pipeUsRespond, &respond);
 		return -1;
 	} else {
-		/*
-		calcolo da fare quando si invia fuori
-		size_t lenCp;
-		lenCp = sizeof(cpRam->head) + cpRam->head.nMex * sizeof(mex);
-		*/
+
 		fillPack(&respond, in_kConv_p, sizeof(cpRam), cpRam, data->idNameRm, data->idNameRm);
 		writePack_inside(pipeUsRespond, &respond);
 		return 0;

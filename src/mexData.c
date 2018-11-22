@@ -122,6 +122,23 @@ mex *makeMex(char *text, int usId) {
 	return m;
 }
 
+mex *makeMexBuf(size_t len, char *bufMex) {
+	bufMex[len - 1] = 0; //non dovrebbe essere necessario, per sicurezza
+	/// text su un buf temporaneo
+	mex *m = malloc(sizeof(mex));
+	if (m == NULL) {
+		return NULL;
+	}
+	m->text = malloc(len - sizeof(mexInfo));
+	if (!m->text) {
+		free(m);
+		return NULL;
+	}
+	memcpy(&m->info, bufMex, sizeof(mexInfo));
+	strcpy(m->text, bufMex + sizeof(mexInfo));
+	return m;
+}
+
 int freeConv(conversation *c) {
 
 	//libero tutti i messaggi
@@ -324,6 +341,26 @@ void printConv(conversation *c, int fdOutP) {
 		dprintf(fdOutP, "**********\n");
 	}
 	dprintf(fdOutP, "-------------------------------------------------------------\n");
+	return;
+}
+
+void printConvRam(convRam *c, int fdOutP) {
+	printf("-------------------------------------------------------------\n");
+	printf("\tLa Conversazione ha salvati i seguenti messaggi:\n");
+	printf("\tsizeof(mex)=%ld\tsizeof(mexInfo)=%ld\tsizeof(convInfo)=%ld\n", sizeof(mex), sizeof(mexInfo),
+	       sizeof(convInfo));
+	printf("FILE stream pointer\t-> NULL (only ram version)\n");
+	printf("\n\t[][]La Conversazione è:[][]\n\n");
+	printConvInfo(&c->head, fdOutP);
+
+	printf("##########\n\n");
+
+	for (int i = 0; i < c->head.nMex; i++) {
+		printf("--->Mex[%d]:\n", i);
+		printMex(c->mexList[i], fdOutP);
+		printf("**********\n");
+	}
+	printf("-------------------------------------------------------------\n");
 	return;
 }
 

@@ -113,6 +113,10 @@ void *thUs_ServTX(thUserArg *);
 
 /* FUNZIONI DI SUPPORTO PER TH-USER SUL SERVER CON RUOLO DI TX */
 
+/*==============================================================*/
+/*==============================================================*/
+/*==============================================================*/
+
 
 /** [][][] TH-ROOM GENERICO, prima di specializzarsi, HA IL COMPITO DI creare le strutture **/
 void *roomTh(thRoomArg *);

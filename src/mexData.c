@@ -103,6 +103,7 @@ int addMex(conversation *c, mex *m) {
 	}
 	c->head.nMex++;
 	c->mexList = reallocarray(c->mexList, c->head.nMex, sizeof(mex *));
+	c->mexList[c->head.nMex - 1] = m;
 	if (overrideHeadF(&c->head, c->stream)) {
 		return -1;
 	}

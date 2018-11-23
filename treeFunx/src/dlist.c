@@ -189,6 +189,42 @@ int count_nodes_dlist(dlist_pp head) {
 	return count;
 }
 
+/*==========================================================*/
+/*=================== Thread safe Metod ====================*/
+/*==========================================================*/
+
+int init_listHead_S(listHead_S_p head, int fd) {
+	// -1 error: see errno
+	// -2 just inizialize
+
+	if (head->head) {
+		dprintf(STDERR_FILENO, "[dlist]List just init.\n");
+		return -2;
+	}
+
+	head->head = calloc(1, sizeof(dlist_p *));
+
+
+	head->semId = semget(IPC_PRIVATE, 3, IPC_CREAT | IPC_EXCL | 0666);
+	if (head->semId == -1) {
+		perror("Create Sem-s take error:");
+		return -1;
+	}
+
+	//enum semName {wantWrite=0,readWorking=1,writeWorking=2}; number is Id of sem
+	unsigned short semStartVal[3] = {0, 0, 1};
+
+	//setup 3 semaphore in system5
+	if (semctl(head->semId, 0, SETALL, semStartVal)) {
+		perror("set Sem take error:");
+		return -1;
+	}
+
+	//dprintf(fdDebug, "SEMAFORO Avl CREATO\n");
+	semInfo(head->semId, fd);
+
+	return 0;
+}
 
 int add_head_dlist_S(listHead_S_p head, dlist_p node) {
 	int ret;
@@ -254,35 +290,3 @@ int count_nodes_dlist_S(listHead_S_p head) {
 }
 
 
-int init_listHead(listHead_S_p head, int fd) {
-	// -1 error: see errno
-	// -2 just inizialize
-
-	if (head->head) {
-		dprintf(STDERR_FILENO, "[dlist]List just init.\n");
-		return -2;
-	}
-
-	head->head = calloc(1, sizeof(dlist_p *));
-
-
-	head->semId = semget(IPC_PRIVATE, 3, IPC_CREAT | IPC_EXCL | 0666);
-	if (head->semId == -1) {
-		perror("Create Sem-s take error:");
-		return -1;
-	}
-
-	//enum semName {wantWrite=0,readWorking=1,writeWorking=2}; number is Id of sem
-	unsigned short semStartVal[3] = {0, 0, 1};
-
-	//setup 3 semaphore in system5
-	if (semctl(head->semId, 0, SETALL, semStartVal)) {
-		perror("set Sem take error:");
-		return -1;
-	}
-
-	//dprintf(fdDebug, "SEMAFORO Avl CREATO\n");
-	semInfo(head->semId, fd);
-
-	return 0;
-}

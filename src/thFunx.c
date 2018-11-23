@@ -839,19 +839,18 @@ void *thUs_ServTX(thUserArg *argTh) {
 					break;
 			}
 		}
-
+		int entryToDel;
 		switch (packRead_in.md.type) {
 			case in_delRm_p:
-				/* RICEVUTO AL TH-User_tx
+				/* RICEVUTO AL TH-room-tx
 				 * type= in_delRm_p
 				 * sender=  roomName(string) ID:NAME //non lo uso
 				 * who= point of entry(string)
 				 * mex= <Null>
 				 */
-				delEntry(argTh->info->tab, atoi(packRead_in.md.whoOrWhy));
-				dprintf(fdDebug, "Th-usTx %s delete entry %d because closig room\n", argTh->idNameUs,
-				        atoi(packRead_in.md.whoOrWhy));
-
+				entryToDel = atoi(packRead_in.md.whoOrWhy);
+				delEntry(argTh->info->tab, entryToDel);
+				dprintf(fdDebug, "Th-usTx %s delete entry %d because closig room\n", argTh->idNameUs, entryToDel);
 
 				/*  INVIO AL CLIENT
 				 * type= out_exitRm_p
@@ -862,7 +861,14 @@ void *thUs_ServTX(thUserArg *argTh) {
 				fillPack(&sendClient, out_exitRm_p, 0, 0, "SERVER", packRead_in.md.whoOrWhy);
 				writePack(argTh->conUs.con.ds_sock, &sendClient);
 				break;
-
+			case in_mess_p:
+				/* RICEVUTO AL TH-room-tx
+				 * type= in_mess_p
+				 * sender=  roomName(string) ID:NAME //non lo uso
+				 * who= frase messaggio in arrivo(string)
+				 * mex= puntatore a mex, e dimesione del pacchetto da inviare nella write_pack
+				 */
+				break;
 			default:
 				//pacchetto non gestito, quindi non indirizzato a noi, lo ri infilo nella pipe
 				writePack_inside(argTh->fdPipe[writeEndPipe], &packRead_in);
@@ -900,7 +906,7 @@ void *roomTh(thRoomArg *info) {
 	strncpy(info->roomName, name, stringLen);
 	sprintf(info->idNameRm, "%d:%s", id, name);
 
-	init_listHead(&info->mailList, fdOut);  //all'avvio della room la coda di inoltro è nulla
+	init_listHead_S(&info->mailList, fdOut);  //all'avvio della room la coda di inoltro è nulla
 
 	dprintf(fdOut, "Ciao sono Un Tr-ROOM\n\tsono la %d\tmi chiamo %s\n\tmi ragiungi da %d\n", info->id, info->roomPath,
 	        info->fdPipe[writeEndPipe]);
@@ -965,7 +971,7 @@ void *thRoomRX(thRoomArg *info) {
 				break;
 		}
 
-		if (!packRecive.mex) free(packRecive.mex);
+		if (packRecive.mex) free(packRecive.mex);
 	}
 	delete_avl_node_S(usAvlTree_Pipe, info->id);   //mi levo dall'avl e inizio la pulizia
 	sleep(1);
@@ -1253,6 +1259,7 @@ void *thRoomTX(thRoomArg *info) {
 				break;
 		}
 
+		if (packRead_in.mex) free(packRead_in.mex);
 	}
 
 
@@ -1270,6 +1277,8 @@ int mexRecive_inside(mail *pack, thRoomArg *data) {
 	mail usRespond;
 	int usPipe, idkeyUs;
 	sscanf(pack->md.sender, "%d:%d", &usPipe, &idkeyUs);
+
+	//segno il nodo inviante
 	dlist_p senderMexNode = nodeSearchKey(data->mailList, atoi(pack->md.sender));
 	if (!senderMexNode) {
 		fillPack(&usRespond, failed_p, 0, 0, data->idNameRm, "Not in Room forwarding List");
@@ -1296,6 +1305,38 @@ int mexRecive_inside(mail *pack, thRoomArg *data) {
 	//inizio a inoltrare a tutti gli elementi della lista di inoltro:
 	//todo: inoltrare ai client connessi
 
+
+	if (!data->mailList.head || !*data->mailList.head) {
+		dprintf(STDERR_FILENO, "[mex_inside_forwarding]head or first node is NULL!\n");
+		return -1;
+	}
+	dlist_p tmp;
+	tmp = *data->mailList.head;
+	listData_p dt = (listData_p) tmp->data;
+	//newMex è aggiunto paro paro alla conv quindi ho già il messaggio aggiunto puntato
+	//todo inviare il mex come un puntatore a mex, e dim la dimensione da spacchettato per writePack
+	fillPack(&usRespond, in_mess_p, pack->md.dim, newMex, data->idNameRm, "New mex incoming");
+	do {
+		if (tmp != senderMexNode) {
+			if (writePack_inside(dt->fdPipeSend, &usRespond)) {
+				switch (errno) {
+					case EPIPE:
+						//pipe non più raggiungibile, tolgo dalla lista di inoltro
+						dprintf(STDERR_FILENO, "In Forwarding mex user=%d impossible to reach\nDeleting from list\n",
+						        dt->keyId);
+						deleteNodeByList(data->mailList, tmp);
+						break;
+					default:
+						dprintf(STDERR_FILENO, "In Forwarding mex user=%d unknown error :%s", dt->keyId,
+						        strerror(errno));
+						break;
+				}
+			}
+		}
+		tmp = tmp->next;
+	} while (tmp != *data->mailList.head);
+
+	return 0;
 
 }
 

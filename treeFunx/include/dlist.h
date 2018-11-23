@@ -50,11 +50,16 @@ int destroy_dlist(dlist_pp head);
 /* Count total nodes in list */
 int count_nodes_dlist(dlist_pp head);
 
+/*==========================================================*/
+/*=================== Thread safe Metod ====================*/
+/*==========================================================*/
+
 typedef struct listHead_S_ {
 	dlist_pp head;
 	int semId;
 } listHead_S, *listHead_S_p;
 
+int init_listHead_S(listHead_S_p head, int fd);
 
 int add_head_dlist_S(listHead_S_p head, dlist_p node);
 
@@ -76,6 +81,5 @@ int destroy_dlist_S(listHead_S_p head);
 /* Count total nodes in list */
 int count_nodes_dlist_S(listHead_S_p head);
 
-int init_listHead(listHead_S_p head, int fd);
 
 

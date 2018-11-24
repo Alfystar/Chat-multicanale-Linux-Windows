@@ -116,8 +116,6 @@ int main (int argc, char *argv[]){
 	}
 	printf ("[3]---> success\n\n");
 
-
-
 	/** Spawn dei thread ROOM **/
 	// Necessario prima delle connessioni perche' le room sono intrinseche al server
 	// I th-User sono invece instanziati ad-hoc
@@ -171,9 +169,6 @@ int main (int argc, char *argv[]){
 	printf ("[5]---> Fase 5 Success\n");
 	printf ("\t#### SERVER CONNECTION ALL ONLINE ####\n\n");
 
-
-
-
 	/** Il Main Thread  diventa il terminale con cui interagire da qui in poi è il terminale **/
 	printf ("\n\n__________________________________________________________________\n[x][x][x][x][x][x]\tAvvio Del terminale\t[x][x][x][x][x][x]\n");
 	/** Ridirezione dello stdErr, così chè gli errori vengano tutti scritti in rosso nel riquadro corrispondente **/
@@ -182,9 +177,6 @@ int main (int argc, char *argv[]){
 	usleep (500000);
 
 	terminalShell ( );
-
 	printf ("\n\nServer Terminato da shell, senza presenza di errori\n\n");
-
 	return 0;
 }
-

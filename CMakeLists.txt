@@ -23,7 +23,3 @@ add_executable(Chat_MultiLevel main.c ${MAIN_DIR_INCLUDE} ${HEADER} ${HEADER_TRE
 target_link_libraries(${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT})
 include_directories(${CURSES_INCLUDE_DIR})
 target_link_libraries(${PROJECT_NAME} ${CURSES_LIBRARIES})
-
-
-
-

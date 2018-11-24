@@ -825,8 +825,7 @@ READ_MEX_RECIVE:
 /** #### TH-USER SUL SERVER CON RUOLO DI TX **/
 void *thUs_ServTX (thUserArg *uData){
 	mail packRead_in, sendClient;
-	int exit = 1;
-	while (exit){
+	while (1){
 		dprintf (fdOut, "[Us-tx-(%s)]wait message from [%d] pipe\n", uData->idNameUs, uData->fdPipe[readEndPipe]);
 		if (readPack_inside (uData->fdPipe[readEndPipe], &packRead_in)){
 			switch (errno){
@@ -979,7 +978,7 @@ void *thRoomRX (thRoomArg *rData){
 				break;
 			case in_exit_p:
 				if (exitRoom_inside (&packRecive, rData)){
-					dprintf (STDERR_FILENO, "[Rm-rx(%s)]Impossible remove node from mail-List of Th-room\n",
+					dprintf (STDERR_FILENO, "[Rm-rx(%s)]Impossible remove node from mail-List of Th-room%s\n",
 					         rData->idNameRm,
 					         packRecive.md.sender);
 				}
@@ -1236,8 +1235,7 @@ int exitRoom_inside (mail *pack, thRoomArg *data){
 /** #### TH-ROOM CON RUOLO DI TX **/
 void *thRoomTX (thRoomArg *rData){
 	mail packRead_in, sendClient;
-	int exit = 1;
-	while (exit){
+	while (1){
 		dprintf (fdDebug, "[Rm-tx-(%s)] wait message from [%d] pipe\n", rData->idNameRm, rData->fdPipe[readEndPipe]);
 		if (readPack_inside (rData->fdPipe[readEndPipe], &packRead_in)){
 			switch (errno){

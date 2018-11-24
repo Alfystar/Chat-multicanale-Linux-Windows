@@ -88,6 +88,8 @@ int recursive_delete (const char *dir){
 					ret = -1;
 				}
 				break;
+			default:
+				break;
 		}
 	}
 

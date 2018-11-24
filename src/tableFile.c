@@ -156,7 +156,7 @@ table *compressTable (table *t){
 	flockfile (t->stream);
 	if (ftruncate (fileno (t->stream), sizeof (firstFree) + sizeof (entry) * newLen)){
 		perror ("Tunck File take error:");
-		return -1;
+		return NULL;
 	}
 	rewind (t->stream);
 	fileWrite (t->stream, sizeof (firstFree), 1, &t->head);

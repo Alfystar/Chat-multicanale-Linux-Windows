@@ -486,7 +486,6 @@ int search_BFS_avl (avl_pp root, int key){
 	//return -2 is not Found
 	avl_p node = NULL;
 	queue_p queue = NULL;
-	int ret = 0;
 
 	if (!root || !*root){
 		dprintf (STDERR_FILENO, "[avl]avl tree or root node is NULL!\n");

@@ -260,7 +260,6 @@ int creatServerStatConf (){
 	int validServerId = open ("serverStat.conf", O_CREAT | O_RDWR | O_TRUNC, 0666);
 
 	/*** Procedura per aggiungere ora di creazione del server ***/
-	char testo[4096];
 	time_t current_time;
 	char *c_time_string;
 

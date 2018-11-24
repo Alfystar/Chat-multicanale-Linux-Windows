@@ -47,7 +47,6 @@ typedef struct infoChat_{
 	table *tab;
 	conversation *conv;
 	char myPath[128];   //path della mia chat
-	int fdTemp;         //file temporaneo, probabilemente non serve più
 } infoChat;
 typedef struct infoUser_{
 	table *tab;         //struttura tab

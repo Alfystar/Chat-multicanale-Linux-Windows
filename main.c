@@ -1,29 +1,10 @@
 #define _GNU_SOURCE             /* See feature_test_macros(7) */
-
-
 #include <stdio.h>
-
-/** Librerie per creare la Pipe**/
-
+#include <execinfo.h>
 
 #include "helpFunx.h"
-
-/** LIBRERIE Ad Hoc **/
 #include "include/fileSystemUtylity.h"
 #include "include/terminalShell.h"  /** screen Shell lib **/
-
-
-/** LIBRERIE Connessione **/
-
-//#include "include/socketConnect.h"
-
-
-/** STRUTTURE & Typedef DEL MAIN **/
-
-/** PROTOTIPI DEL MAIN **/
-
-
-
 
 /** TIDs Of acceptTh **/
 pthread_t *acceptArray;

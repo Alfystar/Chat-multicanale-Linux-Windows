@@ -84,7 +84,6 @@ void terminalShell (){
 void driverCmd (int argc, char *argv[], int *exit){
 	//la funzione deve avere il controllo esclusivo dello schermo
 
-
 	if (argc >= 1){
 		if (strcmp (argv[0], "q") == 0){
 			*exit = 0;
@@ -98,12 +97,10 @@ void driverCmd (int argc, char *argv[], int *exit){
 			debugView = false;
 			return;
 		}
-
 		if (strcmp (argv[0], "room") == 0){
 			sem_wait (&screewWrite);
 			chatShowW (showPannel, 1, 0);
 			sem_post (&screewWrite);
-
 			return;
 		}
 		if (strcmp (argv[0], "p-avlR") == 0){
@@ -116,12 +113,10 @@ void driverCmd (int argc, char *argv[], int *exit){
 			sem_wait (&screewWrite);
 			userShowW (showPannel, 1, 0);
 			sem_post (&screewWrite);
-
 			return;
 		}
 		if (strcmp (argv[0], "p-avlU") == 0){
 			print_avl_S (usAvlTree_Pipe);
-			//print_avl(*usAvlTree_Pipe.avlRoot, *usAvlTree_Pipe.avlRoot);
 			return;
 		}
 		if (strcmp (argv[0], "sstat") == 0){
@@ -132,25 +127,12 @@ void driverCmd (int argc, char *argv[], int *exit){
 			sem_wait (&screewWrite);
 			windowSetUp ();
 			sem_post (&screewWrite);
-
 			return;
 		}
-
-
 	}
 
 	if (argc >= 2) //seleziona comando
 	{
-		/*
-		if (strcmp(argv[0], "mkUs") == 0) {
-			infoUser *info = newUser(argv[1]);
-			if (info == NULL) {
-				dprintf(STDERR_FILENO, "creazione della chat impossibile");
-				return;
-			}
-			return;
-		}
-		*/
 		if (strcmp (argv[0], "usTab") == 0){
 			nameList *user = userExist ();
 			int want = idSearch (user, atoi (argv[1]));
@@ -164,7 +146,6 @@ void driverCmd (int argc, char *argv[], int *exit){
 				mvwprintw (showPannel, 3, 10, "[][][] ID RICHIESTO INESISTENTE [][][]");
 				wrefresh (showPannel);
 				sem_post (&screewWrite);
-
 				return;
 			}
 
@@ -178,17 +159,11 @@ void driverCmd (int argc, char *argv[], int *exit){
 
 				return;
 			}
-			/*
-			dprintf(fdOut, "path=%s\n", userDir);
-			tabPrintFile(info->tab->stream);
-			*/
 			sem_wait (&screewWrite);
 			wtabPrint (showPannel, info->tab, 0);
 			sem_post (&screewWrite);
-
 			return;
 		}
-
 		if (strcmp (argv[0], "roomTab") == 0){
 			nameList *chat = chatRoomExist ();
 			int want = idSearch (chat, atoi (argv[1]));
@@ -202,11 +177,8 @@ void driverCmd (int argc, char *argv[], int *exit){
 				mvwprintw (showPannel, 3, 10, "[][][] ID RICHIESTO INESISTENTE [][][]");
 				wrefresh (showPannel);
 				sem_post (&screewWrite);
-
 				return;
 			}
-
-			///carico dati da visualizzare
 			char chatDir[128];
 			sprintf (chatDir, "./%s/%s", chatDirName, chat->names[want]);
 			nameListFree (chat);
@@ -216,11 +188,9 @@ void driverCmd (int argc, char *argv[], int *exit){
 				return;
 			}
 			dprintf (fdOut, "path=%s\n", chatDir);
-			//tabPrint(info->tab);
 			sem_wait (&screewWrite);
 			wtabPrint (showPannel, info->tab, 0);
 			sem_post (&screewWrite);
-
 			return;
 		}
 		if (strcmp (argv[0], "roomConv") == 0){
@@ -230,8 +200,6 @@ void driverCmd (int argc, char *argv[], int *exit){
 				dprintf (STDERR_FILENO, "Id richiesto inesistente\n");
 				return;
 			}
-
-			///carico dati da visualizzare
 			char chatDir[128];
 			sprintf (chatDir, "./%s/%s", chatDirName, chat->names[want]);
 			nameListFree (chat);
@@ -241,7 +209,6 @@ void driverCmd (int argc, char *argv[], int *exit){
 				return;
 			}
 			dprintf (fdOut, "path=%s\n", chatDir);
-
 			sem_wait (&screewWrite);
 			wprintConv (showPannel, info->conv, 0);
 			sem_post (&screewWrite);
@@ -249,28 +216,10 @@ void driverCmd (int argc, char *argv[], int *exit){
 			return;
 		}
 	}
-	/*
-	if (argc >= 3) {
-		if (strcmp(argv[0], "mkRm") == 0) {
-			infoChat *info = newRoom(argv[1], atoi(argv[2]));
-			if (info == 0) {
-				dprintf(STDERR_FILENO, "creazione della chat impossibile");
-				return;
-			}
-			long idKey = atoi(info->myPath);       //essendo myname xx:TEXT, la funzione termina ai : e ottengo la key
-			char roomDir[128];
-			sprintf(roomDir, "./%s/%ld:%s", chatDirName, idKey, argv[1]);
-			makeThRoom(idKey, roomDir, info);
-            dprintf(fdOut, "ROOM th creato, idKey=%d\n", idKey);
-			return;
-		}
-	}
-	 */
 	dprintf (STDERR_FILENO, "Coomand not Reconize\n");
 	sem_wait (&screewWrite);
 	menuHelpw (cmdW, 2, 0, argc, argv);
 	sem_post (&screewWrite);
-
 }
 
 void menuHelpw (WINDOW *w, int y_start, int x_start, int argc, char *argv[]){
@@ -292,7 +241,6 @@ void menuHelpw (WINDOW *w, int y_start, int x_start, int argc, char *argv[]){
 			wprintw (w, "->!d\t-> Disattiva visualizzazione DebugMonitor\n");
 			wprintw (w, "->sstat\t-> Mostra servStat sul monitor\n");
 			wprintw (w, "->reset\t-> restart Interface\n");
-
 			//wprintw(w, "\t(1)arg\n");
 			//wprintw(w, "\t(2)arg\n");
 			return;
@@ -303,7 +251,6 @@ void menuHelpw (WINDOW *w, int y_start, int x_start, int argc, char *argv[]){
 			wprintw (w, "->p-avlU\t-> Printa l'avl degli User\n");
 
 			wprintw (w, "\t(1)arg\n");
-			//wprintw(w, "->mkUs [Us Name]\t-> Crea un user nel file system\n");
 			wprintw (w, "->usTab [Us id]\t\t-> Visualizza tabella user\n");
 
 			//wprintw(w, "\t(2)arg\n");
@@ -317,15 +264,10 @@ void menuHelpw (WINDOW *w, int y_start, int x_start, int argc, char *argv[]){
 			wprintw (w, "\t(1)arg\n");
 			wprintw (w, "->roomTab [Rm id]\t-> Visualizza tabella Room\n");
 			wprintw (w, "->roomConv [Rm id]\t-> Visualizza conversazione Room\n");
-			/*
-			wprintw(w, "\t(2)arg\n");
-			wprintw(w, "->mkRm [Room Name] [id Admin]\t-> Crea una nuova Room\n");
-			 */
+			//wprintw(w, "\t(2)arg\n");
 			return;
 		}
-
 	}
-
 }
 
 void windowSetUp (){
@@ -345,7 +287,6 @@ void windowSetUp (){
 	init_pair (ErrorPrint, COLOR_RED, COLOR_BLACK);
 	init_pair (DebugPrint, COLOR_MAGENTA, COLOR_BLUE);
 
-
 	/** Main windows print **/
 	mvprintw (LINES - 1, 1, "Versione del server: %s\tPort-Proces: %d\tServerStore :%s", firmwareVersion, portProces,
 	          storagePathServer);
@@ -361,10 +302,8 @@ void windowSetUp (){
 	wbkgd (cmdW, COLOR_PAIR(Comandi));
 	attron(COLOR_PAIR (Comandi));
 
-	//box(cmdW, ' ', '#');    //sovrascrive il testo
 	mvprintw (cmdW->_begy - 1, cmdW->_begx,
 	          "-------------------------------Finestra di comando------------------------------");
-
 	wrefresh (cmdW);
 
 	/** Finestra di Visualizzazione setUp **/
@@ -394,9 +333,8 @@ void titlePrintW (WINDOW *w, int y_start, int x_start){
 }
 
 void chatShowW (WINDOW *w, int y_start, int x_start){
-	mvwprintw (w, 1, 0, "Sul Server sono attualmente presenti i seguenti gruppi:\n");
+	mvwprintw (w, y_start, x_start, "Sul Server sono attualmente presenti i seguenti gruppi:\n");
 	nameList *chats = chatRoomExist ();
-
 	for (int i = 0; i < chats->nMemb; i++){
 		wprintw (w, "[%d]\t|--%s\n", i, chats->names[i]);
 	}
@@ -406,9 +344,8 @@ void chatShowW (WINDOW *w, int y_start, int x_start){
 }
 
 void userShowW (WINDOW *w, int y_start, int x_start){
-	mvwprintw (w, 1, 0, "Sul Server sono attualmente Iscritti gli utenti:\n");
+	mvwprintw (w, y_start, x_start, "Sul Server sono attualmente Iscritti gli utenti:\n");
 	nameList *user = userExist ();
-
 	for (int i = 0; i < user->nMemb; i++){
 		wprintw (w, "[%d]\t|--%s\n", i, user->names[i]);
 	}
@@ -432,7 +369,6 @@ void wtabPrint (WINDOW *w, table *t, int y_start){
 
 	mvwprintw (w, y_start, 0, "");
 	wclrtobot (w);
-
 	wprintw (w, "La tabella ha le seguenti caratteristiche:\n");
 	wprintw (w, "size=%d\n", tabInfo.st_size);
 	wprintw (w, "lenFile=%d\tlenFirst=%d\n", lenFile, t->head.len);
@@ -449,19 +385,16 @@ void wtabPrint (WINDOW *w, table *t, int y_start){
 }
 
 void wfirstPrint (WINDOW *w, firstFree *f){
-
 	wprintw (w, "#1\tfirstFree data Store:\n");
 	wprintw (w, "name\t\t-> %s\n", f->name);
 	wprintw (w, "couterFree\t-> %d\n", f->counter);
 	wprintw (w, "Len\t\t-> %d\n", f->len);
 	wprintw (w, "nextFree\t-> %d\n", f->nf_id);
-	return;
 }
 
 void wentryPrint (WINDOW *w, entry *e){
 	wprintw (w, "Entry data Store:\n??-Last-Free -> %s\tempty  -> %s\nname\t\t-> %s\npoint\t\t-> %d\n",
 	         booleanPrint (isLastEntry (e)), booleanPrint (isEmptyEntry (e)), e->name, e->point);
-	return;
 }
 
 void wprintConv (WINDOW *w, conversation *c, int y_start){
@@ -482,7 +415,6 @@ void wprintConv (WINDOW *w, conversation *c, int y_start){
 		wprintw (w, "**********\n");
 	}
 	wrefresh (w);
-	return;
 }
 
 void wprintMex (WINDOW *w, mex *m){
@@ -511,7 +443,6 @@ void wprintConvInfo (WINDOW *w, convInfo *cI){
 	*/
 	wprintw (w, "#1\tConversation info data Store:\n");
 	wprintw (w, "nMess\t\t-> %d\n", cI->nMex);
-
 	nameList *user = userExist ();
 	char *who;
 	int want = idSearch (user, cI->adminId);
@@ -584,7 +515,6 @@ void shellThStdErr (thShellArg *info){
 		sem_post (&screewWrite);
 	}
 	free (info);
-
 }
 
 void shellThDebug (thShellArg *info){

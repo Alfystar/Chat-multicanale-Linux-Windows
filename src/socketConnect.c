@@ -117,7 +117,6 @@ int readPack (int ds_sock, mail *pack){
 	pack->mex = malloc (dimMex);
 
 	bRead = 0; //rimetto a zero per la nuova lettura
-	ret = 0;
 	iterContr = 0;
 	do{
 		ret = read (ds_sock, pack->mex + bRead, dimMex - bRead);

@@ -50,12 +50,11 @@ int fdOut, fdDebug;       //il riferimento per scrivere in [dprintf(...)]
 
 
 /** AVL TREEs Thread-Safe**/
-///i nodi a livello informativo possiedono:
-/// key :=keyId
-/// data := Fd of Pipe to write at the thread same-things
-
 #include "treeFunx/include/avl.h"
 
+///i nodi a livello informativo possiedono:
+// key :=keyId
+// data := Fd of Pipe to write at the thread same-things
 avl_pp_S usAvlTree_Pipe, rmAvlTree_Pipe;
 
 #endif //CHAT_MULTILEVEL_DEFINESETS_H

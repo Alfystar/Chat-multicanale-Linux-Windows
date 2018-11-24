@@ -62,5 +62,4 @@ void shellThStdout (thShellArg *);
 void shellThStdErr (thShellArg *);
 void shellThDebug (thShellArg *);
 
-
 #endif //CHAT_MULTILEVEL_TERMINALSHELL_H

@@ -71,7 +71,7 @@ void *userTh (thConnArg *info){
 			break;
 	}
 
-	dprintf (fdDebug, "Login success\nTx-th & Rx-th of %d now Create\n", arg->id);
+	dprintf (fdOut, "Login success\nTx-th & Rx-th of %d now Create\n", arg->id);
 	sprintf (arg->idNameUs, "%d:%s", arg->id, arg->userName);
 
 	// dal manuale: fd[0] refers to the read end of the pipe. fd[1] refers to the write end of the pipe.
@@ -841,10 +841,10 @@ void *thUs_ServTX (thUserArg *uData){
 		int entryToDel;
 		switch (packRead_in.md.type){
 			case in_delRm_p:
-				/* RICEVUTO AL TH-room-tx
+				/* RICEVUTO AL TH-ROOM
 				 * type = in_delRm_p
 				 * sender =  roomName(string) ID:NAME //non lo uso
-				 * who = point of entry(string)
+				 * who = index of entry in Tab(string)
 				 * mex = <Null>
 				 */
 				entryToDel = atoi (packRead_in.md.whoOrWhy);
@@ -859,7 +859,7 @@ void *thUs_ServTX (thUserArg *uData){
 				/* INVIO AL CLIENT
 				 * type = out_exitRm_p
 				 * sender =  SERVER(string) //non lo uso
-				 * who = point of entry(string)
+				 * who = index of entry in Tab(string)
 				 * mex = <Null>
 				 */
 				fillPack (&sendClient, out_exitRm_p, 0, 0, "SERVER", packRead_in.md.whoOrWhy);
@@ -1092,10 +1092,16 @@ int delRoom_inside (mail *pack, thRoomArg *data){
 			default:    //utente presente, gli invio il segnale
 				sprintf (pointStr, "%d", en->point);
 				fillPack (&respond, in_delRm_p, 0, 0, data->idNameRm, pointStr);
+				/* INVIO AL TH-USER-TX
+				 * type = in_delRm_p
+				 * sender =  roomName(string) ID:NAME //non lo uso
+				 * who = index of entry in Tab(string)
+				 * mex = <Null>
+				 */
 				writePack_inside (pipeUserScr, &respond);
 				break;
 		}
-	}   //end for, inscritti eliminati
+	}   //#end for, inscritti eliminati
 
 	//elimino la room sul fileSistem
 	fillPack (&respond, success_p, 0, 0, data->idNameRm, "Deleting Room Success");
@@ -1348,27 +1354,27 @@ int readPack_inside (int fdPipe, mail *pack){
 	int iterContr = 0; // vediamo se la read fallisce
 	ssize_t bRead = 0;
 	ssize_t ret = 0;
-	dprintf (fdDebug, "readPack_inside Funx\n");
-
+	//dprintf (fdDebug, "readPack_inside Funx\n");
 	sigset_t newSet, oltSet;
 	sigfillset (&newSet);
 	pthread_sigmask (SIG_SETMASK, &newSet, &oltSet);
 
 	int iterazione = 0;
 	do{
-		dprintf (fdDebug, "reedPack_inside Funx [%d] e leggo dalla pipe %d\n", iterazione, fdPipe);
 		iterazione++;
 		ret = read (fdPipe, pack + bRead, sizeof (mail) - bRead);
 		if (ret == -1){
-			perror ("Read_in error; cause:");
+			dprintf (STDERR_FILENO, "[reedPack_inside]Error @:\niterazione=[%d], read pipe=[%d]\n", iterazione, fdPipe);
+			perror ("cause:");
 			return -1;
 		}
 		if (ret == 0){
 			iterContr++;
 			if (iterContr > 4){
-				dprintf (STDERR_FILENO, "Seems Read can't go further; test connection... [%d]\n", iterContr);
+				dprintf (STDERR_FILENO, "[reedPack_inside]Seems Read can't go further; test connection... [%d]\n",
+				         iterContr);
 				if (testConnection_inside (fdPipe) == -1){
-					dprintf (STDERR_FILENO, "test Fail\n");
+					dprintf (STDERR_FILENO, "[reedPack_inside]Test Fail\n");
 					return -1;
 				}
 				else{
@@ -1398,17 +1404,17 @@ int writePack_inside (int fdPipe, mail *pack) //dentro il thArg deve essere punt
 	sigfillset (&newSet);
 	pthread_sigmask (SIG_SETMASK, &newSet, &oltSet);
 	do{
-		dprintf (fdDebug, "writePack_inside Funx [%d] e scrivo sulla pipe %d\n", iterazione, fdPipe);
 		iterazione++;
 		ret = write (fdPipe, pack + bWrite, sizeof (mail) - bWrite); //original
 		if (ret == -1){
 			switch (errno){
 				case EPIPE:
-					dprintf (STDERR_FILENO, "writePack_inside pipe break 1\n");
+					dprintf (STDERR_FILENO, "[writePack_inside]Pipe break @:\niterazione=[%d], write pipe=[%d]\n",
+					         iterazione, fdPipe);
 					return -1;
 					//GESTIRE LA CHIUSURA DEL SOCKET (LA CONNESSIONE E' STATA INTERROTTA IMPROVVISAMENTE)
 				default:
-					perror ("writePack_inside take error:\n");
+					perror ("[writePack_inside]Error:\n");
 					return -1;
 					break;
 			}
@@ -1417,7 +1423,6 @@ int writePack_inside (int fdPipe, mail *pack) //dentro il thArg deve essere punt
 	}
 	while (sizeof (mail) - bWrite != 0);
 	pthread_sigmask (SIG_SETMASK, &oltSet, &newSet);   //restora tutto
-	dprintf (fdDebug, "writePack_inside Funx send sulla pipe %d\n", iterazione, fdPipe);
 	return 0;
 }
 

@@ -114,16 +114,11 @@ CMakeFiles/Chat_MultiLevel.dir/treeFunx/src/common.c.o: ../treeFunx/include/comm
 CMakeFiles/Chat_MultiLevel.dir/treeFunx/src/common.c.o: ../treeFunx/include/log.h
 CMakeFiles/Chat_MultiLevel.dir/treeFunx/src/common.c.o: ../treeFunx/src/common.c
 
-CMakeFiles/Chat_MultiLevel.dir/treeFunx/src/dlist.c.o: ../globalSet.h
-CMakeFiles/Chat_MultiLevel.dir/treeFunx/src/dlist.c.o: ../treeFunx/include/avl.h
 CMakeFiles/Chat_MultiLevel.dir/treeFunx/src/dlist.c.o: ../treeFunx/include/common.h
 CMakeFiles/Chat_MultiLevel.dir/treeFunx/src/dlist.c.o: ../treeFunx/include/dlist.h
 CMakeFiles/Chat_MultiLevel.dir/treeFunx/src/dlist.c.o: ../treeFunx/include/log.h
-CMakeFiles/Chat_MultiLevel.dir/treeFunx/src/dlist.c.o: ../treeFunx/include/queue.h
-CMakeFiles/Chat_MultiLevel.dir/treeFunx/src/dlist.c.o: ../treeFunx/include/stack.h
 CMakeFiles/Chat_MultiLevel.dir/treeFunx/src/dlist.c.o: ../treeFunx/src/dlist.c
 
-CMakeFiles/Chat_MultiLevel.dir/treeFunx/src/log.c.o: ../treeFunx/include/log.h
 CMakeFiles/Chat_MultiLevel.dir/treeFunx/src/log.c.o: ../treeFunx/src/log.c
 
 CMakeFiles/Chat_MultiLevel.dir/treeFunx/src/queue.c.o: ../treeFunx/include/common.h

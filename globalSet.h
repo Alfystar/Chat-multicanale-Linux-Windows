@@ -44,11 +44,9 @@ int portProces; //port of process
 #define readEndPipe 0
 #define writeEndPipe 1
 
-int FdStdOutPipe[2];  // dal manuale: FdStdOutPipe[0] refers to the read end of the pipe. FdStdOutPipe[1] refers to the write end of the pipe.
-int FdStdErrPipe[2];
-int FdDebugPipe[2];
-int fdOut;           //il riferimento per scrivere [dprintf(...)]
-int fdDebug;
+// dal manuale: FdStdOutPipe[0] refers to the read end of the pipe. FdStdOutPipe[1] refers to the write end of the pipe.
+int FdStdOutPipe[2], FdStdErrPipe[2], FdDebugPipe[2];
+int fdOut, fdDebug;       //il riferimento per scrivere in [dprintf(...)]
 
 
 /** AVL TREEs Thread-Safe**/
@@ -58,7 +56,6 @@ int fdDebug;
 
 #include "treeFunx/include/avl.h"
 
-avl_pp_S usAvlTree_Pipe;
-avl_pp_S rmAvlTree_Pipe;
+avl_pp_S usAvlTree_Pipe, rmAvlTree_Pipe;
 
 #endif //CHAT_MULTILEVEL_DEFINESETS_H

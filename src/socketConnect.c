@@ -197,7 +197,6 @@ void freeConnection(connection *con) {
 	free(con);
 }
 
-
 int fillPack(mail *pack, int type, int dim, void *mex, char *sender, char *whoOrWhy) {
 	if (pack == NULL) {
 		errno = EFAULT;
@@ -223,6 +222,18 @@ int fillPack(mail *pack, int type, int dim, void *mex, char *sender, char *whoOr
 	}
 
 	return 0;
+}
+
+void freePack (mail *p){
+	freeMexPack (p);
+	free (p);
+}
+
+void freeMexPack (mail *p){
+	if (p->mex){
+		free (p->mex);
+		p->mex = NULL;
+	}
 }
 
 void printPack(mail *pack) {

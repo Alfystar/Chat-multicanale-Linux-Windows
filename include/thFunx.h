@@ -92,17 +92,17 @@ void *thUs_ServRX(thUserArg *);
 
 /* FUNZIONI DI SUPPORTO PER TH-USER SUL SERVER CON RUOLO DI RX */
 
-int mkRoomSocket(mail *pack, thUserArg *data);
+int mkRoomSocket (mail *pack, thUserArg *uData);
 
 void makeThRoom(int keyChat, char *roomPath, infoChat *info);
 
-int joinRoomSocket(mail *pack, thUserArg *data);
+int joinRoomSocket (mail *pack, thUserArg *uData);
 
-int delRoomSocket(mail *pack, thUserArg *data);
+int delRoomSocket (mail *pack, thUserArg *uData);
 
-int leaveRoomSocket(mail *pack, thUserArg *data);
+int leaveRoomSocket (mail *pack, thUserArg *uData);
 
-int openRoomSocket(mail *pack, thUserArg *data);
+int openRoomSocket (mail *pack, thUserArg *uData);
 
 int exitRoomSocket(mail *pack, thUserArg *data);
 
@@ -122,7 +122,7 @@ void *thUs_ServTX(thUserArg *);
 void *roomTh(thRoomArg *);
 
 /** #### TH-ROOM CON RUOLO DI RX **/
-void *thRoomRX(thRoomArg *info);
+void *thRoomRX (thRoomArg *rData);
 
 /* FUNZIONI DI SUPPORTO PER TH-ROOM CON RUOLO DI RX */
 int joinRoom_inside(mail *pack, thRoomArg *data);
@@ -137,7 +137,7 @@ int exitRoom_inside(mail *pack, thRoomArg *data);
 
 
 /** #### TH-ROOM CON RUOLO DI TX **/
-void *thRoomTX(thRoomArg *info);
+void *thRoomTX (thRoomArg *rData);
 
 /** FUNZIONI DI SUPPORTO PER TH-ROOM CON RUOLO DI TX **/
 

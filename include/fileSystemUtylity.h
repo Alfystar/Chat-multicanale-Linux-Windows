@@ -31,29 +31,24 @@ typedef struct nameList{
 	int nMemb;
 	char **names;
 } nameList;
-
 typedef struct serverStatFile_{
 	long idKeyUser;
 	long idKeyChat;
 	char serverTimeCreate[64];
 	char firmware_V[64];
 } serverStatFile;
-
 typedef struct serverStat_{
 	serverStatFile statFile;
 	int fd;             //quando chiuso a -2, -1 è per gli errori
 	sem_t lock;
 
 } serverStat;
-
 typedef struct infoChat_{
 	table *tab;
 	conversation *conv;
 	char myPath[128];   //path della mia chat
 	int fdTemp;         //file temporaneo, probabilemente non serve più
 } infoChat;
-
-
 typedef struct infoUser_{
 	table *tab;         //struttura tab
 	char pathName[128];   //path name of dir user ./USER_PATH_DIR/
@@ -67,45 +62,28 @@ serverStat serStat;
 ///Funzioni di avvio e terminazione Server
 //all'avvio del server esso inizializza il sistema, le directory ecc..
 int StartServerStorage (char *storage_name);
-
 ///Funzioni di per operare sulle chat
 infoChat *newRoom (char *nameRoom, int adminId);
-
 infoChat *openRoom (char *pathDir);
-
 infoUser *newUser (char *name);
-
 infoUser *openUser (char *pathDir);
-
 int lockDirFile (char *pathDir);
-
-
 ///Funzioni di supporto al file conf
-int creatServerStatConf ( );
-
-int overrideServerStatConf ( );
-
+int creatServerStatConf ();
+int overrideServerStatConf ();
 void printFcntlFile (int fd);
-
 void printServStat (int FdOut);
-
-int serStat_addUs_lock ( );
-
-long readSerStat_idKeyUser_lock ( );
-
-int serStat_addchat_lock ( );
-
-long readSerStat_idKeyChat_lock ( );
+int serStat_addUs_lock ();
+long readSerStat_idKeyUser_lock ();
+int serStat_addchat_lock ();
+long readSerStat_idKeyChat_lock ();
 
 
 ///Funzioni di scan della directory
 /*Metodi per operare sul database lato fileSystem*/
-nameList *chatRoomExist ( );
-
-nameList *userExist ( );
-
-nameList *allDir ( );
-
+nameList *chatRoomExist ();
+nameList *userExist ();
+nameList *allDir ();
 void nameListFree (nameList *nl);
 
 ///Funzioni per filtrare gli elementi
@@ -113,25 +91,15 @@ void nameListFree (nameList *nl);
  * Di seguito tutte le funzioni create per i vari filtri
  */
 int filterDirChat (const struct dirent *entry);
-
 int filterDir (const struct dirent *entry);
-
 int filterDirAndFile (const struct dirent *entry);
-
 char *fileType (unsigned char d_type, char *externalBuf, int bufLen);
-
 ///Funzioni per visualizzare gli elementi
 void nameListPrint (nameList *nameList, int fdOut);
-
 void infoChatPrint (infoChat *info, int fdOut);
-
 int idSearch (nameList *nl, int idSearch);
-
 void freeInfoChat (infoChat *p);
-
 void freeInfoUser (infoUser *p);
-
-
 #endif //CHAT_MULTILEVEL_FILESYSTEMUTYLITY_H
 
 

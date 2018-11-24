@@ -211,7 +211,7 @@ int init_listHead_S (listHead_S_p head, int fd){
 	}
 
 	//enum semName {wantWrite=0,readWorking=1,writeWorking=2}; number is Id of sem
-	unsigned short semStartVal[3] = { 0, 0, 1 };
+	unsigned short semStartVal[3] = {0, 0, 1};
 
 	//setup 3 semaphore in system5
 	if (semctl (head->semId, 0, SETALL, semStartVal)){

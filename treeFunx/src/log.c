@@ -19,8 +19,7 @@
  */
 
 extern int current_log_level;
-char *logarr[] = { "ERROR", "INFO", "DEBUG" };
-
+char *logarr[] = {"ERROR", "INFO", "DEBUG"};
 
 ///FUNZIONE DEPRECATA
 void debug_log (

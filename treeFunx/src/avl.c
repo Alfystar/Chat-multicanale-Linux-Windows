@@ -225,9 +225,9 @@ avl_pp generate_avl (int *arr, int len){
 		return NULL;
 	}
 
-	head = init_avl ( );
+	head = init_avl ();
 	for (; i < len; i++){
-		if (insert_avl_node (head, i, arr[ i ]) == FALSE){
+		if (insert_avl_node (head, i, arr[i]) == FALSE){
 			dprintf (STDERR_FILENO, "[avl]Insertion failed.\n");
 			destroy_avl (head);
 			return NULL;
@@ -256,7 +256,7 @@ bool insert_avl_node (avl_pp head, int key, int data){
 	nodedata_p n = NULL;
 	bool modified;
 	/* Stack to rebalance each subtree bottom-up after insertion */
-	d_stack_p stack = get_stack ( );
+	d_stack_p stack = get_stack ();
 
 	if (!head){
 		dprintf (STDERR_FILENO, "[avl]Initialize AVL tree first\n");
@@ -499,7 +499,7 @@ int search_BFS_avl (avl_pp root, int key){
 		return node->data;
 	}
 
-	queue = get_queue ( );
+	queue = get_queue ();
 
 	/* Add root node to Queue */
 	if (!enqueue (queue, *root)){
@@ -567,10 +567,10 @@ avl_pp_S generate_avl_S (int *arr, int len){
 		return head;
 	}
 
-	head = init_avl_S ( );
+	head = init_avl_S ();
 
 	for (; i < len; i++){
-		if (insert_avl_node (head.avlRoot, i, arr[ i ]) == FALSE){
+		if (insert_avl_node (head.avlRoot, i, arr[i]) == FALSE){
 			dprintf (STDERR_FILENO, "[avl]Insertion failed.\n");
 			destroy_avl (head.avlRoot);
 			head.avlRoot = NULL;
@@ -595,7 +595,7 @@ avl_pp_S init_avl_S (void){
 	}
 
 	//enum semName {wantWrite=0,readWorking=1,writeWorking=2}; number is Id of sem
-	unsigned short semStartVal[3] = { 0, 0, 1 };
+	unsigned short semStartVal[3] = {0, 0, 1};
 
 	//setup 3 semaphore in system5
 	if (semctl (head.semId, 0, SETALL, semStartVal)){

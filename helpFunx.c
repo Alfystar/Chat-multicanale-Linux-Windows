@@ -9,7 +9,7 @@ void printErrno (char *note, int error){
 	dprintf (STDERR_FILENO, "%s\terr:%d (%s)\n", note, error, strerror (error));
 }
 
-void printAllEnv ( ){
+void printAllEnv (){
 	printf ("\n######################################\n");
 	for (char **envp = environ; *envp != 0; envp++){
 		char *thisEnv = *envp;
@@ -44,7 +44,7 @@ int recursive_delete (const char *dir){
 	// Cast needed (in C) because fts_open() takes a "char * const *", instead
 	// of a "const char * const *", which is only allowed in C++. fts_open()
 	// does not modify the argument.
-	char *files[] = { (char *)dir, NULL };
+	char *files[] = {(char *)dir, NULL};
 
 	// FTS_NOCHDIR  - Avoid changing cwd, which could cause unexpected behavior
 	//                in multithreaded programs

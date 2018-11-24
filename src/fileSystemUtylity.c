@@ -60,13 +60,13 @@ int StartServerStorage (char *storage)  //apre o crea un nuovo storage per il da
 		printErrno ("errore in open('serverStat.conf')", errno);
 		if (errno == 2)//file non presente
 		{
-			nameList *dir = allDir ( );
+			nameList *dir = allDir ();
 			nameListPrint (dir, STDOUT_FILENO);
 
 			if (dir->nMemb == 0){
 				//non sono presenti cartelle di alcun tipo,la directory è quindi valida, creo il file config
 				printf ("La cartella non è valida, non sono presenti file o cartelle estrane\nProcedo alla creazione di serverStat.conf\n");
-				creatServerStatConf ( ); //la funzione inizializza in ram e su hard-disc il file serverConfFile
+				creatServerStatConf (); //la funzione inizializza in ram e su hard-disc il file serverConfFile
 				mkdir (userDirName, 0777);
 				mkdir (chatDirName, 0777);
 
@@ -115,8 +115,8 @@ infoChat *newRoom (char *nameRoom, int adminUs){
 		return info;
 	}
 
-	serStat_addchat_lock ( );
-	long newId = readSerStat_idKeyChat_lock ( );
+	serStat_addchat_lock ();
+	long newId = readSerStat_idKeyChat_lock ();
 
 	///Creo la directory Chat
 	char nameChat[128];
@@ -142,7 +142,7 @@ infoChat *newRoom (char *nameRoom, int adminUs){
 	char tabNamePath[128];
 	sprintf (tabNamePath, "%s/%s", chatPath, chatTable);
 
-	nameList *user = userExist ( );
+	nameList *user = userExist ();
 	int want = idSearch (user, adminUs);
 	if (want == -1)//id non esistente
 	{
@@ -150,7 +150,7 @@ infoChat *newRoom (char *nameRoom, int adminUs){
 		info->tab = init_Tab (tabNamePath, "ROOT");
 	}
 	else{
-		info->tab = init_Tab (tabNamePath, user->names[ want ]);
+		info->tab = init_Tab (tabNamePath, user->names[want]);
 	}
 
 	char convNamePath[128];
@@ -187,8 +187,8 @@ infoUser *newUser (char *name){
 		return info;
 	}
 
-	serStat_addUs_lock ( );
-	long newId = readSerStat_idKeyUser_lock ( );
+	serStat_addUs_lock ();
+	long newId = readSerStat_idKeyUser_lock ();
 
 	///Creo la directory User
 	char nameUser[128];
@@ -252,9 +252,8 @@ int lockDirFile (char *pathDir){
 	return lkFd;
 }
 
-
 ///Funzioni di supporto al file conf
-int creatServerStatConf ( ){
+int creatServerStatConf (){
 	/**
 	 * LA funzione si occupa di aprire e inizializzare il serverStatConf
 	 * **/
@@ -262,7 +261,6 @@ int creatServerStatConf ( ){
 
 	/*** Procedura per aggiungere ora di creazione del server ***/
 	char testo[4096];
-
 	time_t current_time;
 	char *c_time_string;
 
@@ -294,13 +292,13 @@ int creatServerStatConf ( ){
 		return -1;
 	}
 	printServStat (STDOUT_FILENO);
-	overrideServerStatConf ( );
+	overrideServerStatConf ();
 
 
 	return validServerId;
 }
 
-int overrideServerStatConf ( ){
+int overrideServerStatConf (){
 	//sovrascrive il file conInfo l'attuale contenuto nella variabile
 	if (serStat.fd == -2 || serStat.fd == -1){
 		fprintf (stderr, "fd not valid\n");
@@ -312,7 +310,7 @@ int overrideServerStatConf ( ){
 	lockStatConf.l_whence = SEEK_SET;
 	lockStatConf.l_start = 0;
 	lockStatConf.l_len = 0;
-	lockStatConf.l_pid = getpid ( );
+	lockStatConf.l_pid = getpid ();
 
 	//acquisisco il lock in scrittura sul file, se è occupato allora attende
 	if (fcntl (serStat.fd, F_SETLK, &lockStatConf)){
@@ -373,7 +371,7 @@ void printServStat (int fdOut){
 
 }
 
-int serStat_addUs_lock ( ){
+int serStat_addUs_lock (){
 	if (sem_wait (&serStat.lock)){
 		perror ("serStat sem_wait take error: ");
 		return -1;
@@ -383,11 +381,11 @@ int serStat_addUs_lock ( ){
 		perror ("serStat sem_post take error: ");
 		return -1;
 	}
-	overrideServerStatConf ( );
+	overrideServerStatConf ();
 	return 0;
 }
 
-long readSerStat_idKeyUser_lock ( ){
+long readSerStat_idKeyUser_lock (){
 	long read;
 	if (sem_wait (&serStat.lock)){
 		perror ("serStat sem_wait take error: ");
@@ -401,7 +399,7 @@ long readSerStat_idKeyUser_lock ( ){
 	return read;
 }
 
-int serStat_addchat_lock ( ){
+int serStat_addchat_lock (){
 	if (sem_wait (&serStat.lock)){
 		perror ("serStat sem_wait take error: ");
 		return -1;
@@ -412,11 +410,11 @@ int serStat_addchat_lock ( ){
 		return -1;
 	}
 	printServStat (fdOut);
-	overrideServerStatConf ( );
+	overrideServerStatConf ();
 	return 0;
 }
 
-long readSerStat_idKeyChat_lock ( ){
+long readSerStat_idKeyChat_lock (){
 	long read;
 	if (sem_wait (&serStat.lock)){
 		perror ("serStat sem_wait take error: ");
@@ -436,10 +434,9 @@ long readSerStat_idKeyChat_lock ( ){
 /* return **array end with NULL
  * The returned list Must be free in all entry
  */
-nameList *chatRoomExist ( ){
+nameList *chatRoomExist (){
 	nameList *chats = malloc (sizeof (nameList));
 	struct dirent **namelist;
-
 	char home[128] = "./";
 
 	chats->nMemb = scandir (strncat (home, chatDirName, 128), &namelist, filterDirChat, alphasort);
@@ -449,19 +446,18 @@ nameList *chatRoomExist ( ){
 	}
 	chats->names = malloc (sizeof (char *) * (chats->nMemb));
 	for (int i = 0; i < chats->nMemb; i++){
-		chats->names[ i ] = malloc (strlen (namelist[ i ]->d_name));
-		strcpy (chats->names[ i ], namelist[ i ]->d_name);
-		free (namelist[ i ]);
+		chats->names[i] = malloc (strlen (namelist[i]->d_name));
+		strcpy (chats->names[i], namelist[i]->d_name);
+		free (namelist[i]);
 	}
 
 	free (namelist);
 	return chats;
 }
 
-nameList *userExist ( ){
+nameList *userExist (){
 	nameList *users = malloc (sizeof (nameList));
 	struct dirent **namelist;
-
 	char home[128] = "./";
 	users->nMemb = scandir (strncat (home, userDirName, 128), &namelist, filterDir, alphasort);
 	if (users->nMemb == -1){
@@ -470,16 +466,16 @@ nameList *userExist ( ){
 	}
 	users->names = malloc (sizeof (char *) * (users->nMemb));
 	for (int i = 0; i < users->nMemb; i++){
-		users->names[ i ] = malloc (strlen (namelist[ i ]->d_name));
-		strcpy (users->names[ i ], namelist[ i ]->d_name);
-		free (namelist[ i ]);
+		users->names[i] = malloc (strlen (namelist[i]->d_name));
+		strcpy (users->names[i], namelist[i]->d_name);
+		free (namelist[i]);
 	}
 
 	free (namelist);
 	return users;
 }
 
-nameList *allDir ( ){
+nameList *allDir (){
 	nameList *dir = malloc (sizeof (nameList));
 	struct dirent **namelist;
 
@@ -490,9 +486,9 @@ nameList *allDir ( ){
 	}
 	dir->names = malloc (sizeof (char *) * (dir->nMemb));
 	for (int i = 0; i < dir->nMemb; i++){
-		dir->names[ i ] = malloc (strlen (namelist[ i ]->d_name));
-		strcpy (dir->names[ i ], namelist[ i ]->d_name);
-		free (namelist[ i ]);
+		dir->names[i] = malloc (strlen (namelist[i]->d_name));
+		strcpy (dir->names[i], namelist[i]->d_name);
+		free (namelist[i]);
 	}
 
 	free (namelist);
@@ -501,7 +497,7 @@ nameList *allDir ( ){
 
 void nameListFree (nameList *nl){
 	for (int i = 0; i < nl->nMemb; i++){
-		free (nl->names[ i ]);
+		free (nl->names[i]);
 	}
 	free (nl->names);
 	free (nl);
@@ -576,7 +572,7 @@ char *fileType (unsigned char d_type, char *buf, int bufLen){
 void nameListPrint (nameList *nl, int fd){
 	dprintf (fd, "N° elem: %d\n", nl->nMemb);
 	for (int i = 0; i < nl->nMemb; i++){
-		dprintf (fd, "%s\n", nl->names[ i ]);
+		dprintf (fd, "%s\n", nl->names[i]);
 	}
 	dprintf (fd, "\t# End list #\n");
 }
@@ -602,7 +598,7 @@ int idSearch (nameList *nl, int idSearch){
 	//sfruttando che i nomi sono ID:NAME posso cercare conInfo questo stratagemma
 	int want = -1;
 	for (int i = 0; i < nl->nMemb; i++){
-		if (idSearch == atoi (nl->names[ i ])){
+		if (idSearch == atoi (nl->names[i])){
 			want = i;
 			break;
 		}

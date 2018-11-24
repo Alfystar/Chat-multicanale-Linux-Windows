@@ -26,18 +26,16 @@
 typedef struct{
 	dlist_pp head;
 } d_stack_t, *d_stack_p;
-
-/* Create a new Stack */
+/** Create a new Stack */
 d_stack_p get_stack (void);
 
-/* Push a value to Stack */
+/** Push a value to Stack */
 bool push (d_stack_p stack, void *val);
-
-/* Pop a value from Stack */
+/** Pop a value from Stack */
 void *pop (d_stack_p stack);
 
-/* Check if a stack is empty */
+/** Check if a stack is empty */
 bool isStackEmpty (d_stack_p stack);
 
-/* Clean up Stack */
+/** Clean up Stack */
 bool destroy_stack (d_stack_p stack);

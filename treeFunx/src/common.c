@@ -93,17 +93,16 @@ SEM_wantWrite:
 	return 0;
 }
 
-
 int lockReadSem (int semId){
 	struct sembuf sem[2];
-	sem[ 0 ].sem_num = wantWrite;
-	sem[ 0 ].sem_flg = SEM_UNDO;
-	sem[ 1 ].sem_num = readWorking;
-	sem[ 1 ].sem_flg = SEM_UNDO;
+	sem[0].sem_num = wantWrite;
+	sem[0].sem_flg = SEM_UNDO;
+	sem[1].sem_num = readWorking;
+	sem[1].sem_flg = SEM_UNDO;
 
 	//to be sure not concurrency problem, read Thread must be wait until no writes works, and instantly increase his counter
-	sem[ 0 ].sem_op = 0;
-	sem[ 1 ].sem_op = +1;
+	sem[0].sem_op = 0;
+	sem[1].sem_op = +1;
 SEM_wantWrite_readWorking:
 	if (semop (semId, sem, 2)){
 		switch (errno){
@@ -145,9 +144,9 @@ void semInfo (int semId, int fd){
 	semctl (semId, 0, GETALL, semInfo);
 	//enum semName {wantWrite=0,readWorking=1,writeWorking=2};
 	char buf[3][4096];
-	sprintf (buf[ 0 ], "\nsem (mutex)writeWorking=%d\n", semInfo[ writeWorking ]);
-	sprintf (buf[ 1 ], "sem readWorking=%d\n", semInfo[ readWorking ]);
-	sprintf (buf[ 2 ], "sem wantWrite=%d\n", semInfo[ wantWrite ]);
-	dprintf (fd, "%s%s%s", buf[ 0 ], buf[ 1 ], buf[ 2 ]);
+	sprintf (buf[0], "\nsem (mutex)writeWorking=%d\n", semInfo[writeWorking]);
+	sprintf (buf[1], "sem readWorking=%d\n", semInfo[readWorking]);
+	sprintf (buf[2], "sem wantWrite=%d\n", semInfo[wantWrite]);
+	dprintf (fd, "%s%s%s", buf[0], buf[1], buf[2]);
 
 }

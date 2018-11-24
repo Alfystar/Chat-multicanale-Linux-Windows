@@ -69,7 +69,7 @@ convRam *copyConv (conversation *c){
 		if (!mexNode){
 
 			for (int j = 0; j < i; j++){
-				freeMex (cR->mexList[ j ]);
+				freeMex (cR->mexList[j]);
 			}
 			free (cR->mexList);
 			free (cR);
@@ -77,21 +77,21 @@ convRam *copyConv (conversation *c){
 			return NULL;
 		}
 		///Copio i metadati
-		memcpy (mexNode, &c->mexList[ i ]->info, sizeof (mexInfo));
+		memcpy (mexNode, &c->mexList[i]->info, sizeof (mexInfo));
 
 		///Crea in ram la stringa di dim arbitraria e mex la punta
-		mexNode->text = malloc (strlen (c->mexList[ i ]->text) + 1);
+		mexNode->text = malloc (strlen (c->mexList[i]->text) + 1);
 		if (!mexNode->text){
 			for (int j = 0; j < i; j++){
-				freeMex (cR->mexList[ j ]);
+				freeMex (cR->mexList[j]);
 			}
 			free (cR->mexList);
 			free (cR);
 			return NULL;
 		}
-		strcpy (mexNode->text, c->mexList[ i ]->text);
+		strcpy (mexNode->text, c->mexList[i]->text);
 
-		cR->mexList[ i ] = mexNode;   //salvo il puntatore nell'array
+		cR->mexList[i] = mexNode;   //salvo il puntatore nell'array
 	}
 	return cR;
 }
@@ -103,7 +103,7 @@ int addMex (conversation *c, mex *m){
 	}
 	c->head.nMex++;
 	c->mexList = reallocarray (c->mexList, c->head.nMex, sizeof (mex *));
-	c->mexList[ c->head.nMex - 1 ] = m;
+	c->mexList[c->head.nMex - 1] = m;
 	if (overrideHeadF (&c->head, c->stream)){
 		return -1;
 	}
@@ -117,14 +117,14 @@ mex *makeMex (char *text, int usId){
 		return NULL;
 	}
 	m->info.usId = usId;
-	m->info.timeM = currTimeSys ( );
+	m->info.timeM = currTimeSys ();
 	m->text = malloc (strlen (text) + 1);
 	strcpy (m->text, text);
 	return m;
 }
 
 mex *makeMexBuf (size_t len, char *bufMex){
-	bufMex[ len - 1 ] = 0; //non dovrebbe essere necessario, per sicurezza
+	bufMex[len - 1] = 0; //non dovrebbe essere necessario, per sicurezza
 	/// text su un buf temporaneo
 	mex *m = malloc (sizeof (mex));
 	if (m == NULL){
@@ -144,7 +144,7 @@ int freeConv (conversation *c){
 
 	//libero tutti i messaggi
 	for (int i = 0; i < c->head.nMex; i++){
-		freeMex (c->mexList[ i ]);
+		freeMex (c->mexList[i]);
 	}
 	fclose (c->stream);
 	free (c);    //dopo aver liberato e chiuso tutto libero la memoria
@@ -164,7 +164,7 @@ int setUpConvF (int adminId, FILE *stream){
 	conversation newCon;
 	newCon.head.adminId = adminId;
 	newCon.head.nMex = 0;
-	newCon.head.timeCreate = currTimeSys ( );
+	newCon.head.timeCreate = currTimeSys ();
 	overrideHeadF (&newCon.head, stream);
 	return 0;
 }
@@ -249,7 +249,7 @@ conversation *loadConvF (FILE *stream){
 		strcpy (mexNode->text, dataPoint);
 		dataPoint += len;
 
-		conv->mexList[ i ] = mexNode;   //salvo il puntatore nell'array
+		conv->mexList[i] = mexNode;   //salvo il puntatore nell'array
 		/*
 		dprintf(fdOut,"\nil nuovo messaggio creato è:\n");
 		printMex(mexNode);
@@ -310,7 +310,7 @@ int freeMex (mex *m){
 	return 0;
 }
 
-time_t currTimeSys ( ){
+time_t currTimeSys (){
 	time_t current_time;
 
 /* Obtain current time. */
@@ -338,7 +338,7 @@ void printConv (conversation *c, int fdOutP){
 
 	for (int i = 0; i < c->head.nMex; i++){
 		dprintf (fdOutP, "--->Mex[%d]:\n", i);
-		printMex (c->mexList[ i ], fdOutP);
+		printMex (c->mexList[i], fdOutP);
 		dprintf (fdOutP, "**********\n");
 	}
 	dprintf (fdOutP, "-------------------------------------------------------------\n");
@@ -358,7 +358,7 @@ void printConvRam (convRam *c, int fdOutP){
 
 	for (int i = 0; i < c->head.nMex; i++){
 		printf ("--->Mex[%d]:\n", i);
-		printMex (c->mexList[ i ], fdOutP);
+		printMex (c->mexList[i], fdOutP);
 		printf ("**********\n");
 	}
 	printf ("-------------------------------------------------------------\n");
@@ -394,7 +394,6 @@ void printConvInfo (convInfo *cI, int fdOutP){
 	dprintf (fdOutP, "adminId\t\t-> %d\n", cI->adminId);
 	dprintf (fdOutP, "Time Creat\t-> %s\n", timeString (cI->timeCreate));
 }
-
 
 char *timeString (time_t t){
 	char *c_time_string;

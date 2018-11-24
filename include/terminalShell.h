@@ -27,8 +27,6 @@
 typedef struct thShellArg_{
 	int fd_Read;
 } thShellArg;
-
-
 /** Global Variable **/
 WINDOW *mainWindows;
 WINDOW *titleW;
@@ -37,7 +35,6 @@ WINDOW *showPannel;
 WINDOW *monitor; //schermo autonomo che si occupa di visualizzare i printf generati dai thread per notifica
 
 sem_t screewWrite;
-
 bool debugView; //start true in thPrintDebug
 
 /** Extern Global **/
@@ -45,41 +42,24 @@ bool debugView; //start true in thPrintDebug
 
 
 /** Funzioni generali e mainTh **/
-void terminalShell ( );
-
+void terminalShell ();
 void driverCmd (int argc, char *argv[], int *exit);
-
 void menuHelpw (WINDOW *, int, int, int argc, char *argv[]);
-
-
 ///Funzioni specifiche di comando
-void windowSetUp ( );
-
+void windowSetUp ();
 void titlePrintW (WINDOW *window, int y_start, int x_start);
-
 void chatShowW (WINDOW *window, int y_start, int x_start);
-
 void userShowW (WINDOW *window, int y_start, int x_start);
-
 ///Comandi di visualizzazione chat e user
-
 void wtabPrint (WINDOW *window, table *t, int y_start);
-
 void wfirstPrint (WINDOW *window, firstFree *f);
-
 void wentryPrint (WINDOW *window, entry *e);
-
 void wprintConv (WINDOW *window, conversation *c, int y_start);
-
 void wprintMex (WINDOW *window, mex *m);
-
 void wprintConvInfo (WINDOW *window, convInfo *cI);
-
 /** shell th funx**/
 void shellThStdout (thShellArg *);
-
 void shellThStdErr (thShellArg *);
-
 void shellThDebug (thShellArg *);
 
 

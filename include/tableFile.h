@@ -36,12 +36,10 @@ typedef struct firstFree_{
 	int len;
 	int nf_id;      //indice nel'array delle entry che contiene la prima casella libera
 } firstFree;
-
 typedef struct entry_{
 	char name[nameEntrySize];      //nomi da 27 caratteri
 	int point;          //se roomPath='\0' indica la sucessiva entry libera, se roomPath="xxx" indica in quel file l'attuale file dove si trova
 } entry;
-
 typedef struct table_{
 	firstFree head;
 	entry *data;    //array da malloccare contenente le entry della tamella
@@ -52,62 +50,33 @@ typedef struct table_{
 
 /// Funzioni di Interfaccia operanti su Tabella
 table *init_Tab (char *path_file, char *nameFirst);
-
 table *open_Tab (char *path_file);
-
 int addEntry (table *table, char *name, int data);
-
 int renameFirstEntry (table *t, char *name);
-
-
 int delEntry (table *table, int index);
-
 table *compressTable (table *table);
-
 int searchFirstOccurence (table *tabel, char *search);
-
 int searchFirstOccurenceKey (table *t, int ID);
-
-
 int searchEntryBy (table *tabel, char *search, int startIndex);
-
-
 /// Funzioni di supporto operanti sul file
 FILE *openTabF (char *path_file);
-
 int setUpTabF (FILE *fdTable, char *nameFirst);
-
 int addEntryTabF (FILE *fdTable, char *name, int data);
-
 int delEntryTabF (FILE *fdTable, int index);
-
 int entrySeekF (FILE *fdTable, int indexEntry);
-
 size_t lenTabF (FILE *fdTable);
-
 int fileWrite (FILE *fdTable, size_t sizeElem, int nelem, void *dataWrite);
-
-
 ///Show funciton
 void firstPrint (firstFree *head);
-
 void entryPrint (entry *en);
-
 void tabPrint (table *tab);
-
 void tabPrintFile (FILE *fdTable);
-
 ///funzioni di supporto
 int isLastEntry (entry *en);
-
 int isEmptyEntry (entry *en);
-
 char *booleanPrint (int val);
-
 table *makeTable (FILE *fdTable);
-
 void freeTable (table *table);
-
 void closeTable (table *table);
 
 #endif //FILETAB_DEMO_TABLEFILE_H

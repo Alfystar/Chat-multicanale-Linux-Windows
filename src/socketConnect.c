@@ -187,7 +187,6 @@ int writePack (int ds_sock, mail *pack) //dentro il thArg deve essere puntato un
 	return 0;
 }
 
-
 int testConnection (int ds_sock){
 	mail packTest;
 
@@ -198,7 +197,6 @@ int testConnection (int ds_sock){
 	}
 	return 0;
 }
-
 
 void freeConnection (connection *con){
 	free (con);
@@ -219,13 +217,13 @@ int fillPack (mail *pack, int type, int dim, void *mex, char *sender, char *whoO
 	if (sender == NULL) strncpy (pack->md.sender, "", sendDim);
 	else{
 		strncpy (pack->md.sender, sender, sendDim);
-		pack->md.sender[ sendDim - 1 ] = '\0'; // sono sicuro che possa venir letto come una stringa
+		pack->md.sender[sendDim - 1] = '\0'; // sono sicuro che possa venir letto come una stringa
 	}
 
 	if (whoOrWhy == NULL) strncpy (pack->md.whoOrWhy, "", wowDim);
 	else{
 		strncpy (pack->md.whoOrWhy, whoOrWhy, wowDim);
-		pack->md.whoOrWhy[ wowDim - 1 ] = '\0'; // sono sicuro che possa venir letto come una stringa
+		pack->md.whoOrWhy[wowDim - 1] = '\0'; // sono sicuro che possa venir letto come una stringa
 	}
 
 	return 0;
@@ -280,7 +278,6 @@ int acceptCreate (connection *c, void *(*thUserServer) (void *), void *arg){
 		return -1;
 	}
 	pthread_t tid;
-
 	thConnArg *argTh = malloc (sizeof (thConnArg));
 
 	argTh->arg = arg;

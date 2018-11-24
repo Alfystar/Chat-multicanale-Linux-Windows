@@ -53,9 +53,8 @@ int addEntry (table *t, char *name, int data){
 	}
 
 	int addPosition = t->head.nf_id;
-
 	firstFree *first = &t->head;
-	entry *freeData = &t->data[ t->head.nf_id ];
+	entry *freeData = &t->data[t->head.nf_id];
 	if (isLastEntry (freeData))        //se è la fine si cambiano i valori e si crea un nuovo last-entry
 	{
 		//dprintf(fdDebug, "é un lastFree\n");
@@ -69,7 +68,7 @@ int addEntry (table *t, char *name, int data){
 		/// viene generato un nuovo last-free a fine file
 		/// setup di last
 		t->data = reallocarray (t->data, t->head.len, sizeof (entry));
-		entry *last = &t->data[ t->head.len - 1 ];
+		entry *last = &t->data[t->head.len - 1];
 		memset (last->name, 0, nameEntrySize);
 		last->point = -1;
 	}
@@ -113,13 +112,13 @@ int delEntry (table *t, int index){
 		return -1;
 	}
 	firstFree *first = &t->head;
-	entry *delData = &t->data[ index ];
+	entry *delData = &t->data[index];
 	if (isEmptyEntry (delData)){
 		// è già una cella cancellata, e non devo modificare nulla
 		dprintf (fdOut, "la casella è vuota\n");
 		return 0;
 	}
-	delData->name[ 0 ] = 0;  //metto la stringa a ""
+	delData->name[0] = 0;  //metto la stringa a ""
 	delData->point = first->nf_id;
 	first->nf_id = index;
 	first->counter++;
@@ -136,9 +135,9 @@ table *compressTable (table *t){
 	int newLen = 0;
 	///ottengo gli id per i quali ho entry valide e anche la nuova lunghezza
 	for (int i = 0; i < t->head.len; ++i){
-		if (!isEmptyEntry (&t->data[ i ])){
+		if (!isEmptyEntry (&t->data[i])){
 			//se non è una cella vuota allora posso copiarla
-			enNotEmpty_Id[ newLen ] = i;
+			enNotEmpty_Id[newLen] = i;
 			newLen++;
 		}
 	}
@@ -146,7 +145,7 @@ table *compressTable (table *t){
 	/// creo una nuova lista della dimensione giusta e ci copio solo le entry non vuote
 	entry *newData = (entry *)calloc (newLen, sizeof (entry));
 	for (int j = 0; j < newLen; ++j){
-		memcpy (&newData[ j ], &t->data[ enNotEmpty_Id[ j ]], sizeof (entry));
+		memcpy (&newData[j], &t->data[enNotEmpty_Id[j]], sizeof (entry));
 	}
 	free (t->data);          //libero la vecchia lista non più utile
 	t->data = newData;        //punto la nuova lista creata e compatta
@@ -169,7 +168,7 @@ table *compressTable (table *t){
 
 int searchFirstOccurence (table *t, char *search){
 	for (int i = 0; i < t->head.len; i++){
-		if (strcmp (t->data[ i ].name, search) == 0){
+		if (strcmp (t->data[i].name, search) == 0){
 			return i;
 		}
 	}
@@ -178,7 +177,7 @@ int searchFirstOccurence (table *t, char *search){
 
 int searchFirstOccurenceKey (table *t, int ID){
 	for (int i = 0; i < t->head.len; i++){
-		if (atoi (t->data[ i ].name) == ID){
+		if (atoi (t->data[i].name) == ID){
 			return i;
 		}
 	}
@@ -187,7 +186,7 @@ int searchFirstOccurenceKey (table *t, int ID){
 
 int searchEntryBy (table *t, char *search, int idStart){
 	for (int i = idStart; i < t->head.len; i++){
-		if (strcmp (t->data[ i ].name, search) == 0){
+		if (strcmp (t->data[i].name, search) == 0){
 			return i;
 		}
 	}
@@ -254,7 +253,6 @@ int setUpTabF (FILE *tab, char *nameFirst){
 	funlockfile (tab);
 	return 0; //all ok
 }
-
 
 int addEntryTabF (FILE *tab, char *name, int data){
 	/** L'operazione è eseguita in modo atomico rispetto ai Tread del processo **/
@@ -341,8 +339,6 @@ int addEntryTabF (FILE *tab, char *name, int data){
 int delEntryTabF (FILE *tab, int index){
 	firstFree first;
 	entry delData;
-
-
 	int enDelSeek = entrySeekF (tab, index);
 	if (enDelSeek == -1){
 		perror ("in delEntryTabF entrySeekF take error:");
@@ -363,7 +359,7 @@ int delEntryTabF (FILE *tab, int index){
 		return 0;
 	}
 
-	delData.name[ 0 ] = 0;  //metto la stringa a ""
+	delData.name[0] = 0;  //metto la stringa a ""
 	delData.point = first.nf_id;
 	first.nf_id = index;
 	first.counter++;
@@ -460,7 +456,7 @@ void tabPrint (table *tab){
 	dprintf (fdOut, "##########\n\n");
 	for (int i = 0; i < tab->head.len; i++){
 		dprintf (fdOut, "--->entry[%d]:", i);
-		entryPrint ((&tab->data[ i ]));
+		entryPrint ((&tab->data[i]));
 		dprintf (fdOut, "**********\n");
 	}
 	dprintf (fdOut, "-------------------------------------------------------------\n");
@@ -479,12 +475,12 @@ void tabPrintFile (FILE *tab){
 
 
 int isLastEntry (entry *e){
-	if (e->name[ 0 ] == 0 && e->point == -1) return 1;
+	if (e->name[0] == 0 && e->point == -1) return 1;
 	return 0;
 }
 
 int isEmptyEntry (entry *e){
-	if (e->name[ 0 ] == 0 && e->point != -1) return 1;
+	if (e->name[0] == 0 && e->point != -1) return 1;
 	return 0;
 }
 
@@ -506,7 +502,6 @@ table *makeTable (FILE *tab){
 	}
 
 	size_t len = lenTabF (tab);
-
 	table *t = (table *)malloc (sizeof (table));
 	t->data = (entry *)calloc (len, sizeof (entry));
 

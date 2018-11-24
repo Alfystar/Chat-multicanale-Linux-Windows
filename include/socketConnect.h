@@ -54,17 +54,14 @@ typedef struct metadata_{
 	char sender[sendDim];
 	char whoOrWhy[wowDim];
 } metadata;
-
 typedef struct mail_{
 	metadata md;
 	void *mex;
 } mail;
-
 typedef struct connection_{
 	int ds_sock;
 	struct sockaddr_in sock;
 } connection;
-
 typedef struct thConnArg_{
 	connection con;     //connessioni soket attuale
 	void *arg;          //possibili parametri extra
@@ -75,38 +72,24 @@ typedef struct thConnArg_{
 // GLOBALI
 
 connection *initSocket (u_int16_t port, char *IP);
-
 int keepAlive (int *ds_sock);
-
 void freeConnection (connection *con);
-
 int readPack (int ds_sock, mail *pack);  // queste due funzioni prendono il pacchetto thread-specifico
 int writePack (int ds_sock, mail *pack); // ma all'interno contengono la struct mail conInfo i dati
-
 int testConnection (int ds_sock);
-
 int fillPack (mail *pack, int type, int dim, void *mex, char *sender, char *whoOrWhy);
-
 void freePack (mail *p);
-
 void freeMexPack (mail *p);
-
 void printPack (mail *pack);
 
 ///Server FUNCTION
 
 int initServer (connection *connection, int coda);
-
 //tira su un th del tipo void th(thConnArg* info) e dentro info.arg viene messo argFx
 int acceptCreate (connection *connection, void *(*thUserServer) (void *), void *argFx);
-
 ///Client FUNCTION
 int initClient (connection *c);
-
-
 #endif //SOCKETDEMO_SOCKETCONNECT_H
-
-
 
 /// ### DOCUMENTAZIONE ### ///
 

@@ -5,15 +5,15 @@
 #include "../include/terminalShell.h"
 
 
-void terminalShell ( ){
+void terminalShell (){
 	int error;
-	windowSetUp ( );
+	windowSetUp ();
 	sem_init (&screewWrite, 0, 1); //il semaforo può essere usato per scrivere
 
 	/** creazione dei 3 thread che si occupano di leggere le pipe **/
 	pthread_t ThSdtOut_var;
 	thShellArg *arg = malloc (sizeof (thShellArg));
-	arg->fd_Read = FdStdOutPipe[ 0 ];
+	arg->fd_Read = FdStdOutPipe[0];
 	error = pthread_create (&ThSdtOut_var, NULL, shellThStdout, arg);
 	if (error != 0){
 		printErrno ("La creazione del Thread shellThStdout ha dato il seguente errore", error);
@@ -22,7 +22,7 @@ void terminalShell ( ){
 
 	pthread_t ThSdtErr_var;
 	arg = malloc (sizeof (thShellArg));
-	arg->fd_Read = FdStdErrPipe[ 0 ];
+	arg->fd_Read = FdStdErrPipe[0];
 	error = pthread_create (&ThSdtErr_var, NULL, shellThStdErr, arg);
 	if (error != 0){
 		printErrno ("La creazione del Thread shellThSdtErr ha dato il seguente errore", error);
@@ -31,7 +31,7 @@ void terminalShell ( ){
 
 	pthread_t ThDebug_var;
 	arg = malloc (sizeof (thShellArg));
-	arg->fd_Read = FdDebugPipe[ 0 ];
+	arg->fd_Read = FdDebugPipe[0];
 	error = pthread_create (&ThDebug_var, NULL, shellThDebug, arg);
 	if (error != 0){
 		printErrno ("La creazione del Thread shellThDebug ha dato il seguente errore", error);
@@ -55,15 +55,15 @@ void terminalShell ( ){
 
 		/** Tokenizzazione di cmdW per creare un effetto argv[] **/
 		sArgc = 0;
-		sArgv[ sArgc ] = strtok_r (cmdBuf, " ", &savePoint);
-		while (sArgv[ sArgc ] != NULL){
+		sArgv[sArgc] = strtok_r (cmdBuf, " ", &savePoint);
+		while (sArgv[sArgc] != NULL){
 			sArgc++;
-			sArgv[ sArgc ] = strtok_r (NULL, " ", &savePoint);
+			sArgv[sArgc] = strtok_r (NULL, " ", &savePoint);
 		}
 
 
 		for (int i = 0; i < sArgc; i++){
-			dprintf (fdDebug, "sArgv[%d]=%s\n", i, sArgv[ i ]);
+			dprintf (fdDebug, "sArgv[%d]=%s\n", i, sArgv[i]);
 		}
 
 		/// interpretazione sArgv[] ed esecuzione comandi
@@ -78,7 +78,7 @@ void terminalShell ( ){
 		usleep (5000);
 
 	}
-	endwin ( );
+	endwin ();
 }
 
 void driverCmd (int argc, char *argv[], int *exit){
@@ -86,51 +86,51 @@ void driverCmd (int argc, char *argv[], int *exit){
 
 
 	if (argc >= 1){
-		if (strcmp (argv[ 0 ], "q") == 0){
+		if (strcmp (argv[0], "q") == 0){
 			*exit = 0;
 			return;
 		}
-		if (strcmp (argv[ 0 ], "d") == 0){
+		if (strcmp (argv[0], "d") == 0){
 			debugView = true;
 			return;
 		}
-		if (strcmp (argv[ 0 ], "!d") == 0){
+		if (strcmp (argv[0], "!d") == 0){
 			debugView = false;
 			return;
 		}
 
-		if (strcmp (argv[ 0 ], "room") == 0){
+		if (strcmp (argv[0], "room") == 0){
 			sem_wait (&screewWrite);
 			chatShowW (showPannel, 1, 0);
 			sem_post (&screewWrite);
 
 			return;
 		}
-		if (strcmp (argv[ 0 ], "p-avlR") == 0){
+		if (strcmp (argv[0], "p-avlR") == 0){
 			dprintf (fdOut, "Legend id:pipe\n");
 			print_avl_S (rmAvlTree_Pipe);
 			//print_avl(*rmAvlTree_Pipe.avlRoot, *rmAvlTree_Pipe.avlRoot);
 			return;
 		}
-		if (strcmp (argv[ 0 ], "user") == 0){
+		if (strcmp (argv[0], "user") == 0){
 			sem_wait (&screewWrite);
 			userShowW (showPannel, 1, 0);
 			sem_post (&screewWrite);
 
 			return;
 		}
-		if (strcmp (argv[ 0 ], "p-avlU") == 0){
+		if (strcmp (argv[0], "p-avlU") == 0){
 			print_avl_S (usAvlTree_Pipe);
 			//print_avl(*usAvlTree_Pipe.avlRoot, *usAvlTree_Pipe.avlRoot);
 			return;
 		}
-		if (strcmp (argv[ 0 ], "sstat") == 0){
+		if (strcmp (argv[0], "sstat") == 0){
 			printServStat (fdOut);
 			return;
 		}
-		if (strcmp (argv[ 0 ], "reset") == 0){
+		if (strcmp (argv[0], "reset") == 0){
 			sem_wait (&screewWrite);
-			windowSetUp ( );
+			windowSetUp ();
 			sem_post (&screewWrite);
 
 			return;
@@ -151,9 +151,9 @@ void driverCmd (int argc, char *argv[], int *exit){
 			return;
 		}
 		*/
-		if (strcmp (argv[ 0 ], "usTab") == 0){
-			nameList *user = userExist ( );
-			int want = idSearch (user, atoi (argv[ 1 ]));
+		if (strcmp (argv[0], "usTab") == 0){
+			nameList *user = userExist ();
+			int want = idSearch (user, atoi (argv[1]));
 			if (want == -1){
 				dprintf (STDERR_FILENO, "ID RICHIESTO INESISTENTE\n");
 				sem_wait (&screewWrite);
@@ -169,7 +169,7 @@ void driverCmd (int argc, char *argv[], int *exit){
 			}
 
 			char userDir[128];
-			sprintf (userDir, "./%s/%s", userDirName, user->names[ want ]);
+			sprintf (userDir, "./%s/%s", userDirName, user->names[want]);
 			nameListFree (user);
 			//dprintf(fdDebug,"sto per ottenere la openUser con userdir=%s\n",userDir);
 			infoUser *info = openUser (userDir);
@@ -189,9 +189,9 @@ void driverCmd (int argc, char *argv[], int *exit){
 			return;
 		}
 
-		if (strcmp (argv[ 0 ], "roomTab") == 0){
-			nameList *chat = chatRoomExist ( );
-			int want = idSearch (chat, atoi (argv[ 1 ]));
+		if (strcmp (argv[0], "roomTab") == 0){
+			nameList *chat = chatRoomExist ();
+			int want = idSearch (chat, atoi (argv[1]));
 			if (want == -1){
 				dprintf (STDERR_FILENO, "ID RICHIESTO INESISTENTE\n");
 				sem_wait (&screewWrite);
@@ -208,7 +208,7 @@ void driverCmd (int argc, char *argv[], int *exit){
 
 			///carico dati da visualizzare
 			char chatDir[128];
-			sprintf (chatDir, "./%s/%s", chatDirName, chat->names[ want ]);
+			sprintf (chatDir, "./%s/%s", chatDirName, chat->names[want]);
 			nameListFree (chat);
 			infoChat *info = openRoom (chatDir);
 			if (info == 0){
@@ -223,9 +223,9 @@ void driverCmd (int argc, char *argv[], int *exit){
 
 			return;
 		}
-		if (strcmp (argv[ 0 ], "roomConv") == 0){
-			nameList *chat = chatRoomExist ( );
-			int want = idSearch (chat, atoi (argv[ 1 ]));
+		if (strcmp (argv[0], "roomConv") == 0){
+			nameList *chat = chatRoomExist ();
+			int want = idSearch (chat, atoi (argv[1]));
 			if (want == -1){
 				dprintf (STDERR_FILENO, "Id richiesto inesistente\n");
 				return;
@@ -233,7 +233,7 @@ void driverCmd (int argc, char *argv[], int *exit){
 
 			///carico dati da visualizzare
 			char chatDir[128];
-			sprintf (chatDir, "./%s/%s", chatDirName, chat->names[ want ]);
+			sprintf (chatDir, "./%s/%s", chatDirName, chat->names[want]);
 			nameListFree (chat);
 			infoChat *info = openRoom (chatDir);
 			if (info == 0){
@@ -284,7 +284,7 @@ void menuHelpw (WINDOW *w, int y_start, int x_start, int argc, char *argv[]){
 		return;
 	}
 	if (argc >= 2){
-		if (strcmp (argv[ 1 ], "sys") == 0){
+		if (strcmp (argv[1], "sys") == 0){
 			wprintw (w, "\t(0)arg\n");
 			wprintw (w, "->h\t-> Visualizza lista classi di help\n");
 			wprintw (w, "->q\t-> termina server\n");
@@ -297,7 +297,7 @@ void menuHelpw (WINDOW *w, int y_start, int x_start, int argc, char *argv[]){
 			//wprintw(w, "\t(2)arg\n");
 			return;
 		}
-		if (strcmp (argv[ 1 ], "user") == 0){
+		if (strcmp (argv[1], "user") == 0){
 			wprintw (w, "\t(0)arg\n");
 			wprintw (w, "->user\t-> Utenti Registrati\n");
 			wprintw (w, "->p-avlU\t-> Printa l'avl degli User\n");
@@ -309,7 +309,7 @@ void menuHelpw (WINDOW *w, int y_start, int x_start, int argc, char *argv[]){
 			//wprintw(w, "\t(2)arg\n");
 			return;
 		}
-		if (strcmp (argv[ 1 ], "room") == 0){
+		if (strcmp (argv[1], "room") == 0){
 			wprintw (w, "\t(0)arg\n");
 			wprintw (w, "->room\t-> Chat Archiviate\n");
 			wprintw (w, "->p-avlR\t-> Printa l'avl delle chat\n");
@@ -328,17 +328,16 @@ void menuHelpw (WINDOW *w, int y_start, int x_start, int argc, char *argv[]){
 
 }
 
-
-void windowSetUp ( ){
-	mainWindows = initscr ( );    //è lo sfondo, scrivere su di lui i commenti perpetui
+void windowSetUp (){
+	mainWindows = initscr ();    //è lo sfondo, scrivere su di lui i commenti perpetui
 	titleW = newwin (10, 80, 1, 1);
 	cmdW = newwin (15, 80, 12, 1);
 	showPannel = newwin (46, 60, 1, 83);
 	monitor = newwin (18, 80, 29, 1);
 	curs_set (0); //disattivo il cursore così il movimento causato dai thread non si nota
-	refresh( );
+	refresh();
 
-	start_color ( );
+	start_color ();
 	init_pair (Titoli, COLOR_BLUE, COLOR_GREEN);
 	init_pair (Comandi, COLOR_BLACK, COLOR_WHITE);
 	init_pair (ViewPan, COLOR_RED, COLOR_WHITE);
@@ -350,7 +349,7 @@ void windowSetUp ( ){
 	/** Main windows print **/
 	mvprintw (LINES - 1, 1, "Versione del server: %s\tPort-Proces: %d\tServerStore :%s", firmwareVersion, portProces,
 	          storagePathServer);
-	refresh( );
+	refresh();
 
 	/** Finestra Titolo setUp **/
 	wbkgd (titleW, COLOR_PAIR(Titoli));
@@ -382,7 +381,7 @@ void windowSetUp ( ){
 	scrollok (monitor, TRUE);
 	wrefresh (monitor);
 
-	refresh( );
+	refresh();
 }
 
 void titlePrintW (WINDOW *w, int y_start, int x_start){
@@ -394,13 +393,12 @@ void titlePrintW (WINDOW *w, int y_start, int x_start){
 	mvwprintw (w, y_start + 5, x_start, "\\_| |_/\\___/|_| |_| |_|\\___| \\_|  |_/\\___|_| |_|\\__,_|");
 }
 
-
 void chatShowW (WINDOW *w, int y_start, int x_start){
 	mvwprintw (w, 1, 0, "Sul Server sono attualmente presenti i seguenti gruppi:\n");
-	nameList *chats = chatRoomExist ( );
+	nameList *chats = chatRoomExist ();
 
 	for (int i = 0; i < chats->nMemb; i++){
-		wprintw (w, "[%d]\t|--%s\n", i, chats->names[ i ]);
+		wprintw (w, "[%d]\t|--%s\n", i, chats->names[i]);
 	}
 	nameListFree (chats);
 	wclrtobot (w);
@@ -409,10 +407,10 @@ void chatShowW (WINDOW *w, int y_start, int x_start){
 
 void userShowW (WINDOW *w, int y_start, int x_start){
 	mvwprintw (w, 1, 0, "Sul Server sono attualmente Iscritti gli utenti:\n");
-	nameList *user = userExist ( );
+	nameList *user = userExist ();
 
 	for (int i = 0; i < user->nMemb; i++){
-		wprintw (w, "[%d]\t|--%s\n", i, user->names[ i ]);
+		wprintw (w, "[%d]\t|--%s\n", i, user->names[i]);
 	}
 	nameListFree (user);
 	wclrtobot (w);
@@ -444,7 +442,7 @@ void wtabPrint (WINDOW *w, table *t, int y_start){
 	wprintw (w, "##########\n\n");
 	for (int i = 0; i < t->head.len; i++){
 		wprintw (w, "--->entry[%d]:", i);
-		wentryPrint (w, (&t->data[ i ]));
+		wentryPrint (w, (&t->data[i]));
 		wprintw (w, "**********\n");
 	}
 	wrefresh (w);
@@ -466,7 +464,6 @@ void wentryPrint (WINDOW *w, entry *e){
 	return;
 }
 
-
 void wprintConv (WINDOW *w, conversation *c, int y_start){
 	mvwprintw (w, y_start, 0, "");
 	wclrtobot (w);
@@ -481,7 +478,7 @@ void wprintConv (WINDOW *w, conversation *c, int y_start){
 
 	for (int i = 0; i < c->head.nMex; i++){
 		wprintw (w, "--->Mex[%d]:\n", i);
-		wprintMex (w, c->mexList[ i ]);
+		wprintMex (w, c->mexList[i]);
 		wprintw (w, "**********\n");
 	}
 	wrefresh (w);
@@ -515,20 +512,19 @@ void wprintConvInfo (WINDOW *w, convInfo *cI){
 	wprintw (w, "#1\tConversation info data Store:\n");
 	wprintw (w, "nMess\t\t-> %d\n", cI->nMex);
 
-	nameList *user = userExist ( );
+	nameList *user = userExist ();
 	char *who;
 	int want = idSearch (user, cI->adminId);
 	if (want == -1){
 		who = "Non più presente";
 	}
 	else{
-		who = user->names[ want ];
+		who = user->names[want];
 	}
 	wprintw (w, "adminId\t\t-> %d [%s]\n", cI->adminId, who);
 	wprintw (w, "Time Creat\t-> %s\n", timeString (cI->timeCreate));
 	nameListFree (user);
 }
-
 
 /** shell th funx**/
 
@@ -550,7 +546,7 @@ void shellThStdout (thShellArg *info){
 			mvwprintw (monitor, 2, 1, "byteRead error %s\n", strerror (byteRead));
 		}
 		else{
-			fdBuf[ byteRead ] = '\0';
+			fdBuf[byteRead] = '\0';
 			wattron(monitor, COLOR_PAIR (StdoutPrint));
 			wprintw (monitor, "%s", fdBuf);
 		}
@@ -579,7 +575,7 @@ void shellThStdErr (thShellArg *info){
 			mvwprintw (monitor, 2, 1, "byteRead error %s\n", strerror (byteRead));
 		}
 		else{
-			fdBuf[ byteRead ] = '\0';
+			fdBuf[byteRead] = '\0';
 			wattron(monitor, COLOR_PAIR (ErrorPrint));
 			wprintw (monitor, "%s", fdBuf);
 		}
@@ -610,7 +606,7 @@ void shellThDebug (thShellArg *info){
 			mvwprintw (monitor, 2, 1, "byteRead error %s\n", strerror (byteRead));
 		}
 		else{
-			fdBuf[ byteRead ] = '\0';
+			fdBuf[byteRead] = '\0';
 			wattron(monitor, COLOR_PAIR (DebugPrint));
 			if (debugView) wprintw (monitor, "%s", fdBuf);
 		}

@@ -27,10 +27,8 @@
 enum colorText{
 	Titoli = 1, Comandi, ViewPan, StdoutPrint, ErrorPrint, DebugPrint
 };
-
 /** SERVER STORAGE PATH **/
 char *storagePathServer;
-
 /** SERVER CONNECT IP AND PORT**/
 int portProces; //port of process
 

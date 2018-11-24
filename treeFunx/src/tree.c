@@ -61,10 +61,10 @@ tree_pp generate_tree (int *arr, int len){
 		return NULL;
 	}
 
-	head = init_tree ( );
+	head = init_tree ();
 
 	for (; i < len; i++){
-		if (insert_tree_node (head, arr[ i ]) == FALSE){
+		if (insert_tree_node (head, arr[i]) == FALSE){
 			dprintf (STDERR_FILENO, "Insertion failed.\n");
 			destroy_tree (head);
 			return NULL;
@@ -284,7 +284,7 @@ bool search_BFS (tree_pp root, int val, bool stop){
 			return TRUE;
 	}
 
-	queue = get_queue ( );
+	queue = get_queue ();
 
 	/* Add root node to Queue */
 	if (!enqueue (queue, *root)){
@@ -373,7 +373,7 @@ bool search_DFS (tree_pp root, int val, bool stop){
 			return TRUE;
 	}
 
-	stack = get_stack ( );
+	stack = get_stack ();
 
 	/* Add root node to Stack */
 	if (!push (stack, *root)){

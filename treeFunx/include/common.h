@@ -37,7 +37,6 @@
 #include <sys/ipc.h>
 #include <sys/sem.h>
 
-//#include "../../globalSet.h"
 extern int fdDebug;
 extern int fdOut;
 
@@ -50,15 +49,9 @@ extern int fdOut;
 enum semName{
 	wantWrite = 0, readWorking = 1, writeWorking = 2
 };
-
 void semInfo (int semId, int fd);
-
 int lockWriteSem (int semId);
-
 int unlockWriteSem (int semId);
-
 int lockReadSem (int semId);
-
 int unlockReadSem (int semId);
-
 #endif

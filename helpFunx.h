@@ -17,15 +17,10 @@
 
 
 extern char **environ;
-
 void printErrno (char *, int);
-
-void printAllEnv ( );
-
+void printAllEnv ();
 void printDublePointeChar (char **);
-
 void freeDublePointerArr (void **, int);
-
 int recursive_delete (const char *dir);
 
 

@@ -264,10 +264,10 @@ void *thUs_ServRX (thUserArg *uData){
 	bool exit = true;
 	int retTh = 0;
 	while (exit){
-		dprintf (fdOut, "[Us-rx-(%d)]wait message from [%d] sock\n", uData->id, uData->conUs.con.ds_sock);
+		dprintf (fdOut, "[Us-rx-(%s)]wait message from [%d] sock\n", uData->idNameUs, uData->conUs.con.ds_sock);
 		if (readPack (uData->conUs.con.ds_sock, &packClient) == -1){
 			dprintf (STDERR_FILENO, "Read error, broken pipe\n");
-			dprintf (STDERR_FILENO, "thrServRx and Tx %d in chiusura\n", uData->id);
+			dprintf (STDERR_FILENO, "thrServRx and Tx %s in chiusura\n", uData->idNameUs);
 			retTh = -1;
 			break;
 		}
@@ -275,59 +275,61 @@ void *thUs_ServRX (thUserArg *uData){
 		switch (packClient.md.type){
 			case out_mkRoom_p:
 				if (mkRoomSocket (&packClient, uData)){
-					dprintf (STDERR_FILENO, "[Us-rx-(%d)]mkRoomSocket take error, just send fail\n", uData->id);
+					dprintf (STDERR_FILENO, "[Us-rx-(%s)]mkRoomSocket take error, just send fail\n", uData->idNameUs);
 				}
 				else{
-					dprintf (fdOut, "[Us-rx-(%d)]Make New Room success\n", uData->id);
+					dprintf (fdOut, "[Us-rx-(%s)]Make New Room success\n", uData->idNameUs);
 				}
 				break;
 			case out_joinRm_p:
 				if (joinRoomSocket (&packClient, uData)){
-					dprintf (STDERR_FILENO, "[Us-rx-(%d)]joinRoomSocket take error, just send fail\n", uData->id);
+					dprintf (STDERR_FILENO, "[Us-rx-(%s)]joinRoomSocket take error, just send fail\n", uData->idNameUs);
 				}
 				else{
-					dprintf (fdOut, "[Us-rx-(%d)]Join Room success\n", uData->id);
+					dprintf (fdOut, "[Us-rx-(%s)]Join Room success\n", uData->idNameUs);
 				}
 				break;
 			case out_delRm_p:
 				if (delRoomSocket (&packClient, uData)){
-					dprintf (STDERR_FILENO, "[Us-rx-(%d)]delRoomSocket take error, just send fail\n", uData->id);
+					dprintf (STDERR_FILENO, "[Us-rx-(%s)]delRoomSocket take error, just send fail\n", uData->idNameUs);
 				}
 				else{
-					dprintf (fdOut, "[Us-rx-(%d)]Del Room success\n", uData->id);
+					dprintf (fdOut, "[Us-rx-(%s)]Del Room success\n", uData->idNameUs);
 				}
 				break;
 			case out_leaveRm_p:
 				if (leaveRoomSocket (&packClient, uData)){
-					dprintf (STDERR_FILENO, "[Us-rx-(%d)]leaveRoomSocket take error, just send fail\n", uData->id);
+					dprintf (STDERR_FILENO, "[Us-rx-(%s)]leaveRoomSocket take error, just send fail\n",
+					         uData->idNameUs);
 				}
 				else{
-					dprintf (fdOut, "[Us-rx-(%d)]Leave Room success\n", uData->id);
+					dprintf (fdOut, "[Us-rx-(%s)]Leave Room success\n", uData->idNameUs);
 				}
 				break;
 			case out_openRm_p:
 				if (openRoomSocket (&packClient, uData)){
-					dprintf (STDERR_FILENO, "[Us-rx-(%d)]openRoomSocket take error, just send fail\n", uData->id);
+					dprintf (STDERR_FILENO, "[Us-rx-(%s)]openRoomSocket take error, just send fail\n", uData->idNameUs);
 				}
 				else{
-					dprintf (fdOut, "[Us-rx-(%d)]OpenRm success\n", uData->id);
+					dprintf (fdOut, "[Us-rx-(%s)]OpenRm success\n", uData->idNameUs);
 				}
 				break;
 			case out_mess_p:
-				dprintf (fdOut, "[Us-rx-(%d)]MEX Incoming\n", uData->id);
+				dprintf (fdOut, "[Us-rx-(%s)]MEX Incoming\n", uData->idNameUs);
 				if (mexReciveSocket (&packClient, uData)){
-					dprintf (STDERR_FILENO, "[Us-rx-(%d)]mexReciveSocket take error, just send fail\n", uData->id);
+					dprintf (STDERR_FILENO, "[Us-rx-(%s)]mexReciveSocket take error, just send fail\n",
+					         uData->idNameUs);
 				}
 				else{
-					dprintf (fdOut, "[Us-rx-(%d)]Mex Forwarding success\n", uData->id);
+					dprintf (fdOut, "[Us-rx-(%s)]Mex Forwarding success\n", uData->idNameUs);
 				}
 				break;
 			case out_exitRm_p:
 				if (exitRoomSocket (&packClient, uData)){
-					dprintf (STDERR_FILENO, "[Us-rx-(%d)]exitRmSocket take error, NOT SEND FAIL\n", uData->id);
+					dprintf (STDERR_FILENO, "[Us-rx-(%s)]exitRmSocket take error, NOT SEND FAIL\n", uData->idNameUs);
 				}
 				else{
-					dprintf (fdOut, "[Us-rx-(%d)]exitRmSocket success\n", uData->id);
+					dprintf (fdOut, "[Us-rx-(%s)]exitRmSocket success\n", uData->idNameUs);
 				}
 				break;
 			case out_logout_p:
@@ -335,7 +337,7 @@ void *thUs_ServRX (thUserArg *uData){
 				break;
 
 			default:
-				dprintf (fdDebug, "[Us-rx-(%d)]receive pack not aspected\n", uData->id);
+				dprintf (fdDebug, "[Us-rx-(%s)]receive pack not aspected\n", uData->idNameUs);
 				printPack (&packClient);
 				break;
 		}
@@ -825,7 +827,7 @@ void *thUs_ServTX (thUserArg *uData){
 	mail packRead_in, sendClient;
 	int exit = 1;
 	while (exit){
-		dprintf (fdOut, "[Us-tx-(%d)]wait message from [%d] pipe\n", uData->id, uData->fdPipe[readEndPipe]);
+		dprintf (fdOut, "[Us-tx-(%s)]wait message from [%d] pipe\n", uData->idNameUs, uData->fdPipe[readEndPipe]);
 		if (readPack_inside (uData->fdPipe[readEndPipe], &packRead_in)){
 			switch (errno){
 				case EBADF:
@@ -847,9 +849,13 @@ void *thUs_ServTX (thUserArg *uData){
 				 */
 				entryToDel = atoi (packRead_in.md.whoOrWhy);
 				delEntry (uData->info->tab, entryToDel);
-				dprintf (fdDebug, "[Us-tx-(%d)] %s delete entry %d because closig room\n", uData->id, uData->idNameUs,
-				         entryToDel);
-
+				dprintf (fdDebug, "[Us-tx-(%s)]delete entry %d caused closing room\n", uData->idNameUs, entryToDel);
+				//todo possibile problema di sincronia con rx !!!! da meditare
+				if (uData->keyIdRmFF == atoi (packRead_in.md.sender)) //se ero nella sua lista di inoltro mi dimentico
+				{
+					uData->keyIdRmFF = -1;
+					uData->pipeRmFF = -1;
+				}
 				/* INVIO AL CLIENT
 				 * type = out_exitRm_p
 				 * sender =  SERVER(string) //non lo uso
@@ -924,63 +930,65 @@ void *thRoomRX (thRoomArg *rData){
 	bool exit = true;
 	int retTh = 0;
 	while (exit){
-		dprintf (fdOut, "[Rm-rx(%d)]wait message from [%d]pipe\n", rData->id, rData->fdPipe[readEndPipe]);
+		dprintf (fdOut, "[Rm-rx(%s)]wait message from [%d]pipe\n", rData->idNameRm, rData->fdPipe[readEndPipe]);
 		if (readPack_inside (rData->fdPipe[readEndPipe], &packRecive) == -1){
 			dprintf (STDERR_FILENO, "Read error, broken pipe\n");
-			dprintf (STDERR_FILENO, "th-RoomRx %d in chiusura\n", rData->id);
+			dprintf (STDERR_FILENO, "th-RoomRx %s in chiusura\n", rData->idNameRm);
 			retTh = -1;
 			break;
 		}
 		switch (packRecive.md.type){
 			case in_join_p:
 				if (joinRoom_inside (&packRecive, rData)){
-					dprintf (STDERR_FILENO, "[Rm-rx(%d)]Impossible Join for Th-room\n", rData->id);
+					dprintf (STDERR_FILENO, "[Rm-rx(%s)]Impossible Join for Th-room\n", rData->idNameRm);
 				}
 				else{
-					dprintf (fdOut, "[Rm-rx(%d)]New user Join in Room success\n", rData->id);
+					dprintf (fdOut, "[Rm-rx(%s)]New user Join in Room success\n", rData->idNameRm);
 				}
 				break;
 			case in_delRm_p:
 				if (delRoom_inside (&packRecive, rData) == 0){
-					dprintf (fdOut, "[Rm-rx(%d)]Destroy Th-room success\n", rData->id);
+					dprintf (fdOut, "[Rm-rx(%s)]Destroy Th-room success\n", rData->idNameRm);
 					//devo chiudere tutti i th-collegari a questo
 					pthread_cancel (rData->tidTx);    //per ora state e type di default, meditare se modificare il type
 					recursive_delete (rData->roomPath);
 					exit = false;
 				}
 				else{
-					dprintf (STDERR_FILENO, "[Rm-rx(%d)]Impossible Destroy this Th-room\n", rData->id);
+					dprintf (STDERR_FILENO, "[Rm-rx(%s)]Impossible Destroy this Th-room\n", rData->idNameRm);
 				}
 				break;
 			case in_leave_p:
 				if (leaveRoom_inside (&packRecive, rData, &exit)){
-					dprintf (STDERR_FILENO, "[Rm-rx(%d)]Impossible leave user %s of this Th-room\n", rData->id,
+					dprintf (STDERR_FILENO, "[Rm-rx(%s)]Impossible leave user %s of this Th-room\n", rData->idNameRm,
 					         packRecive.md.sender);
 				}
 				else{
-					dprintf (fdOut, "[Rm-rx(%d)]Leave user from Room success\n", rData->id);
+					dprintf (fdOut, "[Rm-rx(%s)]Leave user from Room success\n", rData->idNameRm);
 				}
 				break;
 			case in_openRm_p:
 				if (openRoom_inside (&packRecive, rData)){
-					dprintf (STDERR_FILENO, "[Rm-rx(%d)]Impossible add user %s at mail-List of Th-room\n", rData->id,
+					dprintf (STDERR_FILENO, "[Rm-rx(%s)]Impossible add user %s at mail-List of Th-room\n",
+					         rData->idNameRm,
 					         packRecive.md.sender);
 				}
 				else{
-					dprintf (fdOut, "[Rm-rx(%d)]Add Open Room success\n", rData->id);
+					dprintf (fdOut, "[Rm-rx(%s)]Add Open Room success\n", rData->idNameRm);
 				}
 				break;
 			case in_exit_p:
 				if (exitRoom_inside (&packRecive, rData)){
-					dprintf (STDERR_FILENO, "[Rm-rx(%d)]Impossible remove node from mail-List of Th-room\n", rData->id,
+					dprintf (STDERR_FILENO, "[Rm-rx(%s)]Impossible remove node from mail-List of Th-room\n",
+					         rData->idNameRm,
 					         packRecive.md.sender);
 				}
 				else{
-					dprintf (fdOut, "[Rm-rx(%d)]Remove mail-list node Room success\n", rData->id);
+					dprintf (fdOut, "[Rm-rx(%s)]Remove mail-list node Room success\n", rData->idNameRm);
 				}
 				break;
 			default:
-				dprintf (fdDebug, "[Rm-rx(%d)] receive pack not aspected\n", rData->id);
+				dprintf (fdDebug, "[Rm-rx(%s)] receive pack not aspected\n", rData->idNameRm);
 				printPack (&packRecive);
 				break;
 		}
@@ -1224,7 +1232,7 @@ void *thRoomTX (thRoomArg *rData){
 	mail packRead_in, sendClient;
 	int exit = 1;
 	while (exit){
-		dprintf (fdDebug, "[Rm-tx-(%d)] wait message from [%d] pipe\n", rData->id, rData->fdPipe[readEndPipe]);
+		dprintf (fdDebug, "[Rm-tx-(%s)] wait message from [%d] pipe\n", rData->idNameRm, rData->fdPipe[readEndPipe]);
 		if (readPack_inside (rData->fdPipe[readEndPipe], &packRead_in)){
 			switch (errno){
 				case EBADF:
@@ -1241,11 +1249,11 @@ void *thRoomTX (thRoomArg *rData){
 		switch (packRead_in.md.type){
 			case in_mess_p:
 				if (mexRecive_inside (&packRead_in, rData)){
-					dprintf (STDERR_FILENO, "[Rm-tx(%d)]PROBLEM to Forwarding mex from %s\n", rData->id,
+					dprintf (STDERR_FILENO, "[Rm-tx(%s)]PROBLEM to Forwarding mex from %s\n", rData->idNameRm,
 					         packRead_in.md.sender);
 				}
 				else{
-					dprintf (fdOut, "[Rm-tx(%d)]Make New Room success\n", rData->id);
+					dprintf (fdOut, "[Rm-tx(%s)]Make New Room success\n", rData->idNameRm);
 				}
 				break;
 

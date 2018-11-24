@@ -20,7 +20,7 @@ void printAllEnv (){
 
 void freeDublePointerArr (void **argv, int size)    //l'array deve terminare NULL
 {
-	char (**list)[size] = argv;
+	char (**list)[size] = argv; // creo la variabile list come array di puntatori a stringa
 	for (; *list != NULL; list++){
 		free (*list);
 	}

@@ -23,6 +23,7 @@
 #ifndef COMMON_H
 #define COMMON_H
 
+
 #include "log.h"
 
 
@@ -46,18 +47,18 @@ extern int fdOut;
 #define TRUE true
 #define FALSE false
 
-enum semName {
+enum semName{
 	wantWrite = 0, readWorking = 1, writeWorking = 2
 };
 
-void semInfo(int semId, int fd);
+void semInfo (int semId, int fd);
 
-int lockWriteSem(int semId);
+int lockWriteSem (int semId);
 
-int unlockWriteSem(int semId);
+int unlockWriteSem (int semId);
 
-int lockReadSem(int semId);
+int lockReadSem (int semId);
 
-int unlockReadSem(int semId);
+int unlockReadSem (int semId);
 
 #endif

@@ -20,6 +20,7 @@
 
 #pragma once
 
+
 #include <stdio.h>
 #include <stdarg.h>
 
@@ -31,9 +32,6 @@
     debug_log(__FILE__, __func__, __LINE__, \
             level, format, ##__VA_ARGS__)
 
-void debug_log(const char *file,
-               const char *func,
-               int line,
-               int level,
-               const char *format,
-               ...) __attribute__((__format__(printf, 5, 6)));
+void debug_log (
+		const char *file, const char *func, int line, int level, const char *format,
+		...) __attribute__((__format__(printf, 5, 6)));

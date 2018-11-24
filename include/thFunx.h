@@ -24,15 +24,15 @@
 #include "../treeFunx/include/dlist.h"
 #include "../globalSet.h"
 
-typedef struct thAcceptArg_ {
+typedef struct thAcceptArg_{
 	int id;
-    thConnArg conInfo;
+	thConnArg conInfo;
 } thAcceptArg;
 
 #define stringLen 50
 
-typedef struct thUserArg_ {
-    int id;             //idKey dell'user definito in fase di login
+typedef struct thUserArg_{
+	int id;             //idKey dell'user definito in fase di login
 	char userName[stringLen];  // Nome dell'user (dopo :)
 	char idNameUs[stringLen];
 	infoUser *info;     // contiene tabella e nome per esteso (path), assegnato in fase di login
@@ -43,7 +43,7 @@ typedef struct thUserArg_ {
 } thUserArg;
 
 
-typedef struct thRoomArg_ {
+typedef struct thRoomArg_{
 	int id;
 	char roomName[stringLen];  // Nome dell'user (dopo :)
 	char idNameRm[stringLen];
@@ -55,14 +55,11 @@ typedef struct thRoomArg_ {
 } thRoomArg;
 
 
-enum insidePack {
-	in_join_p = 1000, in_delRm_p, in_leave_p,
-	in_entryIndex_p,
-	in_openRm_p, in_exit_p,
-	in_kConv_p, in_mess_p,
+enum insidePack{
+	in_join_p = 1000, in_delRm_p, in_leave_p, in_entryIndex_p, in_openRm_p, in_exit_p, in_kConv_p, in_mess_p,
 };
 
-typedef struct listData_ {
+typedef struct listData_{
 	int keyId;
 	int fdPipeSend;
 } listData, *listData_p;
@@ -73,28 +70,28 @@ typedef struct listData_ {
 /** [][][][][][][][] PROTOTIPI [][][][][][][][]  **/
 
 /** TH-ACCEPT, GENERA TH USER IN FASE DI ACCEPT **/
-void *acceptTh(thAcceptArg *);
+void *acceptTh (thAcceptArg *);
 
 /** [][][] TH-USER GENERICO, prima di specializzarsi, HA IL COMPITO DI LOGIN **/
-void *userTh(thConnArg *);
+void *userTh (thConnArg *);
 
 /* FUNZIONI PER IL TH-USER GENERICO, prima di specializzarsi */
-int loginServerSide(mail *pack, thUserArg *data);
+int loginServerSide (mail *pack, thUserArg *data);
 
-int setUpThUser(int keyId, thUserArg *argUs);
+int setUpThUser (int keyId, thUserArg *argUs);
 
-int mkUserServerSide(mail *pack, thUserArg *data);
+int mkUserServerSide (mail *pack, thUserArg *data);
 
-void *sendTab(table *t, int *len);
+void *sendTab (table *t, int *len);
 
 /** #### TH-USER SUL SERVER CON RUOLO DI RX **/
-void *thUs_ServRX(thUserArg *);
+void *thUs_ServRX (thUserArg *);
 
 /* FUNZIONI DI SUPPORTO PER TH-USER SUL SERVER CON RUOLO DI RX */
 
 int mkRoomSocket (mail *pack, thUserArg *uData);
 
-void makeThRoom(int keyChat, char *roomPath, infoChat *info);
+void makeThRoom (int keyChat, char *roomPath, infoChat *info);
 
 int joinRoomSocket (mail *pack, thUserArg *uData);
 
@@ -104,12 +101,12 @@ int leaveRoomSocket (mail *pack, thUserArg *uData);
 
 int openRoomSocket (mail *pack, thUserArg *uData);
 
-int exitRoomSocket(mail *pack, thUserArg *data);
+int exitRoomSocket (mail *pack, thUserArg *data);
 
-int mexReciveSocket(mail *pack, thUserArg *data);
+int mexReciveSocket (mail *pack, thUserArg *data);
 
 /** #### TH-USER SUL SERVER CON RUOLO DI TX **/
-void *thUs_ServTX(thUserArg *);
+void *thUs_ServTX (thUserArg *);
 
 /* FUNZIONI DI SUPPORTO PER TH-USER SUL SERVER CON RUOLO DI TX */
 
@@ -119,21 +116,21 @@ void *thUs_ServTX(thUserArg *);
 
 
 /** [][][] TH-ROOM GENERICO, prima di specializzarsi, HA IL COMPITO DI creare le strutture **/
-void *roomTh(thRoomArg *);
+void *roomTh (thRoomArg *);
 
 /** #### TH-ROOM CON RUOLO DI RX **/
 void *thRoomRX (thRoomArg *rData);
 
 /* FUNZIONI DI SUPPORTO PER TH-ROOM CON RUOLO DI RX */
-int joinRoom_inside(mail *pack, thRoomArg *data);
+int joinRoom_inside (mail *pack, thRoomArg *data);
 
-int delRoom_inside(mail *pack, thRoomArg *data);
+int delRoom_inside (mail *pack, thRoomArg *data);
 
-int leaveRoom_inside(mail *pack, thRoomArg *data, int *exit);
+int leaveRoom_inside (mail *pack, thRoomArg *data, int *exit);
 
-int openRoom_inside(mail *pack, thRoomArg *data);
+int openRoom_inside (mail *pack, thRoomArg *data);
 
-int exitRoom_inside(mail *pack, thRoomArg *data);
+int exitRoom_inside (mail *pack, thRoomArg *data);
 
 
 /** #### TH-ROOM CON RUOLO DI TX **/
@@ -141,27 +138,27 @@ void *thRoomTX (thRoomArg *rData);
 
 /** FUNZIONI DI SUPPORTO PER TH-ROOM CON RUOLO DI TX **/
 
-int mexRecive_inside(mail *pack, thRoomArg *data);
+int mexRecive_inside (mail *pack, thRoomArg *data);
 
 /** SEND PACK_inside e WRITE PACK_inside**/
 
-int readPack_inside(int fdPipe, mail *pack);
+int readPack_inside (int fdPipe, mail *pack);
 
-int writePack_inside(int fdPipe, mail *pack);
+int writePack_inside (int fdPipe, mail *pack);
 
-int testConnection_inside(int fdPipe);
+int testConnection_inside (int fdPipe);
 
-void freeUserArg(thUserArg *p);
+void freeUserArg (thUserArg *p);
 
-void freeRoomArg(thRoomArg *p);
+void freeRoomArg (thRoomArg *p);
 
 
 /** List utility**/
-dlist_p makeNode(int keyId, int fdPSend);
+dlist_p makeNode (int keyId, int fdPSend);
 
-dlist_p nodeSearchKey(listHead_S head, int key);
+dlist_p nodeSearchKey (listHead_S head, int key);
 
-int deleteNodeByList(listHead_S head, dlist_p nodeDel);
+int deleteNodeByList (listHead_S head, dlist_p nodeDel);
 
 
 #endif //CHAT_MULTILEVEL_THFUNX_H

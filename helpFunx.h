@@ -6,6 +6,7 @@
 #ifndef CHAT_MULTILEVEL_HELPFUNX_H
 #define CHAT_MULTILEVEL_HELPFUNX_H
 
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -17,15 +18,15 @@
 
 extern char **environ;
 
-void printErrno(char *, int);
+void printErrno (char *, int);
 
-void printAllEnv();
+void printAllEnv ( );
 
-void printDublePointeChar(char **);
+void printDublePointeChar (char **);
 
-void freeDublePointerArr(void **, int);
+void freeDublePointerArr (void **, int);
 
-int recursive_delete(const char *dir);
+int recursive_delete (const char *dir);
 
 
 #endif //CHAT_MULTILEVEL_HELPFUNX_H

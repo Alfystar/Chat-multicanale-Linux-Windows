@@ -23,21 +23,21 @@
 #pragma once
 
 /* Queue ADT using a circular doubly linked list */
-typedef struct {
+typedef struct{
 	dlist_pp head;
 } queue_t, *queue_p;
 
 /* Create a new Queue */
-queue_p get_queue(void);
+queue_p get_queue (void);
 
 /* Add a value to Queue */
-bool enqueue(queue_p queue, void *val);
+bool enqueue (queue_p queue, void *val);
 
 /* Remove a value from Queue */
-void *dequeue(queue_p queue);
+void *dequeue (queue_p queue);
 
 /* Check if the Queue is empty */
-bool isQueueEmpty(queue_p queue);
+bool isQueueEmpty (queue_p queue);
 
 /* Clean up Queue */
-bool destroy_queue(queue_p queue);
+bool destroy_queue (queue_p queue);

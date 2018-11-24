@@ -19,34 +19,35 @@
  */
 
 #include "common.h"
+
 #pragma once
 
-typedef struct tree {
+typedef struct tree{
 	int data;
 	struct tree *left;
 	struct tree *right;
 } tree_t, *tree_p, **tree_pp;
 
 /* Generate tree from an array of input values */
-tree_pp generate_tree(int *arr, int len);
+tree_pp generate_tree (int *arr, int len);
 
 /* Initalize a tree */
-tree_pp init_tree(void);
+tree_pp init_tree (void);
 
 /* Insert a node in tree */
-bool insert_tree_node(tree_pp head, int val);
+bool insert_tree_node (tree_pp head, int val);
 
 /* Delete a node from tree */
-bool delete_tree_node(tree_pp head, int val);
+bool delete_tree_node (tree_pp head, int val);
 
 /* Destroy the tree */
-int destroy_tree(tree_pp head);
+int destroy_tree (tree_pp head);
 
 /* Print a tree in preorder */
-int print_tree(tree_p root);
+int print_tree (tree_p root);
 
 /* Traverse tree in BFS to find a given value */
-bool search_BFS(tree_pp root, int val, bool stop);
+bool search_BFS (tree_pp root, int val, bool stop);
 
 /* Traverse tree in DFS to find a given value */
-bool search_DFS(tree_pp root, int val, bool stop);
+bool search_DFS (tree_pp root, int val, bool stop);

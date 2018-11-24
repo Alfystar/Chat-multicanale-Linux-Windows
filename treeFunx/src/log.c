@@ -18,34 +18,28 @@
  * along with dslib.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "../include/log.h"
-
 extern int current_log_level;
-char *logarr[] = {"ERROR", "INFO", "DEBUG"};
+char *logarr[] = { "ERROR", "INFO", "DEBUG" };
 
 
 ///FUNZIONE DEPRECATA
-void debug_log(const char *file,
-               const char *func,
-               int line,
-               int level,
-               const char *format,
-               ...) {
-    return;
-    /*
-    va_list ap;
+void debug_log (
+		const char *file, const char *func, int line, int level, const char *format, ...){
+	return;
+	/*
+	va_list ap;
 
-    va_start(ap, format);
+	va_start(ap, format);
 
-    if (level < 0 || level > DEBUG)
-        return;
+	if (level < 0 || level > DEBUG)
+		return;
 
-    if (level <= current_log_level) {
-        fprintf(stderr, "[%s, %s(), ln %d] %s: ",
-                file, func, line, logarr[level]);
-        vfprintf(stderr, format, ap);
-    }
+	if (level <= current_log_level) {
+		fprintf(stderr, "[%s, %s(), ln %d] %s: ",
+				file, func, line, logarr[level]);
+		vfprintf(stderr, format, ap);
+	}
 
-    va_end(ap);
-     */
+	va_end(ap);
+	 */
 }

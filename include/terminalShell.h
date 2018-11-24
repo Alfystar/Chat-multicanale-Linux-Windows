@@ -24,7 +24,7 @@
 #include "../globalSet.h"
 
 /** Strutture utili alla shell **/
-typedef struct thShellArg_ {
+typedef struct thShellArg_{
 	int fd_Read;
 } thShellArg;
 
@@ -45,46 +45,42 @@ bool debugView; //start true in thPrintDebug
 
 
 /** Funzioni generali e mainTh **/
-void terminalShell();
+void terminalShell ( );
 
-void driverCmd(int argc, char *argv[], int *exit);
+void driverCmd (int argc, char *argv[], int *exit);
 
-void menuHelpw(WINDOW *, int, int, int argc, char *argv[]);
+void menuHelpw (WINDOW *, int, int, int argc, char *argv[]);
 
 
 ///Funzioni specifiche di comando
-void windowSetUp();
+void windowSetUp ( );
 
-void titlePrintW(WINDOW *window, int y_start, int x_start);
+void titlePrintW (WINDOW *window, int y_start, int x_start);
 
-void chatShowW(WINDOW *window, int y_start, int x_start);
+void chatShowW (WINDOW *window, int y_start, int x_start);
 
-void userShowW(WINDOW *window, int y_start, int x_start);
+void userShowW (WINDOW *window, int y_start, int x_start);
 
 ///Comandi di visualizzazione chat e user
 
-void wtabPrint(WINDOW *window, table *t, int y_start);
+void wtabPrint (WINDOW *window, table *t, int y_start);
 
-void wfirstPrint(WINDOW *window, firstFree *f);
+void wfirstPrint (WINDOW *window, firstFree *f);
 
-void wentryPrint(WINDOW *window, entry *e);
+void wentryPrint (WINDOW *window, entry *e);
 
-void wprintConv(WINDOW *window, conversation *c, int y_start);
+void wprintConv (WINDOW *window, conversation *c, int y_start);
 
-void wprintMex(WINDOW *window, mex *m);
+void wprintMex (WINDOW *window, mex *m);
 
-void wprintConvInfo(WINDOW *window, convInfo *cI);
+void wprintConvInfo (WINDOW *window, convInfo *cI);
 
 /** shell th funx**/
-void shellThStdout(thShellArg *);
+void shellThStdout (thShellArg *);
 
-void shellThStdErr(thShellArg *);
+void shellThStdErr (thShellArg *);
 
-void shellThDebug(thShellArg *);
-
-
-
-
+void shellThDebug (thShellArg *);
 
 
 #endif //CHAT_MULTILEVEL_TERMINALSHELL_H

@@ -21,12 +21,13 @@
 
 #pragma once
 
+
 #include "common.h"
 #include "stack.h"
 #include "queue.h"
 
 
-typedef struct avl {
+typedef struct avl{
 	int keyNode;
 	int data;
 	struct avl *left;
@@ -35,42 +36,42 @@ typedef struct avl {
 } avl_t, *avl_p, **avl_pp;
 
 
-typedef struct avlThSafe {
+typedef struct avlThSafe{
 	avl_pp avlRoot;
 	int semId;
 } avl_pp_S;
 
 /* Generate AVL tree from an array of input values */
-avl_pp generate_avl(int *arr, int len);
+avl_pp generate_avl (int *arr, int len);
 
-avl_pp_S generate_avl_S(int *arr, int len);
+avl_pp_S generate_avl_S (int *arr, int len);
 
 /* Initialize an AVL tree */
-avl_pp init_avl(void);
+avl_pp init_avl (void);
 
-avl_pp_S init_avl_S(void);
+avl_pp_S init_avl_S (void);
 
 /* Insert a node in AVL tree */
-bool insert_avl_node(avl_pp head, int key, int data);
+bool insert_avl_node (avl_pp head, int key, int data);
 
-bool insert_avl_node_S(avl_pp_S head, int key, int data);
+bool insert_avl_node_S (avl_pp_S head, int key, int data);
 
 
 /* Delete a node from AVL tree */
-bool delete_avl_node(avl_pp head, int key);
+bool delete_avl_node (avl_pp head, int key);
 
-bool delete_avl_node_S(avl_pp_S head, int key);
+bool delete_avl_node_S (avl_pp_S head, int key);
 
 /* Destroy the tree */
-int destroy_avl(avl_pp head);
+int destroy_avl (avl_pp head);
 // avl will be destroy isn't necessary sincronize it (is better not destroy)
 
 /* Print a tree in preorder */
-int print_avl(avl_p root, avl_p parent);
+int print_avl (avl_p root, avl_p parent);
 
-void print_avl_S(avl_pp_S root);
+void print_avl_S (avl_pp_S root);
 
 /* Traverse tree in BFS to find a given value */
-int search_BFS_avl(avl_pp root, int key);
+int search_BFS_avl (avl_pp root, int key);
 
-int search_BFS_avl_S(avl_pp_S root, int key);
+int search_BFS_avl_S (avl_pp_S root, int key);

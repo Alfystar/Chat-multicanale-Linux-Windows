@@ -19,25 +19,23 @@
  */
 
 #include "../include/dlist.h"
-#include "../../globalSet.h"
-#include "../include/common.h"
 
 
 /*
  * Add a node to the head of dlist
  */
-int add_head_dlist(dlist_pp head, dlist_p node) {
-	if (!node) {    //nodo non nullo
-		dprintf(STDERR_FILENO, "[dlist]node is NULL!\n");
+int add_head_dlist (dlist_pp head, dlist_p node){
+	if (!node){    //nodo non nullo
+		dprintf (STDERR_FILENO, "[dlist]node is NULL!\n");
 		return -1;
 	}
 
-	if (!head) {    //puntatore del puntatore al nodo testa non nullo
-		dprintf(STDERR_FILENO, "[dlist]head is NULL!\n");
+	if (!head){    //puntatore del puntatore al nodo testa non nullo
+		dprintf (STDERR_FILENO, "[dlist]head is NULL!\n");
 		return -1;
 	}
 
-	if (!*head) {   //se il puntatote ai nodi è 0 allora nodo diventa la testa e si auto referenzia
+	if (!*head){   //se il puntatote ai nodi è 0 allora nodo diventa la testa e si auto referenzia
 		node->next = node;
 		node->prev = node;
 		*head = node;
@@ -58,9 +56,9 @@ int add_head_dlist(dlist_pp head, dlist_p node) {
  * Get the value in the head node of dlist
  * The node is not deleted
  */
-void *get_head_dlist(dlist_pp head) {
-	if (!head || !*head) {
-		dprintf(STDERR_FILENO, "[dlist]head or first node is NULL!\n");
+void *get_head_dlist (dlist_pp head){
+	if (!head || !*head){
+		dprintf (STDERR_FILENO, "[dlist]head or first node is NULL!\n");
 		return NULL;
 	}
 
@@ -71,9 +69,9 @@ void *get_head_dlist(dlist_pp head) {
  * Get the value in the tail node of dlist
  * The node is not deleted
  */
-void *get_tail_dlist(dlist_pp head) {
-	if (!head || !*head) {
-		dprintf(STDERR_FILENO, "[dlist]head or first node is NULL!\n");
+void *get_tail_dlist (dlist_pp head){
+	if (!head || !*head){
+		dprintf (STDERR_FILENO, "[dlist]head or first node is NULL!\n");
 		return NULL;
 	}
 
@@ -83,28 +81,28 @@ void *get_tail_dlist(dlist_pp head) {
 /*
  * Delete the head node of dlist
  */
-int delete_head_dlist(dlist_pp head) {
+int delete_head_dlist (dlist_pp head){
 	dlist_p tmp;
 
-	if (!head || !*head) {
-		dprintf(STDERR_FILENO, "[dlist]No nodes to delete!\n");
+	if (!head || !*head){
+		dprintf (STDERR_FILENO, "[dlist]No nodes to delete!\n");
 		return -1;
 	}
 
-	if (*head == (*head)->next) {   //elimina se stesso
-		free(*head);
+	if (*head == (*head)->next){   //elimina se stesso
+		free (*head);
 		*head = NULL;
 		return 0;
 	}
 
 	tmp = *head;
-	free(tmp->data);
+	free (tmp->data);
 	(*head)->data = NULL;
 	(*head)->prev->next = (*head)->next;
 	(*head)->next->prev = (*head)->prev;
 	*head = (*head)->next; /* head->next becomes next head */
 
-	free(tmp);
+	free (tmp);
 
 	return 0;
 }
@@ -112,27 +110,27 @@ int delete_head_dlist(dlist_pp head) {
 /*
  * Delete the tail node of dlist
  */
-int delete_tail_dlist(dlist_pp head) {
+int delete_tail_dlist (dlist_pp head){
 	dlist_p tmp;
 
-	if (!head || !*head) {
-		dprintf(STDERR_FILENO, "[dlist]head or first node is NULL!\n");
+	if (!head || !*head){
+		dprintf (STDERR_FILENO, "[dlist]head or first node is NULL!\n");
 		return -1;
 	}
 
-	if (*head == (*head)->next) {   //elimina se stesso
-		free(*head);
+	if (*head == (*head)->next){   //elimina se stesso
+		free (*head);
 		*head = NULL;
 		return 0;
 	}
 
 	tmp = (*head)->prev;
-	free(tmp->data);
+	free (tmp->data);
 	tmp->data = NULL;
 	tmp->prev->next = tmp->next; /* tail->prev becomes new tail */
 	tmp->next->prev = tmp->prev;
 
-	free(tmp);
+	free (tmp);
 
 	return 0;
 }
@@ -141,26 +139,26 @@ int delete_tail_dlist(dlist_pp head) {
  * Deallocate all memory and destroy the dlist
  * Returns the number of nodes deleted
  */
-int destroy_dlist(dlist_pp head) {
+int destroy_dlist (dlist_pp head){
 	dlist_p tmp;
 	int deleted = 0;
 
-	if (!head || !*head) {
-		dprintf(STDERR_FILENO, "[dlist]No nodes to delete.\n");
+	if (!head || !*head){
+		dprintf (STDERR_FILENO, "[dlist]No nodes to delete.\n");
 		return -1;
 	}
 
 	/* Set tail->next to NULL to end deletion loop */
 	(*head)->prev->next = NULL;
 
-	while (*head) {
+	while (*head){
 		tmp = *head;
-		free(tmp->data);
+		free (tmp->data);
 		(*head)->data = NULL;
 		(*head)->prev = NULL;
 		*head = (*head)->next;
 
-		free(tmp);
+		free (tmp);
 		deleted++;
 	}
 	//alla fine head dovrebbe tornare Null
@@ -170,21 +168,22 @@ int destroy_dlist(dlist_pp head) {
 /*
  * Count the total number of nodes in the dlist
  */
-int count_nodes_dlist(dlist_pp head) {
+int count_nodes_dlist (dlist_pp head){
 	dlist_p tmp;
 	int count = 0;
 
-	if (!head || !*head) {
-		dprintf(STDERR_FILENO, "[dlist]head or first node is NULL!\n");
+	if (!head || !*head){
+		dprintf (STDERR_FILENO, "[dlist]head or first node is NULL!\n");
 		return -1;
 	}
 
 	tmp = *head;
 
-	do {
+	do{
 		count++;
 		tmp = tmp->next;
-	} while (tmp != *head);
+	}
+	while (tmp != *head);
 
 	return count;
 }
@@ -193,99 +192,99 @@ int count_nodes_dlist(dlist_pp head) {
 /*=================== Thread safe Metod ====================*/
 /*==========================================================*/
 
-int init_listHead_S(listHead_S_p head, int fd) {
+int init_listHead_S (listHead_S_p head, int fd){
 	// -1 error: see errno
 	// -2 just inizialize
 
-	if (head->head) {
-		dprintf(STDERR_FILENO, "[dlist]List just init.\n");
+	if (head->head){
+		dprintf (STDERR_FILENO, "[dlist]List just init.\n");
 		return -2;
 	}
 
-	head->head = calloc(1, sizeof(dlist_p *));
+	head->head = calloc (1, sizeof (dlist_p *));
 
 
-	head->semId = semget(IPC_PRIVATE, 3, IPC_CREAT | IPC_EXCL | 0666);
-	if (head->semId == -1) {
-		perror("Create Sem-s take error:");
+	head->semId = semget (IPC_PRIVATE, 3, IPC_CREAT | IPC_EXCL | 0666);
+	if (head->semId == -1){
+		perror ("Create Sem-s take error:");
 		return -1;
 	}
 
 	//enum semName {wantWrite=0,readWorking=1,writeWorking=2}; number is Id of sem
-	unsigned short semStartVal[3] = {0, 0, 1};
+	unsigned short semStartVal[3] = { 0, 0, 1 };
 
 	//setup 3 semaphore in system5
-	if (semctl(head->semId, 0, SETALL, semStartVal)) {
-		perror("set Sem take error:");
+	if (semctl (head->semId, 0, SETALL, semStartVal)){
+		perror ("set Sem take error:");
 		return -1;
 	}
 
 	//dprintf(fdDebug, "SEMAFORO Avl CREATO\n");
-	semInfo(head->semId, fd);
+	semInfo (head->semId, fd);
 
 	return 0;
 }
 
-int add_head_dlist_S(listHead_S_p head, dlist_p node) {
+int add_head_dlist_S (listHead_S_p head, dlist_p node){
 	int ret;
-	lockWriteSem(head->semId);
-	ret = add_head_dlist(head->head, node);
-	unlockWriteSem(head->semId);
+	lockWriteSem (head->semId);
+	ret = add_head_dlist (head->head, node);
+	unlockWriteSem (head->semId);
 	return ret;
 }
 
 /* Get the head of list */
-void *get_head_dlist_S(listHead_S_p head) {
+void *get_head_dlist_S (listHead_S_p head){
 	void *data;
-	lockReadSem(head->semId);
-	data = get_head_dlist(head->head);
-	unlockReadSem(head->semId);
+	lockReadSem (head->semId);
+	data = get_head_dlist (head->head);
+	unlockReadSem (head->semId);
 	return data;
 }
 
 /* Get the tail of list */
-void *get_tail_dlist_S(listHead_S_p head) {
+void *get_tail_dlist_S (listHead_S_p head){
 	void *data;
-	lockReadSem(head->semId);
-	data = get_tail_dlist(head->head);
-	unlockReadSem(head->semId);
+	lockReadSem (head->semId);
+	data = get_tail_dlist (head->head);
+	unlockReadSem (head->semId);
 	return data;
 }
 
 /* Delete the head of list */
-int delete_head_dlist_S(listHead_S_p head) {
+int delete_head_dlist_S (listHead_S_p head){
 	int ret;
-	lockWriteSem(head->semId);
-	ret = delete_head_dlist(head->head);
-	unlockWriteSem(head->semId);
+	lockWriteSem (head->semId);
+	ret = delete_head_dlist (head->head);
+	unlockWriteSem (head->semId);
 	return ret;
 }
 
 /* Delete the tail of list */
-int delete_tail_dlist_S(listHead_S_p head) {
+int delete_tail_dlist_S (listHead_S_p head){
 	int ret;
-	lockWriteSem(head->semId);
-	ret = delete_tail_dlist(head->head);
-	unlockWriteSem(head->semId);
+	lockWriteSem (head->semId);
+	ret = delete_tail_dlist (head->head);
+	unlockWriteSem (head->semId);
 	return ret;
 }
 
 /* Clean up list */
-int destroy_dlist_S(listHead_S_p head) {
+int destroy_dlist_S (listHead_S_p head){
 	int ret;
-	lockWriteSem(head->semId);
-	ret = destroy_dlist(head->head);
-	free(head->head);
-	unlockWriteSem(head->semId);
+	lockWriteSem (head->semId);
+	ret = destroy_dlist (head->head);
+	free (head->head);
+	unlockWriteSem (head->semId);
 	return ret;
 }
 
 /* Count total nodes in list */
-int count_nodes_dlist_S(listHead_S_p head) {
+int count_nodes_dlist_S (listHead_S_p head){
 	int ret;
-	lockReadSem(head->semId);
-	ret = count_nodes_dlist(head->head);
-	unlockReadSem(head->semId);
+	lockReadSem (head->semId);
+	ret = count_nodes_dlist (head->head);
+	unlockReadSem (head->semId);
 	return ret;
 }
 

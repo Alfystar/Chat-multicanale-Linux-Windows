@@ -19,17 +19,16 @@
  */
 
 #include "../include/queue.h"
-#include "../include/common.h"
 
 
 /*
  * Create a new Queue
  * Alocate a head node
  */
-queue_p get_queue(void) {
-	queue_p queue = calloc(1, sizeof(queue_t));
+queue_p get_queue (void){
+	queue_p queue = calloc (1, sizeof (queue_t));
 
-	queue->head = calloc(1, sizeof(dlist_pp));
+	queue->head = calloc (1, sizeof (dlist_pp));
 	return queue;
 }
 
@@ -37,13 +36,13 @@ queue_p get_queue(void) {
  * Add a value to Queue
  * Allocates a new dlist node and inserts value
  */
-bool enqueue(queue_p queue, void *val) {
-	dlist_p nodeptr = calloc(1, sizeof(dlist_t));
+bool enqueue (queue_p queue, void *val){
+	dlist_p nodeptr = calloc (1, sizeof (dlist_t));
 
 	nodeptr->data = val;
 
-	if (add_head_dlist(queue->head, nodeptr)) /* Last In */
-        return false;
+	if (add_head_dlist (queue->head, nodeptr)) /* Last In */
+		return false;
 	else
 		return true;
 }
@@ -52,11 +51,11 @@ bool enqueue(queue_p queue, void *val) {
  * Remove the value at the front of the Queue
  * Deallocates the dlist node holding the value
  */
-void *dequeue(queue_p queue) {
-	void *data = get_tail_dlist(queue->head); /* Last Out */
+void *dequeue (queue_p queue){
+	void *data = get_tail_dlist (queue->head); /* Last Out */
 
-	if (delete_tail_dlist(queue->head) == -1)
-        dprintf(STDERR_FILENO, "head or first node is NULL!\n");
+	if (delete_tail_dlist (queue->head) == -1)
+		dprintf (STDERR_FILENO, "head or first node is NULL!\n");
 
 	return data;
 }
@@ -64,8 +63,8 @@ void *dequeue(queue_p queue) {
 /*
  * Check if a Queue has any elements
  */
-bool isQueueEmpty(queue_p queue) {
-	if (get_head_dlist(queue->head))
+bool isQueueEmpty (queue_p queue){
+	if (get_head_dlist (queue->head))
 		return TRUE;
 
 	return FALSE;
@@ -75,12 +74,12 @@ bool isQueueEmpty(queue_p queue) {
  * Deallocate all dlist nodes
  * Destroy Queue
  */
-bool destroy_queue(queue_p queue) {
-	if (destroy_dlist(queue->head) == -1)
+bool destroy_queue (queue_p queue){
+	if (destroy_dlist (queue->head) == -1)
 		return FALSE;
 
-	free(queue->head);
-	free(queue);
+	free (queue->head);
+	free (queue);
 
 	return TRUE;
 }

@@ -7,6 +7,7 @@
 #ifndef FILETAB_DEMO_TABLEFILE_H
 #define FILETAB_DEMO_TABLEFILE_H
 
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <malloc.h>
@@ -29,20 +30,19 @@ extern int fdDebug;
 #define nameEntrySize 28
 
 
-
-typedef struct firstFree_ {
+typedef struct firstFree_{
 	char name[nameFirstFreeSize];      //nomi da 19 caratteri per il nome della tabella
 	int counter;        //numero di caselle libere nel file
 	int len;
 	int nf_id;      //indice nel'array delle entry che contiene la prima casella libera
 } firstFree;
 
-typedef struct entry_ {
+typedef struct entry_{
 	char name[nameEntrySize];      //nomi da 27 caratteri
 	int point;          //se roomPath='\0' indica la sucessiva entry libera, se roomPath="xxx" indica in quel file l'attuale file dove si trova
 } entry;
 
-typedef struct table_ {
+typedef struct table_{
 	firstFree head;
 	entry *data;    //array da malloccare contenente le entry della tamella
 	FILE *stream;
@@ -51,64 +51,64 @@ typedef struct table_ {
 /** Prototipi **/
 
 /// Funzioni di Interfaccia operanti su Tabella
-table *init_Tab(char *path_file, char *nameFirst);
+table *init_Tab (char *path_file, char *nameFirst);
 
-table *open_Tab(char *path_file);
+table *open_Tab (char *path_file);
 
-int addEntry(table *table, char *name, int data);
+int addEntry (table *table, char *name, int data);
 
-int renameFirstEntry(table *t, char *name);
-
-
-int delEntry(table *table, int index);
-
-table *compressTable(table *table);
-
-int searchFirstOccurence(table *tabel, char *search);
-
-int searchFirstOccurenceKey(table *t, int ID);
+int renameFirstEntry (table *t, char *name);
 
 
-int searchEntryBy(table *tabel, char *search, int startIndex);
+int delEntry (table *table, int index);
+
+table *compressTable (table *table);
+
+int searchFirstOccurence (table *tabel, char *search);
+
+int searchFirstOccurenceKey (table *t, int ID);
+
+
+int searchEntryBy (table *tabel, char *search, int startIndex);
 
 
 /// Funzioni di supporto operanti sul file
-FILE *openTabF(char *path_file);
+FILE *openTabF (char *path_file);
 
-int setUpTabF(FILE *fdTable, char *nameFirst);
+int setUpTabF (FILE *fdTable, char *nameFirst);
 
-int addEntryTabF(FILE *fdTable, char *name, int data);
+int addEntryTabF (FILE *fdTable, char *name, int data);
 
-int delEntryTabF(FILE *fdTable, int index);
+int delEntryTabF (FILE *fdTable, int index);
 
-int entrySeekF(FILE *fdTable, int indexEntry);
+int entrySeekF (FILE *fdTable, int indexEntry);
 
-size_t lenTabF(FILE *fdTable);
+size_t lenTabF (FILE *fdTable);
 
-int fileWrite(FILE *fdTable, size_t sizeElem, int nelem, void *dataWrite);
+int fileWrite (FILE *fdTable, size_t sizeElem, int nelem, void *dataWrite);
 
 
 ///Show funciton
-void firstPrint(firstFree *head);
+void firstPrint (firstFree *head);
 
-void entryPrint(entry *en);
+void entryPrint (entry *en);
 
-void tabPrint(table *tab);
+void tabPrint (table *tab);
 
-void tabPrintFile(FILE *fdTable);
+void tabPrintFile (FILE *fdTable);
 
 ///funzioni di supporto
-int isLastEntry(entry *en);
+int isLastEntry (entry *en);
 
-int isEmptyEntry(entry *en);
+int isEmptyEntry (entry *en);
 
-char *booleanPrint(int val);
+char *booleanPrint (int val);
 
-table *makeTable(FILE *fdTable);
+table *makeTable (FILE *fdTable);
 
-void freeTable(table *table);
+void freeTable (table *table);
 
-void closeTable(table *table);
+void closeTable (table *table);
 
 #endif //FILETAB_DEMO_TABLEFILE_H
 

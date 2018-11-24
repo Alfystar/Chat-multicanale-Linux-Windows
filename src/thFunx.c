@@ -65,7 +65,7 @@ void *userTh (thConnArg *info){
 			break;
 		default:
 			dprintf (STDERR_FILENO, "Pack rivevuto inadatto a instaurazione com\n");
-			fillPack (&pack, failed_p, 0, NULL, "SERVER", "User Not yet Created");
+			fillPack (&pack, failed_p, 0, 0, "SERVER", "User Not yet Created");
 			writePack (arg->conUs.con.ds_sock, &pack);
 			pthread_exit (NULL);
 			break;
@@ -108,13 +108,13 @@ int loginServerSide (mail *pack, thUserArg *data){
 	//setUpThUser prendendo l'id dell'user mette i dati necessari in data
 	if (setUpThUser (atoi (pack->md.whoOrWhy), data)){
 		perror ("Impossible to create new ThUser of register User :");
-		fillPack (&response, failed_p, 0, NULL, "Server", "setUpThUser error");
+		fillPack (&response, failed_p, 0, 0, "Server", "setUpThUser error");
 		writePack (data->conUs.con.ds_sock, &response);
 		return -1;
 	}
 
 	if (strcmp (data->userName, pack->md.sender) != 0){
-		fillPack (&response, failed_p, 0, NULL, "Server", "USER NAME UN-CORRECT");
+		fillPack (&response, failed_p, 0, 0, "Server", "USER NAME UN-CORRECT");
 		writePack (data->conUs.con.ds_sock, &response);
 		return -1;
 	}
@@ -136,7 +136,7 @@ int loginServerSide (mail *pack, thUserArg *data){
 			}
 		}
 		else if (keySearch == -1){
-			fillPack (&response, failed_p, 0, NULL, "Server", "ERROR IN SEARCH");
+			fillPack (&response, failed_p, 0, 0, "Server", "ERROR IN SEARCH");
 			writePack (data->conUs.con.ds_sock, &response);
 			return -1;
 		}
@@ -152,7 +152,7 @@ int loginServerSide (mail *pack, thUserArg *data){
 	// Invio risposta affermativa
 	fillPack (&response, out_dataUs_p, len, mex, "Server", NULL);
 	writePack (data->conUs.con.ds_sock, &response);
-	free (mex);
+	freeMexPack (&response);
 	return 0;
 }
 
@@ -243,7 +243,7 @@ int mkUserServerSide (mail *pack, thUserArg *data){
 	sprintf (idSend, "%d", data->id);
 	fillPack (&response, out_dataUs_p, len, mex, "Server", idSend);
 	writePack (data->conUs.con.ds_sock, &response);
-	free (mex);
+	freeMexPack (&response);
 	return 0;
 }
 
@@ -494,7 +494,7 @@ int joinRoomSocket (mail *pack, thUserArg *uData){
 	 */
 
 	writePack_inside (pipeRm, &roomPack);
-
+	freeMexPack (&roomPack);
 	/*====================================== Attendo risposta dalla Room ======================================*/
 
 RITENTA:
@@ -537,6 +537,7 @@ RITENTA:
 	memcpy (&enToSend, &uData->info->tab->data[ addPos ], sizeof (entry));
 	fillPack (&respond, out_dataRm_p, sizeof (entry), &enToSend, "Server", 0);
 	writePack (uData->conUs.con.ds_sock, &respond);
+	freeMexPack (&respond);
 	return 0;
 }
 
@@ -743,7 +744,7 @@ READ_ROOM_OPEN:
 			size_t lenCp = sizeof (cpRam->head) + cpRam->head.nMex * sizeof (mex);
 			fillPack (&respond, out_kConv_p, lenCp, roomPack.mex, "Server", roomPack.md.whoOrWhy);
 			writePack (uData->conUs.con.ds_sock, &respond);
-			free (roomPack.mex);
+			freeMexPack (&respond);
 			uData->pipeRmFF = pipeRm;
 			uData->keyIdRmFF = idKeyRm;
 			return 0;
@@ -814,7 +815,7 @@ int mexReciveSocket (mail *pack, thUserArg *data){
 	 * dim = dim messaggio (\0 comreso)
 	 */
 	writePack_inside (data->pipeRmFF, &roomPack);
-
+	freeMexPack (&roomPack);
 	/*====================================== Attendo risposta dalla Room ======================================*/
 	readPack_inside (data->pipeRmFF, &roomPack);
 READ_MEX_RECIVE:
@@ -1227,6 +1228,7 @@ int openRoom_inside (mail *pack, thRoomArg *data){
 		 * mex = <conversazione copiata fino a quel momento> (convRam *)
 		 */
 		writePack_inside (pipeUsRespond, &respond);
+		freeMexPack (&respond);
 		return 0;
 	}
 }
@@ -1255,6 +1257,8 @@ void *thRoomTX (thRoomArg *rData){
 			switch (errno){
 				case EBADF:
 					dprintf (STDERR_FILENO, "readEndPipe=%d now is close\nClose Th\n", rData->fdPipe[ readEndPipe ]);
+					freeMexPack (&packRead_in);
+					freeMexPack (&sendClient);
 					pthread_exit (NULL);  //uccide il th (il pthread_close ha fallito)
 					break;
 				default:
@@ -1448,7 +1452,7 @@ int writePack_inside (int fdPipe, mail *pack) //dentro il thArg deve essere punt
 
 int testConnection_inside (int fdPipe){
 	mail packTest;
-	fillPack (&packTest, out_test_p, 0, NULL, "SERVER", "testing_code");
+	fillPack (&packTest, out_test_p, 0, 0, "SERVER", "testing_code");
 
 	if (writePack_inside (fdPipe, &packTest) == -1){
 		return -1;
@@ -1493,7 +1497,6 @@ dlist_p nodeSearchKey (listHead_S head, int key){
 
 	lockReadSem (head.semId);
 
-
 	if (!head.head || !*head.head){
 		dprintf (STDERR_FILENO, "[dslib Search]head or first node is NULL!\n");
 		unlockReadSem (head.semId);
@@ -1501,7 +1504,6 @@ dlist_p nodeSearchKey (listHead_S head, int key){
 	}
 
 	tmp = *head.head;
-
 	do{
 		dataUs = (listData_p)tmp->data;
 		if (dataUs->keyId == key){
@@ -1528,7 +1530,6 @@ int deleteNodeByList (listHead_S head, dlist_p nodeDel){
 	lockWriteSem (head.semId);
 
 	*head.head = nodeDel;   //è un azzardo ma l'istruzione successiva sposta il puntatore al valore opportuno
-
 	delete_head_dlist (head.head);   //non può dare errore così passati i parametri
 	//ora head.head è posizionato su prossimo della coda NELL'heap e non nello stack
 

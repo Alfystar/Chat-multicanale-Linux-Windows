@@ -29,7 +29,7 @@
 enum typePack{
 	/** SYSTEM **/    success_p = 0,
 	failed_p,
-	out_mess_p,
+	out_mess_p, out_messSuccess_p,
 	out_test_p,
 	/**  USER  **/    out_login_p,
 	out_logout_p,

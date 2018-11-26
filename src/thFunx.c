@@ -805,7 +805,7 @@ int mexReciveSocket (mail *pack, thUserArg *data){
 READ_MEX_RECIVE:
 	switch (roomPack.md.type){
 		case success_p:
-			fillPack (&respond, success_p, 0, 0, roomPack.md.sender, roomPack.md.whoOrWhy);
+			fillPack (&respond, out_messSuccess_p, 0, 0, roomPack.md.sender, roomPack.md.whoOrWhy);
 			writePack (data->conUs.con.ds_sock, &respond);
 			return 0;
 			break;
@@ -1307,7 +1307,7 @@ int mexRecive_inside (mail *pack, thRoomArg *data){
 		writePack_inside (usPipe, &usRespond);
 		return -1;
 	}
-	fillPack (&usRespond, success_p, 0, 0, data->idNameRm, pack->md.whoOrWhy);
+	fillPack (&usRespond, out_messSuccess_p, 0, 0, data->idNameRm, pack->md.whoOrWhy);
 	writePack_inside (usPipe, &usRespond);
 
 	/*#################################### Inoltro nella mail-list ####################################*/

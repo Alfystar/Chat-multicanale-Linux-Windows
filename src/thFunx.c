@@ -717,6 +717,7 @@ int openRoomSocket (mail *pack, thUserArg *uData){
 	convRam *cpRam;
 READ_ROOM_OPEN:
 	readPack_inside (uData->fdPipe[readEndPipe], &roomPack);
+	dprintf (fdDebug, "[openRoomSocket] recive from TH-ROOM type: %d\n", roomPack.md.type);
 	/* RISPOSTA OPEN DA TH-ROOM (PARTICOLARE)
 	 * type = in_kConv_p
 	 * sender = idkeyRoom:name (string)
@@ -729,6 +730,7 @@ READ_ROOM_OPEN:
 			size_t lenCp = sizeof (cpRam->head) + cpRam->head.nMex * sizeof (mex);
 			fillPack (&respond, out_kConv_p, lenCp, roomPack.mex, "Server", roomPack.md.whoOrWhy);
 			writePack (uData->conUs.con.ds_sock, &respond);
+			dprintf (fdDebug, "[openRoomSocket]write k_conv doing\n");
 			freeMexPack (&respond);
 			uData->pipeRmFF = pipeRm;
 			uData->keyIdRmFF = idKeyRm;
@@ -801,8 +803,8 @@ int mexReciveSocket (mail *pack, thUserArg *data){
 	writePack_inside (data->pipeRmFF, &roomPack);
 	freeMexPack (&roomPack);
 	/*====================================== Attendo risposta dalla Room ======================================*/
-	readPack_inside (data->pipeRmFF, &roomPack);
 READ_MEX_RECIVE:
+	readPack_inside (data->fdPipe[readEndPipe], &roomPack);
 	switch (roomPack.md.type){
 		case success_p:
 			fillPack (&respond, out_messSuccess_p, 0, 0, roomPack.md.sender, roomPack.md.whoOrWhy);
@@ -942,7 +944,8 @@ void *thRoomRX (thRoomArg *rData){
 					dprintf (STDERR_FILENO, "[Rm-rx(%s)]Impossible Join for Th-room\n", rData->idNameRm);
 				}
 				else{
-					dprintf (fdOut, "[Rm-rx(%s)]New user Join in Room success\n", rData->idNameRm);
+					dprintf (fdOut, "[Rm-rx(%s)]New user [%s] Join in Room success\n", rData->idNameRm,
+					         packRecive.md.sender);
 				}
 				break;
 			case in_delRm_p:
@@ -963,7 +966,8 @@ void *thRoomRX (thRoomArg *rData){
 					         packRecive.md.sender);
 				}
 				else{
-					dprintf (fdOut, "[Rm-rx(%s)]Leave user from Room success\n", rData->idNameRm);
+					dprintf (fdOut, "[Rm-rx(%s)]Leave [%s]  from Room success\n", packRecive.md.sender,
+					         rData->idNameRm);
 				}
 				break;
 			case in_openRm_p:
@@ -973,7 +977,8 @@ void *thRoomRX (thRoomArg *rData){
 					         packRecive.md.sender);
 				}
 				else{
-					dprintf (fdOut, "[Rm-rx(%s)]Add Open Room success\n", rData->idNameRm);
+					dprintf (fdOut, "[Rm-rx(%s)]Add Open Room of [%s] success\n", rData->idNameRm,
+					         packRecive.md.sender);
 				}
 				break;
 			case in_exit_p:

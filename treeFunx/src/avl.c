@@ -354,7 +354,7 @@ bool delete_avl_node (avl_pp head, int key){
 	avl_p tmp;
 
 	if (!head){
-		dprintf (fdDebug, "Initialize AVL tree first\n");
+		dprintf (fdDebug, "[avl]Initialize AVL tree first\n");
 		return FALSE;
 	}
 
@@ -588,7 +588,7 @@ avl_pp_S init_avl_S (void){
 
 	head.semId = semget (IPC_PRIVATE, 3, IPC_CREAT | IPC_EXCL | 0666);
 	if (head.semId == -1){
-		perror ("Create Sem-s take error:");
+		perror ("[avl]Create Sem-s take error:");
 		head.avlRoot = NULL;
 		return head;
 	}
@@ -598,7 +598,7 @@ avl_pp_S init_avl_S (void){
 
 	//setup 3 semaphore in system5
 	if (semctl (head.semId, 0, SETALL, semStartVal)){
-		perror ("set Sem take error:");
+		perror ("[avl]set Sem take error:");
 		head.avlRoot = NULL;
 		return head;
 	}
@@ -615,7 +615,7 @@ bool insert_avl_node_S (avl_pp_S head, int key, int data){
 	lockWriteSem (head.semId);
 	ret = insert_avl_node (head.avlRoot, key, data);
 	unlockWriteSem (head.semId);
-	dprintf (fdDebug, "new Node %d:%d successfull add\n", key, data);
+	dprintf (fdDebug, "[avl]new Node %d:%d successfull add\n", key, data);
 	return ret;
 }
 
@@ -624,7 +624,7 @@ bool delete_avl_node_S (avl_pp_S head, int key){
 	lockWriteSem (head.semId);
 	ret = delete_avl_node (head.avlRoot, key);
 	unlockWriteSem (head.semId);
-	dprintf (fdDebug, "Node %d removed\n", key);
+	dprintf (fdDebug, "[avl]Node %d removed\n", key);
 
 	return ret;
 }

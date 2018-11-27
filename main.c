@@ -56,7 +56,6 @@ void print_trace (int nSig){
 	size_t nCnt;
 
 	size = backtrace (array, 32);
-
 	strings = backtrace_symbols (array, size);
 
 	/* prints each string of function names of trace*/

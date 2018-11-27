@@ -1138,10 +1138,10 @@ int leaveRoom_inside (mail *pack, thRoomArg *data, int *exit){
 		dprintf (fdDebug, "(rm-TH) leave user Do\n");
 
 		//check presenza in lista di inoltro
-		dlist_p usNode = nodeSearchKey (data->mailList, idNameUs);
+		dlist_p usNode = nodeSearchKey (&data->mailList, idNameUs);
 		if (usNode) //se non nullo esiste e lo devo eliminare
 		{
-			deleteNodeByList (data->mailList, usNode);
+			deleteNodeByList (&data->mailList, usNode);
 		}
 		fillPack (&respond, success_p, 0, 0, data->idNameRm, "Entry remove");
 		writePack_inside (pipeUs, &respond);
@@ -1230,8 +1230,8 @@ int exitRoom_inside (mail *pack, thRoomArg *data){
 	 * who = id_Chat_to_Exit(string)
 	 * mex = <Null>
 	 */
-	dlist_p node = nodeSearchKey (data->mailList, atoi (pack->md.sender));
-	if (deleteNodeByList (data->mailList, node)){
+	dlist_p node = nodeSearchKey (&data->mailList, atoi (pack->md.sender));
+	if (deleteNodeByList (&data->mailList, node)){
 		return -1;
 	}
 	return 0;
@@ -1293,7 +1293,7 @@ int mexRecive_inside (mail *pack, thRoomArg *data){
 	sscanf (pack->md.sender, "%d:%d", &usPipe, &idkeyUs);
 
 	//segno il nodo inviante
-	dlist_p senderMexNode = nodeSearchKey (data->mailList, atoi (pack->md.sender));
+	dlist_p senderMexNode = nodeSearchKey (&data->mailList, atoi (pack->md.sender));
 	if (!senderMexNode){
 		fillPack (&usRespond, failed_p, 0, 0, data->idNameRm, "Not in Room forwarding List");
 		writePack_inside (usPipe, &usRespond);
@@ -1335,7 +1335,7 @@ int mexRecive_inside (mail *pack, thRoomArg *data){
 						//pipe non più raggiungibile, tolgo dalla lista di inoltro
 						dprintf (STDERR_FILENO, "In Forwarding mex user=%d impossible to reach\nDeleting from list\n",
 						         dt->keyId);
-						deleteNodeByList (data->mailList, tmp);
+						deleteNodeByList (&data->mailList, tmp);
 						break;
 					default:
 						dprintf (STDERR_FILENO, "In Forwarding mex user=%d unknown error :%s", dt->keyId,
@@ -1467,37 +1467,37 @@ dlist_p makeNode (int keyId, int fdPSend){
 	return node;
 }
 
-dlist_p nodeSearchKey (listHead_S head, int key){
+dlist_p nodeSearchKey (listHead_S_p head, int key){
 	//NULL non trovato, o per lista vuota o perchè non c'è
 	//pointer al nodo con la key corripondente
 
 	dlist_p tmp;
 	listData_p dataUs;
 
-	lockReadSem (head.semId);
+	lockReadSem (head->semId);
 
-	if (!head.head || !*head.head){
+	if (!head->head || !*head->head){
 		dprintf (STDERR_FILENO, "[dslib Search]head or first node is NULL!\n");
-		unlockReadSem (head.semId);
+		unlockReadSem (head->semId);
 		return NULL;
 	}
 
-	tmp = *head.head;
+	tmp = *head->head;
 	do{
 		dataUs = (listData_p)tmp->data;
 		if (dataUs->keyId == key){
-			unlockReadSem (head.semId);
+			unlockReadSem (head->semId);
 			return tmp;
 		}
 		tmp = tmp->next;
 	}
-	while (tmp != *head.head);
+	while (tmp != *head->head);
 
-	unlockReadSem (head.semId);
+	unlockReadSem (head->semId);
 	return NULL;
 }
 
-int deleteNodeByList (listHead_S head, dlist_p nodeDel){
+int deleteNodeByList (listHead_S_p head, dlist_p nodeDel){
 	//-1 error
 	//0 deleted
 
@@ -1506,12 +1506,12 @@ int deleteNodeByList (listHead_S head, dlist_p nodeDel){
 		return -1;
 	}
 
-	lockWriteSem (head.semId);
+	lockWriteSem (head->semId);
 
-	*head.head = nodeDel;   //è un azzardo ma l'istruzione successiva sposta il puntatore al valore opportuno
-	delete_head_dlist (head.head);   //non può dare errore così passati i parametri
+	*head->head = nodeDel;   //è un azzardo ma l'istruzione successiva sposta il puntatore al valore opportuno
+	delete_head_dlist (head->head);   //non può dare errore così passati i parametri
 	//ora head.head è posizionato su prossimo della coda NELL'heap e non nello stack
 
-	unlockWriteSem (head.semId);
+	unlockWriteSem (head->semId);
 	return 0;
 }

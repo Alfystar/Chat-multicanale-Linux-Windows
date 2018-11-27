@@ -124,8 +124,8 @@ void freeRoomArg (thRoomArg *p);
 
 /** List utility**/
 dlist_p makeNode (int keyId, int fdPSend);
-dlist_p nodeSearchKey (listHead_S head, int key);
-int deleteNodeByList (listHead_S head, dlist_p nodeDel);
+dlist_p nodeSearchKey (listHead_S_p head, int key);
+int deleteNodeByList (listHead_S_p head, dlist_p nodeDel);
 
 
 #endif //CHAT_MULTILEVEL_THFUNX_H

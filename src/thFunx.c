@@ -351,7 +351,8 @@ void *thUs_ServRX (thUserArg *uData){
 				}
 				break;
 			case out_mess_p:
-				dprintf (fdOut, "[Us-rx-(%s)]MEX Incoming\n", uData->idNameUs);
+				dprintf (fdOut, "[Us-rx-(%s)]MEX Incoming:\n%s\n", uData->idNameUs, packClient.mex);
+				sleep (1);
 				if (mexReciveSocket (&packClient, uData)){
 					dprintf (STDERR_FILENO, "[Us-rx-(%s)]mexReciveSocket take error, just send fail\n",
 					         uData->idNameUs);
@@ -373,8 +374,9 @@ void *thUs_ServRX (thUserArg *uData){
 				break;
 
 			default:
-				dprintf (fdDebug, "[Us-rx-(%s)] unexpected pack type = [%d]\n", uData->idNameUs, packClient.md.type);
-				printPack (&packClient);
+				dprintf (fdDebug, "[Us-rx-(%s)] unexpected pack type = %d[%s]\n", uData->idNameUs, packClient.md.type,
+				         typeToText (packClient.md.type));
+				printPack (&packClient, fdDebug);
 				writePack_inside (uData->fdPipe[writeEndPipe], &packClient);
 				break;
 		}
@@ -927,7 +929,8 @@ void *thUs_ServTX (thUserArg *uData){
 				break;
 			default:
 				//pacchetto indesiderato
-				dprintf (fdDebug, "[Us-tx-(%s)] unexpected pack type = [%d]\n", uData->idNameUs, packRead_in.md.type);
+				dprintf (fdDebug, "[Us-tx-(%s)] unexpected pack type = %d[%s]\n", uData->idNameUs, packRead_in.md.type,
+				         typeToText (packRead_in.md.type));
 				writePack_inside (uData->fdPipe[writeEndPipe], &packRead_in);
 				break;
 		}
@@ -1041,8 +1044,9 @@ void *thRoomRX (thRoomArg *rData){
 				}
 				break;
 			default:
-				dprintf (fdDebug, "[Rm-rx-(%s)] unexpected pack type = [%d]\n", rData->idNameRm, packRecive.md.type);
-				printPack (&packRecive);
+				dprintf (fdDebug, "[Rm-rx-(%s)] unexpected pack type = %d[%s]\n", rData->idNameRm, packRecive.md.type,
+				         typeToText (packRecive.md.type));
+				printPack (&packRecive, fdDebug);
 				writePack_inside (rData->fdPipe[writeEndPipe], &packRecive);
 				usleep (5000);   //dorme 5ms per permettere al rx o chi per lui di prendere il pacchetto
 				break;
@@ -1320,7 +1324,8 @@ void *thRoomTX (thRoomArg *rData){
 
 			default:
 				//pacchetto non gestito, quindi non indirizzato a noi, lo ri infilo nella pipe
-				dprintf (fdDebug, "[Rm-tx-(%s)] unexpected pack type = [%d]\n", rData->idNameRm, packRead_in.md.type);
+				dprintf (fdDebug, "[Rm-tx-(%s)] unexpected pack type = %d[%s]\n", rData->idNameRm, packRead_in.md.type,
+				         typeToText (packRead_in.md.type));
 				writePack_inside (rData->fdPipe[writeEndPipe], &packRead_in);
 				usleep (5000);   //dorme 5ms per permettere al rx o chi per lui di prendere il pacchetto
 				break;
@@ -1588,4 +1593,74 @@ int deleteNodeByList (listHead_S_p head, dlist_p nodeDel){
 
 	unlockWriteSem (head->semId);
 	return 0;
+}
+
+char *typeToText (int type){
+
+	switch (type){
+		case success_p:
+			return "success_p";
+		case failed_p:
+			return "failed_p";
+		case out_mess_p:
+			return "mess_p";
+		case out_messSuccess_p:
+			return "messSuccess_p";
+		case out_test_p:
+			return "test_p";
+		case out_login_p:
+			return "login_p";
+		case out_logout_p:
+			return "logout_p";
+		case out_delUs_p:
+			return "delUs_p";
+		case out_mkUser_p:
+			return "mkUser_p";
+		case out_dataUs_p:
+			return "dataUs_p";
+		case out_kConv_p:
+			return "kConv_p";
+		case out_mkRoom_p:
+			return "mkRoom_p";
+		case out_joinRm_p:
+			return "joinRm_p";
+		case out_openRm_p:
+			return "openRm_p";
+		case out_dataRm_p:
+			return "dataRm_p";
+		case out_leaveRm_p:
+			return "leaveRm_p";
+		case out_delRm_p:
+			return "delRm_p";
+		case out_exitRm_p:
+			return "exitRm_p";
+		case in_join_p:
+			return "in_join_p";
+		case in_delRm_p:
+			return "in_delRm_p";
+		case in_leave_p:
+			return "in_leave_p";
+		case in_entryIndex_p:
+			return "in_entryIndex_p";
+		case in_openRm_p:
+			return "in_openRm_p";
+		case in_exit_p:
+			return "in_exit_p";
+		case in_kConv_p:
+			return "in_kConv_p";
+		case in_mess_p:
+			return "in_mess_p";
+		default:
+			return "Not expected type";
+	}
+}
+
+void printPack (mail *pack, int fd){
+	dprintf (fd, "######[][]I METADATI SONO[][]######\n");
+	dprintf (fd, "Dim pack = %ld\n", pack->md.dim);
+	dprintf (fd, "Type = %d[%s]\n", pack->md.type, typeToText (pack->md.type));
+	dprintf (fd, "Sender = %s\n", pack->md.sender);
+	dprintf (fd, "whoOrWhy = %s\n", pack->md.whoOrWhy);
+	dprintf (fd, "------[][]IL MESSAGGIO[][]------\n");
+	dprintf (fd, "MEX = %p\n", pack->mex);
 }

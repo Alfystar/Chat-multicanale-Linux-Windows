@@ -116,6 +116,7 @@ mex *makeMex (char *text, int usId){
 	if (m == NULL){
 		return NULL;
 	}
+	dprintf (fdDebug, "TESTO DEL MESSAGGIO:\n%s\n", text);
 	m->info.usId = usId;
 	m->info.timeM = currTimeSys ();
 	m->text = malloc (strlen (text) + 1);

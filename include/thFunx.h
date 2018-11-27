@@ -126,6 +126,7 @@ void freeRoomArg (thRoomArg *p);
 dlist_p makeNode (int keyId, int fdPSend);
 dlist_p nodeSearchKey (listHead_S_p head, int key);
 int deleteNodeByList (listHead_S_p head, dlist_p nodeDel);
-
+char *typeToText (int type);
+void printPack (mail *pack, int fd);
 
 #endif //CHAT_MULTILEVEL_THFUNX_H

@@ -239,16 +239,6 @@ void freeMexPack (mail *p){
 		p->mex = NULL;
 	}
 }
-
-void printPack (mail *pack){
-	dprintf (fdDebug, "######[][]I METADATI SONO[][]######\n");
-	dprintf (fdDebug, "Dim pack = %ld\n", pack->md.dim);
-	dprintf (fdDebug, "Type = %d\n", pack->md.type);
-	dprintf (fdDebug, "Sender = %s\n", pack->md.sender);
-	dprintf (fdDebug, "whoOrWhy = %s\n", pack->md.whoOrWhy);
-	dprintf (fdDebug, "------[][]IL MESSAGGIO[][]------\n");
-	dprintf (fdDebug, "MEX = %p\n", pack->mex);
-}
 ///Server FUNCTION
 
 int initServer (connection *c, int coda){

@@ -24,7 +24,6 @@
 
 #include "../globalSet.h"
 
-#define fflush(stdin) while(getchar() != '\n')
 
 enum typePack{
 	/** SYSTEM **/    success_p = 0,
@@ -80,7 +79,6 @@ int testConnection (int ds_sock);
 int fillPack (mail *pack, int type, int dim, void *mex, char *sender, char *whoOrWhy);
 void freePack (mail *p);
 void freeMexPack (mail *p);
-void printPack (mail *pack);
 
 ///Server FUNCTION
 

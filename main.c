@@ -45,7 +45,8 @@ void pipeInit (){
 }
 
 void print_trace (int nSig){
-	sleep (1);
+	dprintf (STDERR_FILENO, "CORE DUMB CREATO 10S AT DUMP\n\n\n\n");
+	sleep (10);
 	endwin ();
 
 	printf ("\n\nprint_trace: got signal %d\nCurrent Thread in Scheduling are:\n", nSig);

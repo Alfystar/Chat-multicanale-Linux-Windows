@@ -849,7 +849,6 @@ int mexReciveSocket (mail *pack, thUserArg *data){
 	 * dim = dim messaggio (\0 comreso)
 	 */
 	writePack_inside (data->pipeRmFF, &roomPack);
-	freeMexPack (&roomPack);
 	/*====================================== Attendo risposta dalla Room ======================================*/
 READ_MEX_RECIVE:
 	readPack_inside (data->fdPipe[readEndPipe], &roomPack);
@@ -1312,7 +1311,7 @@ void *thRoomTX (thRoomArg *rData){
 
 		switch (packRead_in.md.type){
 			case in_mess_p:
-				dprintf (fdOut, "[Rm-tx(%s)]Mex incoming in room\n", rData->idNameRm);
+				dprintf (fdOut, "[Rm-tx(%s)]Mex incoming in room, TEXT:\n%s\n", rData->idNameRm, packRead_in.mex);
 				if (mexRecive_inside (&packRead_in, rData)){
 					dprintf (STDERR_FILENO, "[Rm-tx(%s)]PROBLEM to Forwarding mex from %s\n", rData->idNameRm,
 					         packRead_in.md.sender);
@@ -1366,6 +1365,7 @@ int mexRecive_inside (mail *pack, thRoomArg *data){
 	}
 
 	if (addMex (data->info->conv, newMex)){
+		dprintf (STDERR_FILENO, "[mexRecive_inside]Add mex at conv FAIL");
 		fillPack (&usRespond, failed_p, 0, 0, data->idNameRm, "Error in adding mex on conv (maybe saved)");
 		writePack_inside (usPipe, &usRespond);
 		return -1;

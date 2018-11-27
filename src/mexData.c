@@ -98,15 +98,18 @@ convRam *copyConv (conversation *c){
 
 int addMex (conversation *c, mex *m){
 	if (saveNewMexF (m, c->stream)){
-		perror ("error during write :");
+		perror ("[addMex]error during write :");
 		return -1;
 	}
 	c->head.nMex++;
 	c->mexList = reallocarray (c->mexList, c->head.nMex, sizeof (mex *));
 	c->mexList[c->head.nMex - 1] = m;
+	dprintf (fdDebug, "[addMex]Try modify head on fileSystem");
 	if (overrideHeadF (&c->head, c->stream)){
+		dprintf (STDERR_FILENO, "[addMex]Override fail");
 		return -1;
 	}
+	dprintf (fdDebug, "[addMex]Override success");
 	return 0;
 }
 

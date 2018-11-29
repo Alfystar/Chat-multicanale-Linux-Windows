@@ -104,12 +104,14 @@ int addMex (conversation *c, mex *m){
 	c->head.nMex++;
 	c->mexList = reallocarray (c->mexList, c->head.nMex, sizeof (mex *));
 	c->mexList[c->head.nMex - 1] = m;
-	dprintf (fdDebug, "[addMex]Try modify head on fileSystem");
+	//dprintf (fdDebug, "[addMex]Try modify head on fileSystem\n");
+	//printConvInfo (&c->head, STDERR_FILENO);
+	//sleep (5);
 	if (overrideHeadF (&c->head, c->stream)){
-		dprintf (STDERR_FILENO, "[addMex]Override fail");
+		dprintf (STDERR_FILENO, "[addMex]Override fail\n");
 		return -1;
 	}
-	dprintf (fdDebug, "[addMex]Override success");
+	//dprintf (fdDebug, "[addMex]Override success\n");
 	return 0;
 }
 
@@ -119,7 +121,7 @@ mex *makeMex (char *text, int usId){
 	if (m == NULL){
 		return NULL;
 	}
-	dprintf (fdDebug, "TESTO DEL MESSAGGIO:\n%s\n", text);
+	//dprintf (fdDebug, "[makeMex]TESTO DEL MESSAGGIO:\n%s\n", text);
 	m->info.usId = usId;
 	m->info.timeM = currTimeSys ();
 	m->text = malloc (strlen (text) + 1);
@@ -181,7 +183,7 @@ int overrideHeadF (convInfo *cI, FILE *stream){
 		perror ("fwrite fail in overrideHeadF");
 		return -1;
 	}
-
+	fflush (stream);
 	funlockfile (stream);
 
 	return 0;
@@ -379,8 +381,29 @@ void printMex (mex *m, int fdOutP){
 	dprintf (fdOutP, "Mex data Store locate in=%p:\n", m);
 	dprintf (fdOutP, "info.usId\t-> %d\n", m->info.usId);
 	dprintf (fdOutP, "time Message\t-> %s", timeString (m->info.timeM));
-	if (m->text != NULL){
+	if (m->text){
 		dprintf (fdOutP, "Text:\n-->  %s\n", m->text);
+	}
+	else{
+		dprintf (fdOutP, "Text: ##Non Presente##\n");
+	}
+}
+
+void printMexBuf (char *buf, int fdOutP){
+	/*
+	m->text
+	m->info.usId
+	m->info.timeM
+	m->next
+	 */
+	mex m;
+	memcpy (&m, buf, sizeof (mexInfo));
+	m.text = buf + sizeof (mexInfo);
+	dprintf (fdOutP, "Mex BUF data Store locate in=%p:\n", buf);
+	dprintf (fdOutP, "info.usId\t-> %d\n", m.info.usId);
+	dprintf (fdOutP, "time Message\t-> %s", timeString (m.info.timeM));
+	if (m.text != NULL){
+		dprintf (fdOutP, "Text:\n-->  %s\n", m.text);
 	}
 	else{
 		dprintf (fdOutP, "Text: ##Non Presente##\n");

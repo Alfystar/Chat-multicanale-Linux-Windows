@@ -92,6 +92,9 @@ int mexReciveSocket (mail *pack, thUserArg *data);
 void *thUs_ServTX (thUserArg *);
 
 /* FUNZIONI DI SUPPORTO PER TH-USER SUL SERVER CON RUOLO DI TX */
+int delRoomForwarding (mail *pack, thUserArg *data);
+
+int mexForwarding (mail *pack, thUserArg *data);
 
 /*==============================================================*/
 /*==============================================================*/

@@ -73,6 +73,7 @@ time_t currTimeSys ();
 void printConv (conversation *c, int fdOutP);
 void printConvRam (convRam *c, int fdOutP);
 void printMex (mex *m, int fdOutP);
+void printMexBuf (char *buf, int fdOutP);
 void printConvInfo (convInfo *cI, int fdOutP);
 char *timeString (time_t t);
 

@@ -272,10 +272,10 @@ void menuHelpw (WINDOW *w, int y_start, int x_start, int argc, char *argv[]){
 
 void windowSetUp (){
 	mainWindows = initscr ();    //è lo sfondo, scrivere su di lui i commenti perpetui
-	titleW = newwin (10, 80, 1, 1);
-	cmdW = newwin (15, 80, 12, 1);
+	//titleW = newwin (10, 80, 1, 1);
+	cmdW = newwin (15, 80, 2, 1);
 	showPannel = newwin (46, 60, 1, 83);
-	monitor = newwin (18, 80, 29, 1);
+	monitor = newwin (28, 80, 19, 1);
 	curs_set (0); //disattivo il cursore così il movimento causato dai thread non si nota
 	refresh();
 

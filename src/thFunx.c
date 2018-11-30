@@ -40,7 +40,7 @@ void *userTh (thConnArg *info){
 	arg->conUs.con = info->con; //copio i dati di info
 	free (info); //il tipo thConnArg non serve più tutto è stato copiato
 
-	dprintf (fdDebug, "TH-User creato, In Attesa primo pack\n");
+	dprintf (fdOut, "TH-User creato, In Attesa primo pack\n");
 
 	mail pack, responde;
 
@@ -80,7 +80,8 @@ void *userTh (thConnArg *info){
 		printErrno ("La creazione della pipe per il Th-room ha dato l'errore", errorRet);
 		return NULL;
 	}
-	dprintf (fdDebug, "Th-user arg->fdPipe[0]=%d , arg->fdPipe[1]=%d\n", arg->fdPipe[0], arg->fdPipe[1]);
+	dprintf (fdDebug, "[Us-Th (%s)]Have: fdPipe[0] = %d, fdPipe[1]= %d\n", arg->idNameUs, arg->fdPipe[0],
+	         arg->fdPipe[1]);
 
 	insert_avl_node_S (usAvlTree_Pipe, arg->id, arg->fdPipe[writeEndPipe]);
 
@@ -365,8 +366,6 @@ void *thUs_ServRX (thUserArg *uData){
 			default:
 				dprintf (fdDebug, "[Us-rx-(%s)]Unexpected pack type = %d[%s]\n", uData->idNameUs, packClient.md.type,
 				         typeToText (packClient.md.type));
-				//printPack (&packClient, fdDebug);
-				dprintf (fdDebug, "\n");
 				writePack_inside (uData->fdPipe[writeEndPipe], &packClient);
 				break;
 		}
@@ -754,8 +753,6 @@ int openRoomSocket (mail *pack, thUserArg *uData){
 	char *buf;
 READ_ROOM_OPEN:
 	readPack_inside (uData->fdPipe[readEndPipe], &roomPack);
-	dprintf (fdDebug, "[openRoomSocket]Recive from TH-ROOM type: %d[%s]\n", roomPack.md.type,
-	         typeToText (roomPack.md.type));
 	/* RISPOSTA OPEN DA TH-ROOM (PARTICOLARE)
 	 * type = in_kConv_p
 	 * sender = idkeyRoom:name (string)
@@ -775,10 +772,9 @@ READ_ROOM_OPEN:
 				strcpy (buf + pt, cpRam->mexList[i]->text);
 				pt += strlen (cpRam->mexList[i]->text) + 1;
 			}
-
 			fillPack (&respond, out_kConv_p, roomPack.md.dim, buf, "Server", roomPack.md.whoOrWhy);
 			writePack (uData->conUs.con.ds_sock, &respond);
-			//dprintf (fdDebug, "[openRoomSocket]Write k_conv doing\n");
+
 			uData->pipeRmFF = pipeRm;
 			uData->keyIdRmFF = idKeyRm;
 			free (buf);
@@ -1071,7 +1067,6 @@ void *thRoomRX (thRoomArg *rData){
 			default:
 				dprintf (fdDebug, "[Rm-rx-(%s)]Unexpected pack type = %d[%s]\n", rData->idNameRm, packRecive.md.type,
 				         typeToText (packRecive.md.type));
-				//printPack (&packRecive, fdDebug);
 				writePack_inside (rData->fdPipe[writeEndPipe], &packRecive);
 				usleep (50000);   //dorme 50ms per permettere al rx o chi per lui di prendere il pacchetto
 				break;
@@ -1575,28 +1570,12 @@ dlist_p nodeSearchKey (listHead_S_p head, int key){
 		return NULL;
 	}
 
-	dlist_p tmp;
 	int count = 0;
-	/*
-	tmp = *head->head;
-	dprintf (fdDebug, "===[head of LIST]===\n");
-	dprintf (fdDebug, "&HEAD[0]=%p\n",tmp);
-	do {
-		dataUs = (listData_p)tmp->data;
-		dprintf (fdDebug, "-->node[%d]=%d:%d\n",count, dataUs->keyId,dataUs->fdPipeSend);
-		count++;
-		tmp = tmp->next;
-	} while (tmp != *head->head);
-	dprintf (fdDebug, "##################\n#### END LIST ####\n##################\n");
-	sleep (1);
-	*/
-	count = 0;
-	tmp = *head->head;
+	dlist_p tmp = *head->head;
 	do{
 		dataUs = (listData_p)tmp->data;
 		if (dataUs->keyId == key){
 			unlockReadSem (head->semId);
-			dprintf (fdDebug, "[nodeSearchKey]node[%d]have same key(%d)\n", count, key);
 			return tmp;
 		}
 		tmp = tmp->next;
@@ -1605,7 +1584,6 @@ dlist_p nodeSearchKey (listHead_S_p head, int key){
 	while (tmp != *head->head);
 
 	unlockReadSem (head->semId);
-	dprintf (fdDebug, "[nodeSearchKey]No node have same key(%d)\n", key);
 	return NULL;
 }
 

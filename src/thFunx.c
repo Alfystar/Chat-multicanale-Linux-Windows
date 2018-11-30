@@ -106,14 +106,12 @@ void *userTh (thConnArg *info){
 
 	void *resRX, *resTX;
 
-	do{ //devo ciclare perche' non e' detto che il CANCEL avvenga subito
-
-		pthread_cancel (arg->tidRx);
-		pthread_cancel (arg->tidTx);
-		pthread_join (arg->tidRx, &resRX);
-		pthread_join (arg->tidTx, &resTX);
-	}
-	while (resRX == PTHREAD_CANCELED || resTX == PTHREAD_CANCELED);
+	pthread_cancel (arg->tidRx);
+	pthread_cancel (arg->tidTx);
+	dprintf (STDERR_FILENO, "pthread_cancel %s Send\n", arg->idNameUs);
+	pthread_join (arg->tidRx, &resRX);
+	pthread_join (arg->tidTx, &resTX);
+	dprintf (STDERR_FILENO, "pthread_join %s Finish\n", arg->idNameUs);
 
 	close (arg->fdPipe[0]);
 	close (arg->fdPipe[1]);
@@ -378,12 +376,11 @@ void *thUs_ServRX (thUserArg *uData){
 
 	void *resRX, *resTX;
 
-	do{ //devo ciclare perche' non e' detto che il CANCEL avvenga subito
 
-		pthread_cancel (uData->tidTx);
-		pthread_join (uData->tidTx, &resTX);
-	}
-	while (resRX == PTHREAD_CANCELED || resTX == PTHREAD_CANCELED);
+	pthread_cancel (uData->tidTx);
+	dprintf (STDERR_FILENO, "[Us-rx-(%s)]Send pthread_cancel\n", uData->idNameUs);
+	pthread_join (uData->tidTx, &resTX);
+	dprintf (STDERR_FILENO, "[Us-rx-(%s)]Finish pthread_join \n", uData->idNameUs);
 
 	close (uData->fdPipe[0]);
 	close (uData->fdPipe[1]);

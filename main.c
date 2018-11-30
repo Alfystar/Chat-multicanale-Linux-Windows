@@ -44,12 +44,23 @@ void pipeInit (){
 	fdDebug = FdDebugPipe[1];
 }
 
+char *SigName (int sig){
+	switch (sig){
+		case SIGABRT:
+			return "Sig Abnormal Abort";
+		case SIGSEGV:
+			return "Sig Segmentation Fault";
+		default:
+			return "Unknow Signal";
+	}
+}
+
 void print_trace (int nSig){
-	dprintf (STDERR_FILENO, "CORE DUMB CREATO 10S AT DUMP\n\n\n\n");
-	sleep (10);
+	dprintf (STDERR_FILENO, "CORE DUMB CREATO 20S AT DUMP\nSignal: %d [%s]\t\n\t\n\t\n", nSig, SigName (nSig));
+	sleep (20);
 	endwin ();
 
-	printf ("\n\nprint_trace: got signal %d\nCurrent Thread in Scheduling are:\n", nSig);
+	printf ("\n\nprint_trace: got signal %d [%s]\nCurrent Thread in Scheduling are:\n", nSig, SigName (nSig));
 
 	void *array[32];    /* Array to store backtrace symbols */
 	size_t size;     /* To store the exact no of values stored */
@@ -63,7 +74,6 @@ void print_trace (int nSig){
 	for (nCnt = 0; nCnt < size; nCnt++)
 		printf ("%s\n", strings[nCnt]);
 
-
 	exit (-1);
 }
 
@@ -74,6 +84,7 @@ int main (int argc, char *argv[]){
 	}
 
 	signal (SIGSEGV, print_trace);   //catturo sigSegv per potermi printare info varie
+	signal (SIGABRT, print_trace);   //catturo SIGABRT per potermi printare info varie
 
 	pipeInit ();
 
@@ -86,7 +97,7 @@ int main (int argc, char *argv[]){
 	printf ("\t#### SERVER STORAGE AVVIATO ####\n\n");
 
 	/** INIT GLOBAL AVL TREE**/
-	printf ("[3]---> Fase 3 Inizializzare alberi & SEMAFORI AVL avl dove verranno posizionate le pipe dei thread Room e User\n");
+	printf ("[3]---> Fase 3 Inizializzare alberi & SEMAFORI AVL per le pipe dei thread Room e User\n");
 
 	usAvlTree_Pipe = init_avl_S ();
 	rmAvlTree_Pipe = init_avl_S ();

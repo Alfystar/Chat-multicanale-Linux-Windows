@@ -102,16 +102,13 @@ int addMex (conversation *c, mex *m){
 		return -1;
 	}
 	c->head.nMex++;
-	c->mexList = reallocarray (c->mexList, c->head.nMex, sizeof (mex *));
+	if (c->head.nMex == 1) c->mexList = calloc (1, sizeof (mex *));
+	else c->mexList = reallocarray (c->mexList, c->head.nMex, sizeof (mex *));
 	c->mexList[c->head.nMex - 1] = m;
-	//dprintf (fdDebug, "[addMex]Try modify head on fileSystem\n");
-	//printConvInfo (&c->head, STDERR_FILENO);
-	//sleep (5);
 	if (overrideHeadF (&c->head, c->stream)){
 		dprintf (STDERR_FILENO, "[addMex]Override fail\n");
 		return -1;
 	}
-	//dprintf (fdDebug, "[addMex]Override success\n");
 	return 0;
 }
 

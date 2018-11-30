@@ -117,9 +117,8 @@ void *userTh (thConnArg *info){
 	close (arg->fdPipe[0]);
 	close (arg->fdPipe[1]);
 	freeUserArg (arg);
-	freeMexPack (&arg);
-	freeMexPack (&arg);
-	pthread_exit (&arg);
+	freeMexPack (&packSocket);
+	pthread_exit (NULL);
 
 	return NULL;
 }
@@ -294,10 +293,11 @@ void *thUs_ServRX (thUserArg *uData){
 					pthread_exit (NULL);  //uccide il th (il pthread_close ha fallito)
 					break;
 				default:
+					dprintf (STDERR_FILENO, "[Us-rx-(%s)]During Read_inside take error %s\n", uData->idNameUs,
+					         strerror (errno));
 					break;
 			}
 		}
-
 		switch (packClient.md.type){
 			case out_mkRoom_p:
 				if (mkRoomSocket (&packClient, uData)){
@@ -341,10 +341,7 @@ void *thUs_ServRX (thUserArg *uData){
 				}
 				break;
 			case out_mess_p:
-				dprintf (fdOut, "[Us-rx-(%s)]MEX Incoming:\n", uData->idNameUs);
-				//dprintf (fdOut, "[Us-rx-(%s)]MEX Incoming:\n%s\n", uData->idNameUs, packClient.mex);
-				//printPack (&packClient,fdOut);
-				//sleep (1);
+				dprintf (fdOut, "[Us-rx-(%s)]MEX Incoming: '%s'\n", uData->idNameUs, packClient.mex);
 				if (mexReciveSocket (&packClient, uData)){
 					dprintf (STDERR_FILENO, "[Us-rx-(%s)]mexReciveSocket take error, just send fail\n",
 					         uData->idNameUs);
@@ -368,7 +365,7 @@ void *thUs_ServRX (thUserArg *uData){
 			default:
 				dprintf (fdDebug, "[Us-rx-(%s)]Unexpected pack type = %d[%s]\n", uData->idNameUs, packClient.md.type,
 				         typeToText (packClient.md.type));
-				printPack (&packClient, fdDebug);
+				//printPack (&packClient, fdDebug);
 				dprintf (fdDebug, "\n");
 				writePack_inside (uData->fdPipe[writeEndPipe], &packClient);
 				break;
@@ -514,7 +511,6 @@ int joinRoomSocket (mail *pack, thUserArg *uData){
 	mail roomPack;
 	char firstIndex[16];
 	sprintf (firstIndex, "%d", uData->info->tab->head.nf_id);
-	dprintf (fdDebug, "Join th-User send in_join_p, at %d pipe\n", pipeRm);
 	int *fdUsWritePipe = malloc (sizeof (int));       //i messaggi devono essere pacchetti malloccati
 	*fdUsWritePipe = uData->fdPipe[writeEndPipe];
 
@@ -682,14 +678,12 @@ READ_ROOM_LEAVE:
 	switch (roomPack.md.type){
 		case success_p:
 			delEntry (uData->info->tab, indexTabUs);
-			//warning del può fallire se ci sono problemi nel file sistem
-			dprintf (fdDebug, "leaveRoomSocket send success at user\n");
+			//todo warning del può fallire se ci sono problemi nel file sistem
 			fillPack (&respondUser, success_p, 0, 0, uData->idNameUs, "Leave compleate");
 			writePack (uData->conUs.con.ds_sock, &respondUser);
 			return 0;
 			break;
 		case failed_p:
-			dprintf (fdDebug, "leaveRoomSocket send fail at user\n");
 			fillPack (&respondUser, failed_p, 0, 0, uData->idNameUs, "Leave fail in room-Th");
 			writePack (uData->conUs.con.ds_sock, &respondUser);
 			return -1;
@@ -779,7 +773,7 @@ READ_ROOM_OPEN:
 				memcpy (buf + pt, &cpRam->mexList[i]->info, sizeof (mexInfo));
 				pt += sizeof (mexInfo);
 				strcpy (buf + pt, cpRam->mexList[i]->text);
-				pt += strlen (cpRam->mexList[i]->text);
+				pt += strlen (cpRam->mexList[i]->text) + 1;
 			}
 
 			fillPack (&respond, out_kConv_p, roomPack.md.dim, buf, "Server", roomPack.md.whoOrWhy);
@@ -856,6 +850,7 @@ int mexReciveSocket (mail *pack, thUserArg *data){
 	 * dim = dim messaggio (\0 comreso)
 	 */
 	writePack_inside (data->pipeRmFF, &roomPack);
+
 	/*====================================== Attendo risposta dalla Room ======================================*/
 READ_MEX_RECIVE:
 	readPack_inside (data->fdPipe[readEndPipe], &roomPack);
@@ -897,8 +892,7 @@ void *thUs_ServTX (thUserArg *uData){
 
 		switch (packPipeRead.md.type){
 			case in_delRm_p:
-				if (delRoomForwarding (&packPipeRead, uData))
-				{
+				if (delRoomForwarding (&packPipeRead, uData)){
 					dprintf (STDERR_FILENO, "[Us-tx-(%s)]Forwarding delRoom notify take error\n", uData->idNameUs);
 				}
 				else{
@@ -907,10 +901,10 @@ void *thUs_ServTX (thUserArg *uData){
 				break;
 			case in_mess_p:
 				if (mexForwarding (&packPipeRead, uData)){
-					dprintf (STDERR_FILENO, "[Us-tx-(%s)]Forwarding message take error\n", uData->idNameUs);
+					dprintf (STDERR_FILENO, "[Us-tx-(%s)]Forwarding message To user take error\n", uData->idNameUs);
 				}
 				else{
-					dprintf (fdOut, "[Us-tx-(%s)]Forwarding message Success\n", uData->idNameUs);
+					dprintf (fdOut, "[Us-tx-(%s)]Forwarding message To user Success\n", uData->idNameUs);
 				}
 				break;
 			default:
@@ -936,7 +930,7 @@ int delRoomForwarding (mail *pack, thUserArg *data){
 	 */
 	int entryToDel = atoi (pack->md.whoOrWhy);
 	delEntry (data->info->tab, entryToDel);
-	dprintf (fdDebug, "[Us-tx-(%s)]delete entry %d caused closing room\n", data->idNameUs, entryToDel);
+	dprintf (fdDebug, "[Us-tx-(%s)]delete entry %d of my Table; caused delete Room\n", data->idNameUs, entryToDel);
 	//todo possibile problema di sincronia con rx !!!! da meditare
 	if (data->keyIdRmFF == atoi (pack->md.sender)) //se ero nella sua lista di inoltro mi dimentico
 	{
@@ -968,9 +962,9 @@ int mexForwarding (mail *pack, thUserArg *data){
 	memcpy (buf, pack->mex, sizeof (mexInfo));
 	memcpy ((buf + sizeof (mexInfo)), m->text, pack->md.dim - sizeof (mexInfo));
 
-	fillPack (&pack, out_mess_p, pack->md.dim, buf, pack->md.sender, pack->md.whoOrWhy);
+	fillPack (pack, out_mess_p, pack->md.dim, buf, pack->md.sender, pack->md.whoOrWhy);
 	//inoltro al client cambiando tipo
-	writePack (data->conUs.con.ds_sock, &pack);
+	writePack (data->conUs.con.ds_sock, pack);
 	return 0;
 }
 
@@ -1058,8 +1052,7 @@ void *thRoomRX (thRoomArg *rData){
 			case in_openRm_p:
 				if (openRoom_inside (&packRecive, rData)){
 					dprintf (STDERR_FILENO, "[Rm-rx(%s)]Impossible add user %s at mail-List of Th-room\n",
-					         rData->idNameRm,
-					         packRecive.md.sender);
+					         rData->idNameRm, packRecive.md.sender);
 				}
 				else{
 					dprintf (fdOut, "[Rm-rx(%s)]Add Open Room of [%s] success\n", rData->idNameRm,
@@ -1069,8 +1062,7 @@ void *thRoomRX (thRoomArg *rData){
 			case in_exit_p:
 				if (exitRoom_inside (&packRecive, rData)){
 					dprintf (STDERR_FILENO, "[Rm-rx(%s)]Impossible remove node from mail-List of Th-room%s\n",
-					         rData->idNameRm,
-					         packRecive.md.sender);
+					         rData->idNameRm, packRecive.md.sender);
 				}
 				else{
 					dprintf (fdOut, "[Rm-rx(%s)]Remove mail-list node Room success\n", rData->idNameRm);
@@ -1079,9 +1071,9 @@ void *thRoomRX (thRoomArg *rData){
 			default:
 				dprintf (fdDebug, "[Rm-rx-(%s)]Unexpected pack type = %d[%s]\n", rData->idNameRm, packRecive.md.type,
 				         typeToText (packRecive.md.type));
-				printPack (&packRecive, fdDebug);
+				//printPack (&packRecive, fdDebug);
 				writePack_inside (rData->fdPipe[writeEndPipe], &packRecive);
-				usleep (5000);   //dorme 5ms per permettere al rx o chi per lui di prendere il pacchetto
+				usleep (50000);   //dorme 50ms per permettere al rx o chi per lui di prendere il pacchetto
 				break;
 		}
 		//freeMexPack (&packRecive);
@@ -1111,7 +1103,6 @@ int joinRoom_inside (mail *pack, thRoomArg *data){
 	int pipeUser = *((int *)pack->mex);
 	free (pack->mex);
 
-	dprintf (fdDebug, "Join th-Room recive in_join_p, and pipe user is %d pipe\n", pipeUser);
 	//aggiungo alla mia tabella il nuovo user
 	int addPos = addEntry (data->info->tab, pack->md.sender, atoi (pack->md.whoOrWhy));
 	if (addPos == -1){
@@ -1223,7 +1214,6 @@ int leaveRoom_inside (mail *pack, thRoomArg *data, int *exit){
 			writePack_inside (pipeUs, &respond);
 			return -1;
 		}
-		dprintf (fdDebug, "(rm-TH) leave user Do\n");
 
 		//check presenza in lista di inoltro
 		dlist_p usNode = nodeSearchKey (&data->mailList, idNameUs);
@@ -1349,7 +1339,7 @@ void *thRoomTX (thRoomArg *rData){
 
 		switch (packRead_in.md.type){
 			case in_mess_p:
-				dprintf (fdOut, "[Rm-tx(%s)]Mex incoming in room, TEXT: %s\n", rData->idNameRm, packRead_in.mex);
+				dprintf (fdOut, "[Rm-tx(%s)]Mex incoming in room, TEXT: '%s'\n", rData->idNameRm, packRead_in.mex);
 				if (mexRecive_inside (&packRead_in, rData)){
 					dprintf (STDERR_FILENO, "[Rm-tx(%s)]PROBLEM to Forwarding mex from %s\n", rData->idNameRm,
 					         packRead_in.md.sender);
@@ -1364,7 +1354,7 @@ void *thRoomTX (thRoomArg *rData){
 				dprintf (fdDebug, "[Rm-tx-(%s)]Unexpected pack type = %d[%s]\n", rData->idNameRm, packRead_in.md.type,
 				         typeToText (packRead_in.md.type));
 				writePack_inside (rData->fdPipe[writeEndPipe], &packRead_in);
-				usleep (5000);   //dorme 5ms per permettere al rx o chi per lui di prendere il pacchetto
+				usleep (50000);   //dorme 50ms per permettere al rx o chi per lui di prendere il pacchetto
 				break;
 		}
 
@@ -1388,8 +1378,8 @@ int mexRecive_inside (mail *pack, thRoomArg *data){
 	sscanf (pack->md.sender, "%d:%d", &usPipe, &idkeyUs);
 
 	//segno il nodo inviante
-	dlist_p senderMexNode = nodeSearchKey (&data->mailList, idkeyUs);
-	if (!senderMexNode){
+	dlist_p sendNode = nodeSearchKey (&data->mailList, idkeyUs);
+	if (!sendNode){
 		fillPack (&usRespond, failed_p, 0, 0, data->idNameRm, "Not in Room forwarding List");
 		writePack_inside (usPipe, &usRespond);
 		return -1;
@@ -1401,7 +1391,6 @@ int mexRecive_inside (mail *pack, thRoomArg *data){
 		writePack_inside (usPipe, &usRespond);
 		return -1;
 	}
-	//printMex (newMex, STDERR_FILENO);
 
 	if (addMex (data->info->conv, newMex)){
 		dprintf (STDERR_FILENO, "[mexRecive_inside]Add mex at conv FAIL\n");
@@ -1409,79 +1398,59 @@ int mexRecive_inside (mail *pack, thRoomArg *data){
 		writePack_inside (usPipe, &usRespond);
 		return -1;
 	}
-	//dprintf (fdDebug, "[mexRecive_inside] Add mex on conv Success\n");
 	fillPack (&usRespond, out_messSuccess_p, 0, 0, data->idNameRm, pack->md.whoOrWhy);
 	writePack_inside (usPipe, &usRespond);
 
 	/*#################################### Inoltro nella mail-list ####################################*/
-	dprintf (fdDebug, "[mex_inside_forwarding]\ndata->mailList.head=%p, *data->mailList.head=%p\n", data->mailList.head,
-	         *data->mailList.head);
+	dprintf (fdDebug, "\t[mex_inside_forwarding]\ndata->mailList.head=%p, *data->mailList.head=%p\n",
+	         data->mailList.head, *data->mailList.head);
 	if (!data->mailList.head || !*data->mailList.head){
 		dprintf (STDERR_FILENO, "[mex_inside_forwarding]head or first node is NULL!\n");
 		return -1;
 	}
-	dlist_p tmp;
-	tmp = *data->mailList.head;
-	listData_p dt;
 
-	//tmp = *head->head;
-	int count = 0;
-	dprintf (fdDebug, "===[head of LIST]===\n");
-	dprintf (fdDebug, "HEAD[0]=%p\n", tmp);
-	do{
-		dt = (listData_p)tmp->data;
-		dprintf (fdDebug, "-->node[%d]=%d:%d\n", count, dt->keyId, dt->fdPipeSend);
-		count++;
-		tmp = tmp->next;
-	}
-	while (tmp != *data->mailList.head);
-	dprintf (fdDebug, "##################\n#### END LIST ####\n##################\n");
-	sleep (1);
-
-	dt = (listData_p)tmp->data;
+	printDlist (data->mailList.head, fdDebug);
 
 	//invio il mexPack come un puntatore a newMex, e per dim la dimensione da spacchettato per writePack
 	//int len = sizeof(newMex->info) + pack->md.dim;
 	fillPack (&usRespond, in_mess_p, sizeof (newMex->info) + pack->md.dim, newMex, data->idNameRm, "New mex incoming");
-	tmp = *data->mailList.head;
-	dprintf (fdDebug, "inizio inoltro\nsenderNode=%p [%d]\n", senderMexNode, ((listData_p)senderMexNode->data)->keyId);
-	//todo da far funzionare
-	/*do{
-		if (tmp != senderMexNode){
-			dprintf (fdDebug, "senderNode=%p [%d], tmpNode=%p [%d]\n", senderMexNode,
-			         ((listData_p)senderMexNode->data)->keyId, tmp,
-			         ((listData_p)tmp->data)->keyId);    //*tmp->data casca sul 1° intero
-			//sleep (1);
+	dlist_p tmp = *data->mailList.head;
+	listData_p dt = (listData_p)tmp->data;
+
+	do{
+		if (tmp != sendNode){
+			dprintf (fdDebug, "[mexRecive_inside]SenderNode=%p [%d]-->tmpNode=%p [%d]\n", sendNode,
+			         ((listData_p)sendNode->data)->keyId, tmp, dt->keyId);
 			if (writePack_inside (dt->fdPipeSend, &usRespond)){
 				switch (errno){
 					case EPIPE:
 						//pipe non più raggiungibile, tolgo dalla lista di inoltro
-						dprintf (STDERR_FILENO, "In Forwarding mex user=%d impossible to reach\nDeleting from list\n",
+						dprintf (STDERR_FILENO,
+						         "[mexRecive_inside]In Forwarding mex user=%d impossible to reach\nDeleting from list\n",
 						         dt->keyId);
 						deleteNodeByList (&data->mailList, tmp);
 						break;
 					default:
-						dprintf (STDERR_FILENO, "In Forwarding mex user=%d unknown error :%s", dt->keyId,
-						         strerror (errno));
+						dprintf (STDERR_FILENO, "[mexRecive_inside]In Forwarding mex user=%d unknown error :%s",
+						         dt->keyId, strerror (errno));
 						break;
 				}
 			}
 		}
 		tmp = tmp->next;
+		dt = (listData_p)tmp->data;
+
 	}
 	while (tmp != *data->mailList.head);
-	*/
-	//freeMexPack (&usRespond);
+	dprintf (fdDebug, "[mexRecive_inside]Forwarding end\n");
 	return 0;
-
 }
 
 /** SEND PACK_inside e WRITE PACK_inside**/
 int readPack_inside (int fdPipe, mail *pack){
 	int iterContr = 0; // vediamo se la read fallisce
-	ssize_t bRead = 0;
+	size_t bRead = 0;
 	ssize_t ret = 0;
-	//dprintf (fdDebug, "readPack_inside Funx\n");
 	sigset_t newSet, oltSet;
 	sigfillset (&newSet);
 	pthread_sigmask (SIG_SETMASK, &newSet, &oltSet);
@@ -1491,8 +1460,8 @@ int readPack_inside (int fdPipe, mail *pack){
 		iterazione++;
 		ret = read (fdPipe, pack + bRead, sizeof (mail) - bRead);
 		if (ret == -1){
-			dprintf (STDERR_FILENO, "[reedPack_inside]Error @:\niterazione=[%d], read pipe=[%d]\n", iterazione, fdPipe);
-			perror ("cause:");
+			dprintf (STDERR_FILENO, "[reedPack_inside]Error @:\niterazione=[%d], read pipe=[%d]\ncause :%s", iterazione,
+			         fdPipe, strerror (errno));
 			return -1;
 		}
 		if (ret == 0){
@@ -1517,6 +1486,7 @@ int readPack_inside (int fdPipe, mail *pack){
 	while (sizeof (mail) - bRead != 0);
 
 	pthread_sigmask (SIG_SETMASK, &oltSet, &newSet);   //restora tutto
+
 	return 0;
 }
 
@@ -1656,6 +1626,23 @@ int deleteNodeByList (listHead_S_p head, dlist_p nodeDel){
 
 	unlockWriteSem (head->semId);
 	return 0;
+}
+
+void printDlist (dlist_pp head, int fd){
+	dlist_p tmp;
+	tmp = *head;
+	listData_p dt = (listData_p)tmp->data;
+	int count = 0;
+	dprintf (fd, "===[head of LIST]===\n");
+	dprintf (fd, "HEAD[0]=%p\n", tmp);
+	do{
+		dprintf (fd, "-->node[%d]=%d:%d\n", count, dt->keyId, dt->fdPipeSend);
+		count++;
+		tmp = tmp->next;
+		dt = (listData_p)tmp->data;
+	}
+	while (tmp != *head);
+	dprintf (fdDebug, "##################\n#### END LIST ####\n##################\n");
 }
 
 char *typeToText (int type){

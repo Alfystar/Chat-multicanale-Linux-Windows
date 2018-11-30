@@ -129,6 +129,7 @@ void freeRoomArg (thRoomArg *p);
 dlist_p makeNode (int keyId, int fdPSend);
 dlist_p nodeSearchKey (listHead_S_p head, int key);
 int deleteNodeByList (listHead_S_p head, dlist_p nodeDel);
+void printDlist (dlist_pp head, int fd);
 char *typeToText (int type);
 void printPack (mail *pack, int fd);
 

@@ -219,17 +219,6 @@ int setUpThUser (int keyId, thUserArg *argUs){
 	argUs->id = keyId;
 	argUs->info = info;
 
-	/* Tokenizzazione di user->names[want] per ottenere name */
-	/*char *sArgv[2];  //consento lo storage fino a 64 comandi
-	int sArgc = 0;
-	char *savePoint;
-	sArgc = 0;
-	sArgv[sArgc] = strtok_r(user->names[want], ":", &savePoint);
-	while (sArgv[sArgc] != NULL && sArgc < 2) {
-		sArgc++;
-		sArgv[sArgc] = strtok_r(NULL, ":", &savePoint);
-	}*/
-	//todo verifica se metodo funziona
 	int id;
 	char name[stringLen];
 	sscanf (user->names[want], "%d:%s", &id, name);
@@ -377,9 +366,10 @@ void *thUs_ServRX (thUserArg *uData){
 				break;
 
 			default:
-				dprintf (fdDebug, "[Us-rx-(%s)] unexpected pack type = %d[%s]\n", uData->idNameUs, packClient.md.type,
+				dprintf (fdDebug, "[Us-rx-(%s)]Unexpected pack type = %d[%s]\n", uData->idNameUs, packClient.md.type,
 				         typeToText (packClient.md.type));
 				printPack (&packClient, fdDebug);
+				dprintf (fdDebug, "\n");
 				writePack_inside (uData->fdPipe[writeEndPipe], &packClient);
 				break;
 		}
@@ -766,31 +756,39 @@ int openRoomSocket (mail *pack, thUserArg *uData){
 	/*====================================== Attendo risposta dalla Room ======================================*/
 
 	convRam *cpRam;
+	size_t pt;
+	char *buf;
 READ_ROOM_OPEN:
 	readPack_inside (uData->fdPipe[readEndPipe], &roomPack);
-	dprintf (fdDebug, "[openRoomSocket] recive from TH-ROOM type: %d\n", roomPack.md.type);
+	dprintf (fdDebug, "[openRoomSocket]Recive from TH-ROOM type: %d[%s]\n", roomPack.md.type,
+	         typeToText (roomPack.md.type));
 	/* RISPOSTA OPEN DA TH-ROOM (PARTICOLARE)
 	 * type = in_kConv_p
 	 * sender = idkeyRoom:name (string)
 	 * who = idkeyRoom:name (string)
+	 * dim = dimensione del file srotolato (sul file sistem)
 	 * mex = <conversazione copiata fino a quel momento> (convRam *)
 	 */
 	switch (roomPack.md.type){
 		case in_kConv_p:
 			cpRam = roomPack.mex;
-			//todo calcolare la corretta lunghezza ricordando che i messaggi sono variabili
-			size_t lenCp = sizeof (cpRam->head) + cpRam->head.nMex * sizeof (mex);
+			buf = malloc (roomPack.md.dim);
+			memcpy (buf, cpRam, sizeof (convInfo));
+			pt = sizeof (convInfo);
+			for (int i = 0; i < cpRam->head.nMex; ++i){
+				memcpy (buf + pt, &cpRam->mexList[i]->info, sizeof (mexInfo));
+				pt += sizeof (mexInfo);
+				strcpy (buf + pt, cpRam->mexList[i]->text);
+				pt += strlen (cpRam->mexList[i]->text);
+			}
 
-			//todo creare un buffer CONTINUO su cui salvare i messaggi nell'ordine corretto
-			char buf[lenCp];
-			memcpy (buf, cpRam, sizeof (mexInfo));
-
-			fillPack (&respond, out_kConv_p, lenCp, roomPack.mex, "Server", roomPack.md.whoOrWhy);
+			fillPack (&respond, out_kConv_p, roomPack.md.dim, buf, "Server", roomPack.md.whoOrWhy);
 			writePack (uData->conUs.con.ds_sock, &respond);
-			dprintf (fdDebug, "[openRoomSocket]write k_conv doing\n");
-			//freeMexPack (&respond);
+			//dprintf (fdDebug, "[openRoomSocket]Write k_conv doing\n");
 			uData->pipeRmFF = pipeRm;
 			uData->keyIdRmFF = idKeyRm;
+			free (buf);
+			buf = NULL;
 			return 0;
 			break;
 		case failed_p:
@@ -917,7 +915,7 @@ void *thUs_ServTX (thUserArg *uData){
 				break;
 			default:
 				//pacchetto indesiderato
-				dprintf (fdDebug, "[Us-tx-(%s)] unexpected pack type = %d[%s]\n", uData->idNameUs, packPipeRead.md.type,
+				dprintf (fdDebug, "[Us-tx-(%s)]Unexpected pack type = %d[%s]\n", uData->idNameUs, packPipeRead.md.type,
 				         typeToText (packPipeRead.md.type));
 				writePack_inside (uData->fdPipe[writeEndPipe], &packPipeRead);
 				break;
@@ -1079,7 +1077,7 @@ void *thRoomRX (thRoomArg *rData){
 				}
 				break;
 			default:
-				dprintf (fdDebug, "[Rm-rx-(%s)] unexpected pack type = %d[%s]\n", rData->idNameRm, packRecive.md.type,
+				dprintf (fdDebug, "[Rm-rx-(%s)]Unexpected pack type = %d[%s]\n", rData->idNameRm, packRecive.md.type,
 				         typeToText (packRecive.md.type));
 				printPack (&packRecive, fdDebug);
 				writePack_inside (rData->fdPipe[writeEndPipe], &packRecive);
@@ -1300,11 +1298,15 @@ int openRoom_inside (mail *pack, thRoomArg *data){
 		return -1;
 	}
 	else{
-		fillPack (&respond, in_kConv_p, sizeof (cpRam), cpRam, data->idNameRm, data->idNameRm);
+		struct stat streamInfo;
+		fstat (fileno (data->info->conv->stream), &streamInfo);
+
+		fillPack (&respond, in_kConv_p, streamInfo.st_size, cpRam, data->idNameRm, data->idNameRm);
 		/* RISPOSTA OPEN DA TH-ROOM (PARTICOLARE)
 		 * type = in_kConv_p
 		 * sender = idkeyRoom:name (string)
 		 * who = idkeyRoom:name (string)
+		 * dim = dimensione del file srotolato (sul file sistem)
 		 * mex = <conversazione copiata fino a quel momento> (convRam *)
 		 */
 		writePack_inside (pipeUsRespond, &respond);
@@ -1347,7 +1349,7 @@ void *thRoomTX (thRoomArg *rData){
 
 		switch (packRead_in.md.type){
 			case in_mess_p:
-				dprintf (fdOut, "[Rm-tx(%s)]Mex incoming in room, TEXT:\n%s\n", rData->idNameRm, packRead_in.mex);
+				dprintf (fdOut, "[Rm-tx(%s)]Mex incoming in room, TEXT: %s\n", rData->idNameRm, packRead_in.mex);
 				if (mexRecive_inside (&packRead_in, rData)){
 					dprintf (STDERR_FILENO, "[Rm-tx(%s)]PROBLEM to Forwarding mex from %s\n", rData->idNameRm,
 					         packRead_in.md.sender);
@@ -1359,7 +1361,7 @@ void *thRoomTX (thRoomArg *rData){
 
 			default:
 				//pacchetto non gestito, quindi non indirizzato a noi, lo ri infilo nella pipe
-				dprintf (fdDebug, "[Rm-tx-(%s)] unexpected pack type = %d[%s]\n", rData->idNameRm, packRead_in.md.type,
+				dprintf (fdDebug, "[Rm-tx-(%s)]Unexpected pack type = %d[%s]\n", rData->idNameRm, packRead_in.md.type,
 				         typeToText (packRead_in.md.type));
 				writePack_inside (rData->fdPipe[writeEndPipe], &packRead_in);
 				usleep (5000);   //dorme 5ms per permettere al rx o chi per lui di prendere il pacchetto
@@ -1443,7 +1445,8 @@ int mexRecive_inside (mail *pack, thRoomArg *data){
 	fillPack (&usRespond, in_mess_p, sizeof (newMex->info) + pack->md.dim, newMex, data->idNameRm, "New mex incoming");
 	tmp = *data->mailList.head;
 	dprintf (fdDebug, "inizio inoltro\nsenderNode=%p [%d]\n", senderMexNode, ((listData_p)senderMexNode->data)->keyId);
-	do{
+	//todo da far funzionare
+	/*do{
 		if (tmp != senderMexNode){
 			dprintf (fdDebug, "senderNode=%p [%d], tmpNode=%p [%d]\n", senderMexNode,
 			         ((listData_p)senderMexNode->data)->keyId, tmp,
@@ -1467,6 +1470,7 @@ int mexRecive_inside (mail *pack, thRoomArg *data){
 		tmp = tmp->next;
 	}
 	while (tmp != *data->mailList.head);
+	*/
 	//freeMexPack (&usRespond);
 	return 0;
 

@@ -59,14 +59,14 @@ void *userTh (thConnArg *info){
 				perror ("make New User fase fail :");
 				dprintf (STDERR_FILENO, "Shutdown Th %d\n", arg->id);
 				fillPack (&responde, failed_p, 0, 0, "Server", "Can't create user");
-				writePack (arg->conUs.con.ds_sock, &responde);
+				writePack (arg->conUs.con.ds_sock, responde);
 				pthread_exit (NULL);
 			}
 			break;
 		default:
 			dprintf (STDERR_FILENO, "Pack rivevuto inadatto a instaurazione com\n");
 			fillPack (&pack, failed_p, 0, 0, "SERVER", "User Not yet Created");
-			writePack (arg->conUs.con.ds_sock, &pack);
+			writePack (arg->conUs.con.ds_sock, pack);
 			pthread_exit (NULL);
 			break;
 	}
@@ -140,13 +140,13 @@ int loginServerSide (mail *pack, thUserArg *data){
 	if (setUpThUser (atoi (pack->md.whoOrWhy), data)){
 		perror ("Impossible to create new ThUser of register User :");
 		fillPack (&response, failed_p, 0, 0, "Server", "setUpThUser error");
-		writePack (data->conUs.con.ds_sock, &response);
+		writePack (data->conUs.con.ds_sock, response);
 		return -1;
 	}
 
 	if (strcmp (data->userName, pack->md.sender) != 0){
 		fillPack (&response, failed_p, 0, 0, "Server", "USER NAME UN-CORRECT");
-		writePack (data->conUs.con.ds_sock, &response);
+		writePack (data->conUs.con.ds_sock, response);
 		return -1;
 	}
 
@@ -168,7 +168,7 @@ int loginServerSide (mail *pack, thUserArg *data){
 		}
 		else if (keySearch == -1){
 			fillPack (&response, failed_p, 0, 0, "Server", "ERROR IN SEARCH");
-			writePack (data->conUs.con.ds_sock, &response);
+			writePack (data->conUs.con.ds_sock, response);
 			return -1;
 		}
 		else{
@@ -182,7 +182,7 @@ int loginServerSide (mail *pack, thUserArg *data){
 
 	// Invio risposta affermativa
 	fillPack (&response, out_dataUs_p, len, mex, "Server", NULL);
-	writePack (data->conUs.con.ds_sock, &response);
+	writePack (data->conUs.con.ds_sock, response);
 	//freeMexPack (&response);
 	return 0;
 }
@@ -260,7 +260,7 @@ int mkUserServerSide (mail *pack, thUserArg *data){
 	char idSend[16];
 	sprintf (idSend, "%d", data->id);
 	fillPack (&response, out_dataUs_p, len, mex, "Server", idSend);
-	writePack (data->conUs.con.ds_sock, &response);
+	writePack (data->conUs.con.ds_sock, response);
 	//freeMexPack (&response);
 	return 0;
 }
@@ -405,7 +405,7 @@ int mkRoomSocket (mail *pack, thUserArg *uData){
 	if (info == 0){
 		dprintf (STDERR_FILENO, "creazione della chat impossibile");
 		fillPack (&packSend, failed_p, 0, 0, "Server", "Impossible Create room");
-		writePack (uData->conUs.con.ds_sock, &packSend);
+		writePack (uData->conUs.con.ds_sock, packSend);
 		return -1;
 	}
 	//==================================================================
@@ -442,7 +442,7 @@ int mkRoomSocket (mail *pack, thUserArg *uData){
 	 * who= keyChat:Name(string)
 	 * mex= <Null>
 	 */
-	writePack (uData->conUs.con.ds_sock, &packSend);
+	writePack (uData->conUs.con.ds_sock, packSend);
 	return 0;
 }
 
@@ -482,13 +482,13 @@ int joinRoomSocket (mail *pack, thUserArg *uData){
 	if (pipeRm == -1){
 		dprintf (STDERR_FILENO, "Cercare la pipe ha creato un errore\nJoin Abortita");
 		fillPack (&respond, failed_p, 0, 0, "Server", "Error in search room");
-		writePack (uData->conUs.con.ds_sock, &respond);
+		writePack (uData->conUs.con.ds_sock, respond);
 		return -1;
 	}
 	else if (pipeRm == -2){
 		dprintf (STDERR_FILENO, "Room id not found\nJoin Abortita");
 		fillPack (&respond, failed_p, 0, 0, "Server", "Room id not found");
-		writePack (uData->conUs.con.ds_sock, &respond);
+		writePack (uData->conUs.con.ds_sock, respond);
 		return -1;
 	}
 
@@ -497,7 +497,7 @@ int joinRoomSocket (mail *pack, thUserArg *uData){
 		//sono già joinato nella room
 		dprintf (STDERR_FILENO, "Just Join inRoom %d\n", idChatJoin);
 		fillPack (&respond, failed_p, 0, 0, "Server", "Room id just Join");
-		writePack (uData->conUs.con.ds_sock, &respond);
+		writePack (uData->conUs.con.ds_sock, respond);
 	}
 
 	/*===========================================================================================*/
@@ -536,7 +536,7 @@ RITENTA:
 		case failed_p:
 			dprintf (STDERR_FILENO, "Room take error\nJoin Abortita");
 			fillPack (&respond, failed_p, 0, 0, "Server", "Room th take error");
-			writePack (uData->conUs.con.ds_sock, &respond);
+			writePack (uData->conUs.con.ds_sock, respond);
 			return -1;
 			break;
 		default:
@@ -553,13 +553,13 @@ RITENTA:
 	if (addPos == -1){
 		dprintf (STDERR_FILENO, "Add Entry for join take error\n");
 		fillPack (&respond, failed_p, 0, 0, "ROOM", "addEntry fail");
-		writePack (uData->conUs.con.ds_sock, &respond);
+		writePack (uData->conUs.con.ds_sock, respond);
 		return -1;
 	}
 	entry enToSend;
 	memcpy (&enToSend, &uData->info->tab->data[addPos], sizeof (entry));
 	fillPack (&respond, out_dataRm_p, sizeof (entry), &enToSend, "Server", 0);
-	writePack (uData->conUs.con.ds_sock, &respond);
+	writePack (uData->conUs.con.ds_sock, respond);
 	//freeMexPack (&respond);
 	return 0;
 }
@@ -588,14 +588,14 @@ int delRoomSocket (mail *pack, thUserArg *uData){
 	if (pipeRm == -1){
 		dprintf (STDERR_FILENO, "Cercare la pipe ha creato un errore\nDel Abortita");
 		fillPack (&respond, failed_p, 0, 0, "Server", "Error in search room");
-		writePack (uData->conUs.con.ds_sock, &respond);
+		writePack (uData->conUs.con.ds_sock, respond);
 		return -1;
 	}
 	else if (pipeRm == -2){
 		//se arrivo qua allora SICURAMENTE è già scomparso dalla mia tabella, comunico al client di eliminarlo anche dalla sua
 		dprintf (STDERR_FILENO, "Room id not found\nDel Abortita");
 		fillPack (&respond, out_delRm_p, 0, 0, "Server", "Room id delete");
-		writePack (uData->conUs.con.ds_sock, &respond);
+		writePack (uData->conUs.con.ds_sock, respond);
 		return -1;
 	}
 	writePack_inside (pipeRm, &sendRoom);
@@ -611,12 +611,12 @@ RITENTA:
 			delEntry (uData->info->tab, indexEntryRoom);
 			dprintf (fdDebug, "destroy room succes\n");
 			fillPack (&respond, success_p, 0, 0, "Server", "destroy room succes");
-			writePack (uData->conUs.con.ds_sock, &respond);
+			writePack (uData->conUs.con.ds_sock, respond);
 			break;
 		case failed_p:
 			dprintf (STDERR_FILENO, "destroy room fail\nDel Abortita");
 			fillPack (&respond, failed_p, 0, 0, "Server", reciveRoom.md.whoOrWhy);
-			writePack (uData->conUs.con.ds_sock, &respond);
+			writePack (uData->conUs.con.ds_sock, respond);
 			return -1;
 			break;
 		default:
@@ -642,14 +642,14 @@ int leaveRoomSocket (mail *pack, thUserArg *uData){
 	if (pipeRm == -1){
 		dprintf (STDERR_FILENO, "Cercare la pipe ha creato un errore\nDel Abortita");
 		fillPack (&respondUser, failed_p, 0, 0, "Server", "Error in search room");
-		writePack (uData->conUs.con.ds_sock, &respondUser);
+		writePack (uData->conUs.con.ds_sock, respondUser);
 		return -1;
 	}
 	else if (pipeRm == -2){
 		//se arrivo qua allora SICURAMENTE è già scomparso dalla mia tabella, comunico al client di eliminarlo anche dalla sua
 		dprintf (STDERR_FILENO, "Room id not found\nDel Abortita");
 		fillPack (&respondUser, out_delRm_p, 0, 0, "Server", "Room id delete");
-		writePack (uData->conUs.con.ds_sock, &respondUser);
+		writePack (uData->conUs.con.ds_sock, respondUser);
 		return -1;
 	}
 
@@ -676,12 +676,12 @@ READ_ROOM_LEAVE:
 			delEntry (uData->info->tab, indexTabUs);
 			//todo warning del può fallire se ci sono problemi nel file sistem
 			fillPack (&respondUser, success_p, 0, 0, uData->idNameUs, "Leave compleate");
-			writePack (uData->conUs.con.ds_sock, &respondUser);
+			writePack (uData->conUs.con.ds_sock, respondUser);
 			return 0;
 			break;
 		case failed_p:
 			fillPack (&respondUser, failed_p, 0, 0, uData->idNameUs, "Leave fail in room-Th");
-			writePack (uData->conUs.con.ds_sock, &respondUser);
+			writePack (uData->conUs.con.ds_sock, respondUser);
 			return -1;
 			break;
 		default:
@@ -707,7 +707,7 @@ int openRoomSocket (mail *pack, thUserArg *uData){
 	//test indexTab sia nella mia room
 	if (atoi (uData->info->tab->data[indexTab].name) != idKeyRm){
 		fillPack (&respond, failed_p, 0, 0, "Server", "Not in my table");
-		writePack (uData->conUs.con.ds_sock, &respond);
+		writePack (uData->conUs.con.ds_sock, respond);
 		return -1;
 	}
 
@@ -720,14 +720,14 @@ int openRoomSocket (mail *pack, thUserArg *uData){
 	if (pipeRm == -1){
 		dprintf (STDERR_FILENO, "Cercare la pipe ha creato un errore\n");
 		fillPack (&respond, failed_p, 0, 0, "Server", "Error in search room");
-		writePack (uData->conUs.con.ds_sock, &respond);
+		writePack (uData->conUs.con.ds_sock, respond);
 		return -1;
 	}
 	else if (pipeRm == -2){
 		//se arrivo qua allora SICURAMENTE è già scomparso dalla mia tabella, comunico al client di eliminarlo anche dalla sua
 		dprintf (STDERR_FILENO, "Room id not found\nOpen Abortita");
 		fillPack (&respond, out_delRm_p, 0, 0, "Server", "Room id deleted");
-		writePack (uData->conUs.con.ds_sock, &respond);
+		writePack (uData->conUs.con.ds_sock, respond);
 		return -1;
 	}
 
@@ -770,7 +770,7 @@ READ_ROOM_OPEN:
 				pt += strlen (cpRam->mexList[i]->text) + 1;
 			}
 			fillPack (&respond, out_kConv_p, roomPack.md.dim, buf, "Server", roomPack.md.whoOrWhy);
-			writePack (uData->conUs.con.ds_sock, &respond);
+			writePack (uData->conUs.con.ds_sock, respond);
 
 			uData->pipeRmFF = pipeRm;
 			uData->keyIdRmFF = idKeyRm;
@@ -780,7 +780,7 @@ READ_ROOM_OPEN:
 			break;
 		case failed_p:
 			fillPack (&respond, failed_p, 0, 0, "Server", roomPack.md.whoOrWhy);
-			writePack (uData->conUs.con.ds_sock, &respond);
+			writePack (uData->conUs.con.ds_sock, respond);
 			return -1;
 			break;
 		default:
@@ -850,13 +850,13 @@ READ_MEX_RECIVE:
 	switch (roomPack.md.type){
 		case out_messSuccess_p:
 			fillPack (&respond, out_messSuccess_p, 0, 0, roomPack.md.sender, roomPack.md.whoOrWhy);
-			writePack (data->conUs.con.ds_sock, &respond);
+			writePack (data->conUs.con.ds_sock, respond);
 			return 0;
 			break;
 		case failed_p:
 			dprintf (STDERR_FILENO, "[mexReciveSocket_respond room] fail from room, cause %s\n", roomPack.md.whoOrWhy);
 			fillPack (&respond, failed_p, 0, 0, roomPack.md.sender, roomPack.md.whoOrWhy);
-			writePack (data->conUs.con.ds_sock, &respond);
+			writePack (data->conUs.con.ds_sock, respond);
 			return -1;
 			break;
 		default:
@@ -938,7 +938,7 @@ int delRoomForwarding (mail *pack, thUserArg *data){
 	 */
 	mail sendClient;
 	fillPack (&sendClient, out_exitRm_p, 0, 0, "SERVER", pack->md.whoOrWhy);
-	writePack (data->conUs.con.ds_sock, &sendClient);
+	writePack (data->conUs.con.ds_sock, sendClient);
 	return 0;
 }
 
@@ -957,7 +957,7 @@ int mexForwarding (mail *pack, thUserArg *data){
 
 	fillPack (pack, out_mess_p, pack->md.dim, buf, pack->md.sender, pack->md.whoOrWhy);
 	//inoltro al client cambiando tipo
-	writePack (data->conUs.con.ds_sock, pack);
+	writePack (data->conUs.con.ds_sock, *pack);
 	return 0;
 }
 

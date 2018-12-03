@@ -157,14 +157,14 @@ int readPack (int ds_sock, mail *pack){
 	return 0;
 }
 
-int writePack (int ds_sock, mail *pack) //dentro il thArg deve essere puntato un mail
+int writePack (int ds_sock, mail pack) //dentro il thArg deve essere puntato un mail
 {
 	//** Modifica per il network order**//
 
-	size_t dimMex = pack->md.dim; // manteniamo in ordine della macchina il valore del messaggio
+	size_t dimMex = pack.md.dim; // manteniamo in ordine della macchina il valore del messaggio
 
-	pack->md.type = htonl ((u_int32_t)pack->md.type);
-	pack->md.dim = htonl ((u_int32_t)pack->md.dim);
+	pack.md.type = htonl ((u_int32_t)pack.md.type);
+	pack.md.dim = htonl ((u_int32_t)pack.md.dim);
 
 	//****//
 
@@ -177,10 +177,10 @@ int writePack (int ds_sock, mail *pack) //dentro il thArg deve essere puntato un
 	pthread_sigmask (SIG_SETMASK, &newSet, &oldSet);
 
 	do{
-		ret = send (ds_sock, pack + bWrite, sizeof (metadata) - bWrite, MSG_NOSIGNAL);
+		ret = send (ds_sock, &pack + bWrite, sizeof (metadata) - bWrite, MSG_NOSIGNAL);
 		if (ret == -1){
 			if (errno == EPIPE){
-				dprintf (STDERR_FILENO, "write_out pack pipe break 1\n");
+				dprintf (STDERR_FILENO, "write pack pipe break 1\n");
 				return -1;
 				//GESTIRE LA CHIUSURA DEL SOCKET (LA CONNESSIONE E' STATA INTERROTTA IMPROVVISAMENTE)
 			}
@@ -193,10 +193,10 @@ int writePack (int ds_sock, mail *pack) //dentro il thArg deve essere puntato un
 	bWrite = 0;
 
 	do{
-		ret = send (ds_sock, pack->mex + bWrite, dimMex - bWrite, MSG_NOSIGNAL);
+		ret = send (ds_sock, pack.mex + bWrite, dimMex - bWrite, MSG_NOSIGNAL);
 		if (ret == -1){
 			if (errno == EPIPE){
-				dprintf (STDERR_FILENO, "write_out pack pipe break 2\n");
+				dprintf (STDERR_FILENO, "write pack pipe break 2\n");
 				return -1;
 				//GESTIRE LA CHIUSURA DEL SOCKET (LA CONNESSIONE E' STATA INTERROTTA IMPROVVISAMENTE)
 			}
@@ -209,12 +209,13 @@ int writePack (int ds_sock, mail *pack) //dentro il thArg deve essere puntato un
 	return 0;
 }
 
+
 int testConnection (int ds_sock){
 	mail packTest;
 
 	fillPack (&packTest, out_test_p, 0, NULL, "SERVER", "testing_code");
 
-	if (writePack (ds_sock, &packTest) == -1){
+	if (writePack (ds_sock, packTest) == -1){
 		return -1;
 	}
 	return 0;

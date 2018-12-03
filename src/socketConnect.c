@@ -77,8 +77,6 @@ int keepAlive (int *ds_sock){
 int readPack (int ds_sock, mail *pack){
 	//se mex è presente DEVE essere Free fuori
 	int iterContr = 0; // vediamo se la read fallisce
-
-
 	ssize_t bRead = 0;
 	ssize_t ret = 0;
 	do{
@@ -107,7 +105,14 @@ int readPack (int ds_sock, mail *pack){
 	}
 	while (sizeof (metadata) - bRead != 0);
 
-	size_t dimMex = pack->md.dim;
+	//** Modifica per il network order**//
+
+	pack->md.type = ntohl ((u_int32_t)pack->md.type);
+	pack->md.dim = ntohl ((u_int32_t)pack->md.dim);
+
+	size_t dimMex = pack->md.dim; // manteniamo in ordine della macchina il valore del messaggio
+
+	//****//
 
 	if (dimMex == 0){
 		pack->mex = NULL;
@@ -149,6 +154,15 @@ int readPack (int ds_sock, mail *pack){
 
 int writePack (int ds_sock, mail *pack) //dentro il thArg deve essere puntato un mail
 {
+	//** Modifica per il network order**//
+
+	size_t dimMex = pack->md.dim; // manteniamo in ordine della macchina il valore del messaggio
+
+	pack->md.type = htonl ((u_int32_t)pack->md.type);
+	pack->md.dim = htonl ((u_int32_t)pack->md.dim);
+
+	//****//
+
 	/// la funzione si aspetta che il buffer non sia modificato durante l'invio
 	ssize_t bWrite = 0;
 	ssize_t ret = 0;

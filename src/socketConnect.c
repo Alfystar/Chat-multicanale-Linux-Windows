@@ -79,6 +79,11 @@ int readPack (int ds_sock, mail *pack){
 	int iterContr = 0; // vediamo se la read fallisce
 	ssize_t bRead = 0;
 	ssize_t ret = 0;
+
+	sigset_t newSet, oldSet;
+	sigfillset (&newSet);
+	pthread_sigmask (SIG_SETMASK, &newSet, &oldSet);
+
 	do{
 		ret = read (ds_sock, &pack->md + bRead, sizeof (metadata) - bRead);
 		if (ret == -1){
@@ -148,7 +153,7 @@ int readPack (int ds_sock, mail *pack){
 		bRead += ret;
 	}
 	while (dimMex - bRead != 0);
-
+	pthread_sigmask (SIG_SETMASK, &oldSet, &newSet);   //restora tutto
 	return 0;
 }
 
@@ -167,6 +172,10 @@ int writePack (int ds_sock, mail *pack) //dentro il thArg deve essere puntato un
 	ssize_t bWrite = 0;
 	ssize_t ret = 0;
 
+	sigset_t newSet, oldSet;
+	sigfillset (&newSet);
+	pthread_sigmask (SIG_SETMASK, &newSet, &oldSet);
+
 	do{
 		ret = send (ds_sock, pack + bWrite, sizeof (metadata) - bWrite, MSG_NOSIGNAL);
 		if (ret == -1){
@@ -184,7 +193,7 @@ int writePack (int ds_sock, mail *pack) //dentro il thArg deve essere puntato un
 	bWrite = 0;
 
 	do{
-		ret = send (ds_sock, pack->mex + bWrite, pack->md.dim - bWrite, MSG_NOSIGNAL);
+		ret = send (ds_sock, pack->mex + bWrite, dimMex - bWrite, MSG_NOSIGNAL);
 		if (ret == -1){
 			if (errno == EPIPE){
 				dprintf (STDERR_FILENO, "write_out pack pipe break 2\n");
@@ -195,8 +204,8 @@ int writePack (int ds_sock, mail *pack) //dentro il thArg deve essere puntato un
 		bWrite += ret;
 
 	}
-	while (pack->md.dim - bWrite != 0);
-
+	while (dimMex - bWrite != 0);
+	pthread_sigmask (SIG_SETMASK, &oldSet, &newSet);   //restora tutto
 	return 0;
 }
 

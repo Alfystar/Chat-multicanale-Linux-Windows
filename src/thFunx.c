@@ -1456,7 +1456,6 @@ int readPack_inside (int fdMSG, int targetTag, mail *pack){
 	size_t bRead = 0;
 	ssize_t ret = 0;
 	int iterazione = 0;
-
 	msg mes;
 
 	sigset_t newSet, oltSet;
@@ -1481,31 +1480,21 @@ int readPack_inside (int fdMSG, int targetTag, mail *pack){
 		bRead += ret;
 	}
 	while (sizeof (mail) - bRead != 0);
-
 	pthread_sigmask (SIG_SETMASK, &oltSet, &newSet);   //restora tutto
-
 	memcpy (pack, &mes.pack, sizeof (mail));
-
 	return 0;
 }
 
 int writePack_inside (int fdMSG, int targetTag, mail *pack) //dentro il thArg deve essere puntato un mail
 {
-	//rispetto alla versione normale invio il puntatore di mex, per cui prima lo si mallocca ,e il ricevente lo freeza
-	/// la funzione si aspetta che il buffer non sia modificato durante l'invio
-	ssize_t bWrite = 0;
-	ssize_t ret = 0;
-	int iterazione = 0;
-
+	//wrappo il pachetto per poter sfruttare il multiplexer
 	msg mes;
 	mes.mDest = targetTag;
 	memcpy (&mes.pack, pack, sizeof (mail));
 
-
 	sigset_t newSet, oltSet;
 	sigfillset (&newSet);
 	pthread_sigmask (SIG_SETMASK, &newSet, &oltSet);
-
 	if (msgsnd (fdMSG, &mes, sizeof (mail), 0)){
 		switch (errno){
 			case EIDRM:
@@ -1520,30 +1509,6 @@ int writePack_inside (int fdMSG, int targetTag, mail *pack) //dentro il thArg de
 				break;
 		}
 	}
-
-	/*
-	do{
-		iterazione++;
-		ret = write (fdMSG, pack + bWrite, sizeof (mail) - bWrite); //original
-		if (ret == -1){
-			switch (errno){
-				case EPIPE:
-					dprintf (STDERR_FILENO, "[writePack_inside]Pipe break @:\niterazione=[%d], write pipe=[%d]\n",
-					         iterazione, fdMSG);
-					pthread_sigmask (SIG_SETMASK, &oltSet, &newSet);   //restora tutto
-					return -1;
-					//GESTIRE LA CHIUSURA DEL SOCKET (LA CONNESSIONE E' STATA INTERROTTA IMPROVVISAMENTE)
-				default:
-					perror ("[writePack_inside]Error:\n");
-					pthread_sigmask (SIG_SETMASK, &oltSet, &newSet);   //restora tutto
-					return -1;
-					break;
-			}
-		}
-		bWrite += ret;
-	}
-	while (sizeof (mail) - bWrite != 0);
-	 */
 	pthread_sigmask (SIG_SETMASK, &oltSet, &newSet);   //restora tutto
 	return 0;
 }

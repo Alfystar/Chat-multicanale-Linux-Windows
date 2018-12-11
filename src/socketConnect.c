@@ -116,11 +116,6 @@ int readPack (int ds_sock, mail *pack){
 
 	//****//
 
-	//** Modifica per il network order**//
-	/*
-	pack->md.type = ntohl(pack->md.type);
-	pack->md.dim = ntohl(pack->md.dim);
-	*/
 	size_t dimMex = pack->md.dim; // manteniamo in ordine della macchina il valore del messaggio
 
 	//****//
@@ -162,14 +157,7 @@ int readPack (int ds_sock, mail *pack){
 
 int writePack (int ds_sock, mail pack) //dentro il thArg deve essere puntato un mail
 {
-	//** Modifica per il network order**//
-
 	size_t dimMex = pack.md.dim; // manteniamo in ordine della macchina il valore del messaggio
-
-	/*pack.md.type = htonl(pack.md.type);
-	pack.md.dim = htonl(pack.md.dim);
-	*/
-	//****//
 
 	//** CONVERSIONE IN MAIL A CARATTERI **//
 

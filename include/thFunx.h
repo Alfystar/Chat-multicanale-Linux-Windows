@@ -13,6 +13,11 @@
 #include <fcntl.h>              /* Obtain O_* constant definitions */
 #include <limits.h>
 
+/*library for message tag*/
+#include<sys/types.h>
+#include<sys/ipc.h>
+#include<sys/msg.h>
+
 
 #include "fileSystemUtylity.h"
 #include "mexData.h"
@@ -37,23 +42,35 @@ typedef struct thUserArg_{
 	char idNameUs[stringLen];
 	infoUser *info;     // contiene tabella e nome per esteso (path), assegnato in fase di login
 	thConnArg conUs;    //contiene Tab e path dir dell'user
-	int fdPipe[2];      //contiene i valori delle pipe per parlare alla room, Definita da thRoom-generico
+	int fdMSGPipe;      //contiene i valori delle pipe per parlare alla room, Definita da thRoom-generico
 	pthread_t tidRx, tidTx;
 	int keyIdRmFF, pipeRmFF; //parametri della room a cui inoltrare mex incoming
 } thUserArg;
+
 typedef struct thRoomArg_{
 	int id;
 	char roomName[stringLen];  // Nome dell'user (dopo :)
 	char idNameRm[stringLen];
 	char roomPath[stringLen];  // Path completo room  ("./%s/%s", chatDirName, chats->names[i]); e chats->names = %d:%s
 	infoChat *info;     // contiene tabella,Conversazione e nome per esteso (path), assegnato in fase di creazione
-	int fdPipe[2];      //contiene i valori delle pipe per parlare alla room, Definita da thRoom-generico
+	int fdMSGPipe;      //contiene i valori delle pipe per parlare alla room, Definita da thRoom-generico
 	pthread_t tidRx, tidTx;
 	listHead_S mailList;  // è la coda dove viene segnato a chi si deve inoltrare i messaggi in arrivo
 } thRoomArg;
 enum insidePack{
 	in_join_p = 1000, in_delRm_p, in_leave_p, in_entryIndex_p, in_openRm_p, in_exit_p, in_kConv_p, in_mess_p,
 };
+
+#define noTag 0
+#define txTag 1
+#define rxTag 2
+
+typedef struct{
+	long mDest;     //In base alla priorità stabilisco se il th di destinazione è un Tx o un Rx
+	mail pack;
+} msg;
+
+
 typedef struct listData_{
 	int keyId;
 	int fdPipeSend;
@@ -119,9 +136,9 @@ void *thRoomTX (thRoomArg *rData);
 int mexRecive_inside (mail *pack, thRoomArg *data);
 /** SEND PACK_inside e WRITE PACK_inside**/
 
-int readPack_inside (int fdPipe, mail *pack);
-int writePack_inside (int fdPipe, mail *pack);
-int testConnection_inside (int fdPipe);
+int readPack_inside (int fdMSG, int targetTag, mail *pack);
+int writePack_inside (int fdMSG, int targetTag, mail *pack);
+int closeMSG (int fd);
 void freeUserArg (thUserArg *p);
 void freeRoomArg (thRoomArg *p);
 

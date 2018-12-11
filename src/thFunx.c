@@ -402,7 +402,6 @@ int mkRoomSocket (mail *pack, thUserArg *uData){
 	 * who = id (string)
 	 * mex="<nameRoom>
 	 */
-	//todo chiedere a filippo cosa invia in who
 	mail packSend;
 	infoChat *info = newRoom (pack->mex, uData->id);
 	if (info == 0){
@@ -677,7 +676,6 @@ READ_ROOM_LEAVE:
 	switch (roomPack.md.type){
 		case success_p:
 			delEntry (uData->info->tab, indexTabUs);
-			//todo warning del può fallire se ci sono problemi nel file sistem
 			fillPack (&respondUser, success_p, 0, 0, uData->idNameUs, "Leave compleate");
 			writePack (uData->conUs.con.ds_sock, respondUser);
 			return 0;
@@ -928,7 +926,6 @@ int delRoomForwarding (mail *pack, thUserArg *data){
 	int entryToDel = atoi (pack->md.whoOrWhy);
 	delEntry (data->info->tab, entryToDel);
 	dprintf (fdOut, "[Us-tx-(%s)]Delete entry %d of my Table; Cause deleting of Room\n", data->idNameUs, entryToDel);
-	//todo possibile problema di sincronia con rx !!!! da meditare
 	if (data->keyIdRmFF == atoi (pack->md.sender)) //se ero nella sua lista di inoltro mi dimentico
 	{
 		data->keyIdRmFF = -1;
@@ -1455,25 +1452,18 @@ int mexRecive_inside (mail *pack, thRoomArg *data){
 int readPack_inside (int fdMSG, int targetTag, mail *pack){
 	size_t bRead = 0;
 	ssize_t ret = 0;
-	int iterazione = 0;
+	int count = 0;
 	msg mes;
 
 	sigset_t newSet, oltSet;
 	sigfillset (&newSet);
 	pthread_sigmask (SIG_SETMASK, &newSet, &oltSet);
 	do{
-		iterazione++;
+		count++;
 		ret = msgrcv (fdMSG, &mes + bRead, sizeof (mail), targetTag, 0);
 		if (ret == -1){
-			dprintf (STDERR_FILENO, "[reedPack_inside]Error @:\niterazione=[%d], read pipe=[%d]\ncause :%s", iterazione,
-			         fdMSG, strerror (errno));
-			switch (errno){
-				case EIDRM: //The  message  queue  is  removed  from the system.
-					//todo coding the error for the calling thread
-					break;
-				default:
-					break;
-			}
+			dprintf (STDERR_FILENO, "[reedPack_inside]Error: count=[%d], fdMSG=[%d]\ncause :%s", count, fdMSG,
+			         strerror (errno));
 			pthread_sigmask (SIG_SETMASK, &oltSet, &newSet);   //restora tutto
 			return -1;
 		}

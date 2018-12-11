@@ -109,13 +109,14 @@ int renameFirstEntry (table *t, char *name){
 int delEntry (table *t, int index){
 	if (delEntryTabF (t->stream, index)){
 		//Eliminazione non avvenuta conInfo successo
+		dprintf (STDERR_FILENO, "[delEntry]Fail on File-System\n");
 		return -1;
 	}
 	firstFree *first = &t->head;
 	entry *delData = &t->data[index];
 	if (isEmptyEntry (delData)){
 		// è già una cella cancellata, e non devo modificare nulla
-		dprintf (fdOut, "la casella è vuota\n");
+		dprintf (fdDebug, "[delEntry]Entry just Empty\n");
 		return 0;
 	}
 	delData->name[0] = 0;  //metto la stringa a ""

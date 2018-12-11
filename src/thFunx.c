@@ -65,6 +65,7 @@ void *userTh (thConnArg *info){
 			break;
 		default:
 			dprintf (STDERR_FILENO, "Pack rivevuto inadatto a instaurazione com\n");
+			printPack (&pack, STDERR_FILENO);
 			fillPack (&pack, failed_p, 0, 0, "SERVER", "User Not yet Created");
 			writePack (arg->conUs.con.ds_sock, pack);
 			pthread_exit (NULL);
@@ -923,7 +924,7 @@ int delRoomForwarding (mail *pack, thUserArg *data){
 	 */
 	int entryToDel = atoi (pack->md.whoOrWhy);
 	delEntry (data->info->tab, entryToDel);
-	dprintf (fdDebug, "[Us-tx-(%s)]delete entry %d of my Table; caused delete Room\n", data->idNameUs, entryToDel);
+	dprintf (fdOut, "[Us-tx-(%s)]Delete entry %d of my Table; Cause deleting of Room\n", data->idNameUs, entryToDel);
 	//todo possibile problema di sincronia con rx !!!! da meditare
 	if (data->keyIdRmFF == atoi (pack->md.sender)) //se ero nella sua lista di inoltro mi dimentico
 	{
@@ -937,7 +938,7 @@ int delRoomForwarding (mail *pack, thUserArg *data){
 	 * mex = <Null>
 	 */
 	mail sendClient;
-	fillPack (&sendClient, out_exitRm_p, 0, 0, "SERVER", pack->md.whoOrWhy);
+	fillPack (&sendClient, out_delRm_p, 0, 0, "SERVER", pack->md.whoOrWhy);
 	writePack (data->conUs.con.ds_sock, sendClient);
 	return 0;
 }

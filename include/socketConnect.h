@@ -57,6 +57,21 @@ typedef struct mail_{
 	metadata md;
 	void *mex;
 } mail;
+#define dimDim 8
+#define typeDim 8
+
+typedef struct metadataChar_{ //dim metadataChar = 100 byte
+	char dim[dimDim];
+	char type[typeDim]; // dobbiamo definire dei tipi di comandi: es. 0 per il login => password in campo mex, ...
+	char sender[sendDim];
+	char whoOrWhy[wowDim];
+} metadataChar;
+
+typedef struct mailChar_{
+	metadataChar md;
+	void *mex;
+} mailChar;
+
 typedef struct connection_{
 	int ds_sock;
 	struct sockaddr_in sock;

@@ -75,7 +75,7 @@ int keepAlive (int *ds_sock){
 }
 
 int readPack (int ds_sock, mail *pack){
-	//se mex è presente DEVE essere Free fuori
+
 	int iterContr = 0; // vediamo se la read fallisce
 	ssize_t bRead = 0;
 	ssize_t ret = 0;
@@ -84,71 +84,74 @@ int readPack (int ds_sock, mail *pack){
 	sigfillset (&newSet);
 	pthread_sigmask (SIG_SETMASK, &newSet, &oldSet);
 
+	mailChar mailCRead;
+
 	do{
-		ret = read (ds_sock, &pack->md + bRead, sizeof (metadata) - bRead);
+		ret = read (ds_sock, &mailCRead.md + bRead, sizeof (metadataChar) - bRead);
 		if (ret == -1){
-			perror ("Read_out md error; cause:");
+			perror ("Read error; cause:");
+			pthread_sigmask (SIG_SETMASK, &oldSet, &newSet);   //restora tutto
 			return -1;
 		}
 		if (ret == 0){
 			iterContr++;
-			if (iterContr > 4){
-				dprintf (STDERR_FILENO, "Seems Read can't go further; test connection... [%d]\n", iterContr);
+			if (iterContr > 2){
+				dprintf (STDERR_FILENO, "Seems Read can't go further; test connection...\n");
 				if (testConnection (ds_sock) == -1){
-					dprintf (STDERR_FILENO, "test Fail\n");
+					pthread_sigmask (SIG_SETMASK, &oldSet, &newSet);   //restora tutto
 					return -1;
-				}
-				else{
-					iterContr = 0;
 				}
 			}
 		}
-		else{
-			iterContr = 0;
-		}
 		bRead += ret;
 	}
-	while (sizeof (metadata) - bRead != 0);
+	while (sizeof (metadataChar) - bRead != 0);
+
+	//** CONVERSIONE MAIL IN INTERI **//
+
+	sscanf (mailCRead.md.dim, "%ld", &pack->md.dim);
+	sscanf (mailCRead.md.type, "%d", &pack->md.type);
+	memcpy (pack->md.sender, mailCRead.md.sender, sendDim);
+	memcpy (pack->md.whoOrWhy, mailCRead.md.whoOrWhy, wowDim);
+
+	//****//
 
 	//** Modifica per il network order**//
-
-	pack->md.type = ntohl ((u_int32_t)pack->md.type);
-	pack->md.dim = ntohl ((u_int32_t)pack->md.dim);
-
+	/*
+	pack->md.type = ntohl(pack->md.type);
+	pack->md.dim = ntohl(pack->md.dim);
+	*/
 	size_t dimMex = pack->md.dim; // manteniamo in ordine della macchina il valore del messaggio
 
 	//****//
 
 	if (dimMex == 0){
 		pack->mex = NULL;
+		pthread_sigmask (SIG_SETMASK, &oldSet, &newSet);   //restora tutto
 		return 0;
 	}
 
 	pack->mex = malloc (dimMex);
 
 	bRead = 0; //rimetto a zero per la nuova lettura
+	ret = 0;
 	iterContr = 0;
 	do{
 		ret = read (ds_sock, pack->mex + bRead, dimMex - bRead);
 		if (ret == -1){
-			perror ("Read_out mex error; cause:");
+			perror ("Read error; cause:");
+			pthread_sigmask (SIG_SETMASK, &oldSet, &newSet);   //restora tutto
 			return -1;
 		}
 		if (ret == 0){
 			iterContr++;
-			if (iterContr > 4){
-				dprintf (STDERR_FILENO, "Seems Read_out MEX can't go further; test connection... [%d]\n", iterContr);
+			if (iterContr > 2){
+				dprintf (STDERR_FILENO, "Seems Read can't go further; test connection...\n");
 				if (testConnection (ds_sock) == -1){
-					dprintf (STDERR_FILENO, "test Fail\n");
+					pthread_sigmask (SIG_SETMASK, &oldSet, &newSet);   //restora tutto
 					return -1;
 				}
-				else{
-					iterContr = 0;
-				}
 			}
-		}
-		else{
-			iterContr = 0;
 		}
 		bRead += ret;
 	}
@@ -163,8 +166,19 @@ int writePack (int ds_sock, mail pack) //dentro il thArg deve essere puntato un 
 
 	size_t dimMex = pack.md.dim; // manteniamo in ordine della macchina il valore del messaggio
 
-	pack.md.type = htonl ((u_int32_t)pack.md.type);
-	pack.md.dim = htonl ((u_int32_t)pack.md.dim);
+	/*pack.md.type = htonl(pack.md.type);
+	pack.md.dim = htonl(pack.md.dim);
+	*/
+	//****//
+
+	//** CONVERSIONE IN MAIL A CARATTERI **//
+
+	mailChar mailCWrite;
+	sprintf (mailCWrite.md.dim, "%ld", pack.md.dim);
+	sprintf (mailCWrite.md.type, "%d", pack.md.type);
+	memcpy (mailCWrite.md.sender, pack.md.sender, sendDim);
+	memcpy (mailCWrite.md.whoOrWhy, pack.md.whoOrWhy, wowDim);
+	mailCWrite.mex = pack.mex;
 
 	//****//
 
@@ -177,10 +191,11 @@ int writePack (int ds_sock, mail pack) //dentro il thArg deve essere puntato un 
 	pthread_sigmask (SIG_SETMASK, &newSet, &oldSet);
 
 	do{
-		ret = send (ds_sock, &pack + bWrite, sizeof (metadata) - bWrite, MSG_NOSIGNAL);
+		ret = send (ds_sock, &mailCWrite + bWrite, sizeof (metadataChar) - bWrite, MSG_NOSIGNAL);
 		if (ret == -1){
 			if (errno == EPIPE){
 				dprintf (STDERR_FILENO, "write pack pipe break 1\n");
+				pthread_sigmask (SIG_SETMASK, &oldSet, &newSet);   //restora tutto
 				return -1;
 				//GESTIRE LA CHIUSURA DEL SOCKET (LA CONNESSIONE E' STATA INTERROTTA IMPROVVISAMENTE)
 			}
@@ -188,15 +203,21 @@ int writePack (int ds_sock, mail pack) //dentro il thArg deve essere puntato un 
 		bWrite += ret;
 
 	}
-	while (sizeof (metadata) - bWrite != 0);
+	while (sizeof (metadataChar) - bWrite != 0);
+
+	if (dimMex == 0){
+		pthread_sigmask (SIG_SETMASK, &oldSet, &newSet);   //restora tutto
+		return 0;
+	} //cosi' evitiamo un periodo di scrittura
 
 	bWrite = 0;
 
 	do{
-		ret = send (ds_sock, pack.mex + bWrite, dimMex - bWrite, MSG_NOSIGNAL);
+		ret = send (ds_sock, mailCWrite.mex + bWrite, dimMex - bWrite, MSG_NOSIGNAL);
 		if (ret == -1){
 			if (errno == EPIPE){
 				dprintf (STDERR_FILENO, "write pack pipe break 2\n");
+				pthread_sigmask (SIG_SETMASK, &oldSet, &newSet);   //restora tutto
 				return -1;
 				//GESTIRE LA CHIUSURA DEL SOCKET (LA CONNESSIONE E' STATA INTERROTTA IMPROVVISAMENTE)
 			}
@@ -208,7 +229,6 @@ int writePack (int ds_sock, mail pack) //dentro il thArg deve essere puntato un 
 	pthread_sigmask (SIG_SETMASK, &oldSet, &newSet);   //restora tutto
 	return 0;
 }
-
 
 int testConnection (int ds_sock){
 	mail packTest;

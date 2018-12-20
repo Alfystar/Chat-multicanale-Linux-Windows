@@ -138,7 +138,7 @@ int mexRecive_inside (mail *pack, thRoomArg *data);
 
 int readPack_inside (long fdMSG, int targetTag, mail *pack);
 int writePack_inside (long fdMSG, int targetTag, mail *pack);
-int closeMSG (int fd);
+int closeMSG (long fd);
 void freeUserArg (thUserArg *p);
 void freeRoomArg (thRoomArg *p);
 

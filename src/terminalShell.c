@@ -391,7 +391,7 @@ void wfirstPrint (WINDOW *w, firstFree *f){
 }
 
 void wentryPrint (WINDOW *w, entry *e){
-	wprintw (w, "Entry data Store:\n??-Last-Free -> %s\tempty  -> %s\nname\t\t-> %s\npoint\t\t-> %d\n",
+	wprintw (w, "Entry data Store:\n?-Last-Free -> %s\tempty  -> %s\nname\t\t-> %s\npoint\t\t-> %d\n",
 	         booleanPrint (isLastEntry (e)), booleanPrint (isEmptyEntry (e)), e->name, e->point);
 }
 

@@ -81,7 +81,7 @@ void *userTh (thConnArg *info){
 		dprintf (STDERR_FILENO, "[Us-Th (%s)]MSG Queue Take error: %s", arg->idNameUs, strerror (errno));
 		return NULL;
 	}
-	dprintf (fdDebug, "[Us-Th (%s)]Have: fdMSGPipe = %d\n", arg->idNameUs, arg->fdMSGPipe);
+	dprintf (fdDebug, "[Us-Th (%s)]Have: fdMSGPipe = %ld\n", arg->idNameUs, arg->fdMSGPipe);
 
 	insert_avl_node_S (usAvlTree_Pipe, arg->id, arg->fdMSGPipe);
 
@@ -102,7 +102,7 @@ void *userTh (thConnArg *info){
 		if (writePack_inside (arg->fdMSGPipe, rxTag, &packSocket)){
 			switch (errno){
 				case EIDRM:
-					dprintf (STDERR_FILENO, "readEndPipe=%d now is close\nClose Th\n", arg->fdMSGPipe);
+					dprintf (STDERR_FILENO, "readEndPipe=%ld now is close\nClose Th\n", arg->fdMSGPipe);
 					exit = 0;
 					continue;
 					break;
@@ -301,11 +301,11 @@ void *thUs_ServRX (thUserArg *uData){
 	bool exit = true;
 	int retTh = 0;
 	while (exit){
-		dprintf (fdOut, "[Us-rx-(%s)]wait message from [%d] fdMSGPipe\n", uData->idNameUs, uData->fdMSGPipe);
+		dprintf (fdOut, "[Us-rx-(%s)]wait message from [%ld] fdMSGPipe\n", uData->idNameUs, uData->fdMSGPipe);
 		if (readPack_inside (uData->fdMSGPipe, rxTag, &packClient) == -1){
 			switch (errno){
 				case EIDRM:
-					dprintf (STDERR_FILENO, "readEndPipe=%d now is close\nClose Th\n", uData->fdMSGPipe);
+					dprintf (STDERR_FILENO, "readEndPipe=%ld now is close\nClose Th\n", uData->fdMSGPipe);
 					freeMexPack (&packClient);
 					freeMexPack (&packRoom);
 					pthread_exit (NULL);  //uccide il th (il pthread_close ha fallito)
@@ -855,7 +855,12 @@ int mexReciveSocket (mail *pack, thUserArg *data){
 	 * mex = testoMessaggio
 	 * dim = dim messaggio (\0 comreso)
 	 */
-	writePack_inside (data->pipeRmFF, txTag, &roomPack);
+	if (writePack_inside (data->pipeRmFF, txTag, &roomPack)){
+		dprintf (STDERR_FILENO, "[mexReciveSocket_respond room] fail send to room, cause %s\n", strerror (errno));
+		fillPack (&respond, failed_p, 0, 0, "Server", strerror (errno));
+		writePack (data->conUs.con.ds_sock, respond);
+		return -1;
+	}
 
 	/*====================================== Attendo risposta dalla Room ======================================*/
 READ_MEX_RECIVE:
@@ -884,11 +889,11 @@ READ_MEX_RECIVE:
 void *thUs_ServTX (thUserArg *uData){
 	mail packPipeRead;
 	while (1){
-		dprintf (fdOut, "[Us-tx-(%s)]wait message from [%d] fdMSGPipe\n", uData->idNameUs, uData->fdMSGPipe);
+		dprintf (fdOut, "[Us-tx-(%s)]wait message from [%ld] fdMSGPipe\n", uData->idNameUs, uData->fdMSGPipe);
 		if (readPack_inside (uData->fdMSGPipe, txTag, &packPipeRead)){
 			switch (errno){
 				case EIDRM:
-					dprintf (STDERR_FILENO, "readEndPipe=%d now is close\nClose Th\n", uData->fdMSGPipe);
+					dprintf (STDERR_FILENO, "readEndPipe=%ld now is close\nClose Th\n", uData->fdMSGPipe);
 					freeMexPack (&packPipeRead);
 					pthread_exit (NULL);  //uccide il th (il pthread_close ha fallito)
 					break;
@@ -987,7 +992,7 @@ void *roomTh (thRoomArg *info){
 		dprintf (STDERR_FILENO, "[Rm-Th (%s)]MSG Queue Take error: %s", info->idNameRm, strerror (errno));
 		return NULL;
 	}
-	dprintf (fdDebug, "[Rm-Th (%s)]Have: fdMSGPipe = %d\n", info->idNameRm, info->fdMSGPipe);
+	dprintf (fdDebug, "[Rm-Th (%s)]Have: fdMSGPipe = %ld\n", info->idNameRm, info->fdMSGPipe);
 
 	insert_avl_node_S (rmAvlTree_Pipe, info->id, info->fdMSGPipe);
 
@@ -1000,7 +1005,7 @@ void *roomTh (thRoomArg *info){
 
 	init_listHead_S (&info->mailList, fdOut);  //all'avvio della room la coda di inoltro è nulla
 
-	dprintf (fdOut, "Th-ROOM %d create\n\tmyPath = %s\n\tfdMSGPipe = %d\n", info->id, info->roomPath, info->fdMSGPipe);
+	dprintf (fdOut, "Th-ROOM %d create\n\tmyPath = %s\n\tfdMSGPipe = %ld\n", info->id, info->roomPath, info->fdMSGPipe);
 
 	//i thRoom condividono lo stesso oggetto thRoomArg info, quindi stare attenti
 	pthread_create (&info->tidRx, NULL, thRoomRX, info);
@@ -1016,12 +1021,12 @@ void *thRoomRX (thRoomArg *rData){
 	bool exit = true;
 	int retTh = 0;
 	while (exit){
-		dprintf (fdOut, "[Rm-rx(%s)]wait message from [%d]fdMSGPipe\n", rData->idNameRm, rData->fdMSGPipe);
+		dprintf (fdOut, "[Rm-rx(%s)]wait message from [%ld]fdMSGPipe\n", rData->idNameRm, rData->fdMSGPipe);
 
 		if (readPack_inside (rData->fdMSGPipe, rxTag, &packRecive) == -1){
 			switch (errno){
 				case EIDRM:
-					dprintf (STDERR_FILENO, "readEndPipe=%d now is close\nClose Th\n", rData->fdMSGPipe);
+					dprintf (STDERR_FILENO, "readEndPipe=%ld now is close\nClose Th\n", rData->fdMSGPipe);
 					freeMexPack (&packRecive);
 					freeMexPack (&packRecive);
 					retTh = -1;
@@ -1341,11 +1346,11 @@ int exitRoom_inside (mail *pack, thRoomArg *data){
 void *thRoomTX (thRoomArg *rData){
 	mail packRead_in, sendClient;
 	while (1){
-		dprintf (fdOut, "[Rm-tx-(%s)] wait message from [%d] fdMSGPipe\n", rData->idNameRm, rData->fdMSGPipe);
+		dprintf (fdOut, "[Rm-tx-(%s)] wait message from [%ld] fdMSGPipe\n", rData->idNameRm, rData->fdMSGPipe);
 		if (readPack_inside (rData->fdMSGPipe, txTag, &packRead_in)){
 			switch (errno){
 				case EBADF:
-					dprintf (STDERR_FILENO, "readEndPipe=%d now is close\nClose Th\n", rData->fdMSGPipe);
+					dprintf (STDERR_FILENO, "readEndPipe=%ld now is close\nClose Th\n", rData->fdMSGPipe);
 					freeMexPack (&packRead_in);
 					freeMexPack (&sendClient);
 					pthread_exit (NULL);  //uccide il th (il pthread_close ha fallito)
@@ -1445,7 +1450,7 @@ int mexRecive_inside (mail *pack, thRoomArg *data){
 						deleteNodeByList (&data->mailList, tmp);
 						break;
 					default:
-						dprintf (STDERR_FILENO, "[mexRecive_inside]In Forwarding mex user=%d unknown error :%s",
+						dprintf (STDERR_FILENO, "[mexRecive_inside]In Forwarding mex user=%d error :%s",
 						         dt->keyId, strerror (errno));
 						break;
 				}
@@ -1474,7 +1479,7 @@ int readPack_inside (long fdMSG, int targetTag, mail *pack){
 		count++;
 		ret = msgrcv (fdMSG, &mes + bRead, sizeof (mail), targetTag, 0);
 		if (ret == -1){
-			dprintf (STDERR_FILENO, "[reedPack_inside]Error: count=[%d], fdMSG=[%d]\ncause :%s", count, fdMSG,
+			dprintf (STDERR_FILENO, "[reedPack_inside]Error: count=[%d], fdMSG=[%ld] cause :%s\n", count, fdMSG,
 			         strerror (errno));
 			pthread_sigmask (SIG_SETMASK, &oltSet, &newSet);   //restora tutto
 			return -1;
@@ -1500,7 +1505,7 @@ int writePack_inside (long fdMSG, int targetTag, mail *pack) //dentro il thArg d
 	if (msgsnd (fdMSG, &mes, sizeof (mail), 0)){
 		switch (errno){
 			case EIDRM:
-				dprintf (STDERR_FILENO, "[writePack_inside]Queue Deleted. Impossible Send to %d\n", fdMSG);
+				dprintf (STDERR_FILENO, "[writePack_inside]Queue Deleted. Impossible Send to %ldl\n", fdMSG);
 				pthread_sigmask (SIG_SETMASK, &oltSet, &newSet);   //restora tutto
 				return -1;
 				break;
@@ -1515,7 +1520,8 @@ int writePack_inside (long fdMSG, int targetTag, mail *pack) //dentro il thArg d
 	return 0;
 }
 
-int closeMSG (int fd){
+int closeMSG (long fd){
+	dprintf (STDERR_FILENO, "[closeMSG]Try Close[%ld]\n", fd);
 	if (msgctl (fd, IPC_RMID, NULL)){
 		switch (errno){
 			case EIDRM:
@@ -1621,7 +1627,7 @@ void printDlist (dlist_pp head, int fd){
 	dprintf (fd, "===[head of LIST]===\n");
 	dprintf (fd, "HEAD[0]=%p\n", tmp);
 	do{
-		dprintf (fd, "-->node[%d]=%d:%d\n", count, dt->keyId, dt->fdPipeSend);
+		dprintf (fd, "-->node[%d]=%d:%ld\n", count, dt->keyId, dt->fdPipeSend);
 		count++;
 		tmp = tmp->next;
 		dt = (listData_p)tmp->data;

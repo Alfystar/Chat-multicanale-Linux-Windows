@@ -42,7 +42,7 @@ typedef struct thUserArg_{
 	char idNameUs[stringLen];
 	infoUser *info;     // contiene tabella e nome per esteso (path), assegnato in fase di login
 	thConnArg conUs;    //contiene Tab e path dir dell'user
-	int fdMSGPipe;      //contiene i valori delle pipe per parlare alla room, Definita da thRoom-generico
+	long fdMSGPipe;      //contiene i valori delle pipe per parlare alla room, Definita da thRoom-generico
 	pthread_t tidRx, tidTx;
 	int keyIdRmFF, pipeRmFF; //parametri della room a cui inoltrare mex incoming
 } thUserArg;
@@ -53,7 +53,7 @@ typedef struct thRoomArg_{
 	char idNameRm[stringLen];
 	char roomPath[stringLen];  // Path completo room  ("./%s/%s", chatDirName, chats->names[i]); e chats->names = %d:%s
 	infoChat *info;     // contiene tabella,Conversazione e nome per esteso (path), assegnato in fase di creazione
-	int fdMSGPipe;      //contiene i valori delle pipe per parlare alla room, Definita da thRoom-generico
+	long fdMSGPipe;      //contiene i valori delle pipe per parlare alla room, Definita da thRoom-generico
 	pthread_t tidRx, tidTx;
 	listHead_S mailList;  // è la coda dove viene segnato a chi si deve inoltrare i messaggi in arrivo
 } thRoomArg;
@@ -73,7 +73,7 @@ typedef struct{
 
 typedef struct listData_{
 	int keyId;
-	int fdPipeSend;
+	long fdPipeSend;
 } listData, *listData_p;
 
 
@@ -136,14 +136,14 @@ void *thRoomTX (thRoomArg *rData);
 int mexRecive_inside (mail *pack, thRoomArg *data);
 /** SEND PACK_inside e WRITE PACK_inside**/
 
-int readPack_inside (int fdMSG, int targetTag, mail *pack);
-int writePack_inside (int fdMSG, int targetTag, mail *pack);
+int readPack_inside (long fdMSG, int targetTag, mail *pack);
+int writePack_inside (long fdMSG, int targetTag, mail *pack);
 int closeMSG (int fd);
 void freeUserArg (thUserArg *p);
 void freeRoomArg (thRoomArg *p);
 
 /** List utility**/
-dlist_p makeNode (int keyId, int fdPSend);
+dlist_p makeNode (int keyId, long fdPSend);
 dlist_p nodeSearchKey (listHead_S_p head, int key);
 int deleteNodeByList (listHead_S_p head, dlist_p nodeDel);
 void printDlist (dlist_pp head, int fd);

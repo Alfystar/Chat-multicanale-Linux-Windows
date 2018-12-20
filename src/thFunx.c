@@ -521,10 +521,10 @@ int joinRoomSocket (mail *pack, thUserArg *uData){
 	mail roomPack;
 	char firstIndex[16];
 	sprintf (firstIndex, "%d", uData->info->tab->head.nf_id);
-	int *fdUsWritePipe = malloc (sizeof (int));       //i messaggi devono essere pacchetti malloccati
+	long *fdUsWritePipe = malloc (sizeof (long));       //i messaggi devono essere pacchetti malloccati
 	*fdUsWritePipe = uData->fdMSGPipe;
 
-	fillPack (&roomPack, in_join_p, sizeof (int), fdUsWritePipe, uData->idNameUs, firstIndex);
+	fillPack (&roomPack, in_join_p, sizeof (long), fdUsWritePipe, uData->idNameUs, firstIndex);
 	/* RICHIESTA JOIN A ROOM DA TH-USER
 	 * type = in_join_p
 	 * sender =  idkeyUs:name (string)
@@ -1118,7 +1118,7 @@ int joinRoom_inside (mail *pack, thRoomArg *data){
 	 * mex = <myPipe> (int)
 	 */
 	mail respond;
-	int pipeUser = *((int *)pack->mex);
+	long pipeUser = *((long *)pack->mex);
 	free (pack->mex);
 
 	//aggiungo alla mia tabella il nuovo user
@@ -1461,7 +1461,7 @@ int mexRecive_inside (mail *pack, thRoomArg *data){
 }
 
 /** SEND PACK_inside e WRITE PACK_inside**/
-int readPack_inside (int fdMSG, int targetTag, mail *pack){
+int readPack_inside (long fdMSG, int targetTag, mail *pack){
 	size_t bRead = 0;
 	ssize_t ret = 0;
 	int count = 0;
@@ -1487,7 +1487,7 @@ int readPack_inside (int fdMSG, int targetTag, mail *pack){
 	return 0;
 }
 
-int writePack_inside (int fdMSG, int targetTag, mail *pack) //dentro il thArg deve essere puntato un mail
+int writePack_inside (long fdMSG, int targetTag, mail *pack) //dentro il thArg deve essere puntato un mail
 {
 	//wrappo il pachetto per poter sfruttare il multiplexer
 	msg mes;
@@ -1547,7 +1547,7 @@ void freeRoomArg (thRoomArg *p){
 
 /** List utility**/
 
-dlist_p makeNode (int keyId, int fdPSend){
+dlist_p makeNode (int keyId, long fdPSend){
 	dlist_p node = calloc (1, sizeof (dlist_t));
 	if (!node){
 		return NULL;

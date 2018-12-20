@@ -102,13 +102,18 @@ int addMex (conversation *c, mex *m){
 		return -1;
 	}
 	c->head.nMex++;
-	if (c->head.nMex == 1) c->mexList = calloc (1, sizeof (mex *));
-	else c->mexList = reallocarray (c->mexList, c->head.nMex, sizeof (mex *));
-	c->mexList[c->head.nMex - 1] = m;
 	if (overrideHeadF (&c->head, c->stream)){
 		dprintf (STDERR_FILENO, "[addMex]Override fail\n");
 		return -1;
 	}
+	if (c->head.nMex <= 1) c->mexList = calloc (1, sizeof (mex *));
+	else c->mexList = reallocarray (c->mexList, c->head.nMex, sizeof (mex *));
+	if (c->mexList == NULL){
+		dprintf (STDERR_FILENO, "[addMex]calloc/reallocarray fail(nMex = %d)\n", c->head.nMex);
+		return -1;
+	}
+	c->mexList[c->head.nMex - 1] = m;
+
 	return 0;
 }
 
@@ -233,10 +238,15 @@ conversation *loadConvF (FILE *stream){
 	dataPoint = buf + sizeof (conv->head);
 	if (streamInfo.st_size == sizeof (conv->head)){
 		//non sono presenti messaggi e ho una conversazione vuota
-		dprintf (fdOut, "File conInfo solo testa\n");
+		dprintf (fdOut, "[loadConvF]File conInfo solo testa\n");
+		conv->mexList = NULL;
 		return conv;
 	}
 	conv->mexList = calloc (conv->head.nMex, sizeof (mex *));   //creo un array di puntatori a mex
+	if (conv->mexList == NULL && conv->head.nMex != 0){
+		dprintf (STDERR_FILENO, "[loadConvF]Error in Calloc\n");
+		return NULL;
+	}
 	mex *mexNode;
 	size_t len;
 	for (int i = 0; i < conv->head.nMex; i++){
@@ -253,10 +263,6 @@ conversation *loadConvF (FILE *stream){
 		dataPoint += len;
 
 		conv->mexList[i] = mexNode;   //salvo il puntatore nell'array
-		/*
-		dprintf(fdOut,"\nil nuovo messaggio creato è:\n");
-		printMex(mexNode);
-		*/
 	}
 	return conv;
 }

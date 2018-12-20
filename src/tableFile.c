@@ -505,7 +505,10 @@ table *makeTable (FILE *tab){
 	size_t len = lenTabF (tab);
 	table *t = (table *)malloc (sizeof (table));
 	t->data = (entry *)calloc (len, sizeof (entry));
-
+	if (t->data == NULL && len != 0){
+		dprintf (STDERR_FILENO, "[makeTable]Error in Calloc\n");
+		return NULL;
+	}
 	//dprintf(fdDebug,"makeTable flock\n");
 	flockfile (tab);
 	rewind (tab);

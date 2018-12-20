@@ -19,6 +19,7 @@ void *acceptTh (thAcceptArg *info){
 		arg->conUs = info->conInfo; //copia negli argomenti del th una copia totale della connessione del server
 		arg->info = NULL;
 		arg->userName[0] = 0;
+		arg->idNameUs[0] = 0;
 		arg->fdMSGPipe = -1;
 		arg->keyIdRmFF = -1;
 		arg->pipeRmFF = -1;
@@ -453,6 +454,8 @@ void makeThRoom (int keyChat, char *roomPath, infoChat *info){
 		dprintf (STDERR_FILENO, "infoChat NULL, impossibile creare Tr-ROOM\n");
 		return;
 	}
+
+
 	pthread_t roomtid;
 	thRoomArg *arg = malloc (sizeof (thRoomArg));
 	arg->id = keyChat;

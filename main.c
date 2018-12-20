@@ -169,5 +169,5 @@ int main (int argc, char *argv[]){
 
 	terminalShell ();
 	printf ("\n\nServer Terminato da shell, senza presenza di errori\n\n");
-	return 0;
+	exit (0);
 }

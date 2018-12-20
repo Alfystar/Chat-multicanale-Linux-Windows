@@ -27,7 +27,7 @@ void *acceptTh (thAcceptArg *info){
 		if (acceptCreate (&info->conInfo.con, userTh, arg) == -1){
 			dprintf (STDERR_FILENO, "errore in accept\n");
 		}
-		dprintf (fdOut, "userTh Creato da accept,i suoi arg = %p sono stati creati.\n", arg);
+		dprintf (fdOut, "userTh Creato da accept %d,i suoi arg = %p sono stati creati.\n", info->id, arg);
 
 	}
 	free (info);
@@ -152,12 +152,14 @@ int loginServerSide (mail *pack, thUserArg *data){
 		writePack (data->conUs.con.ds_sock, response);
 		return -1;
 	}
+	dprintf (fdDebug, "[login]setupUser Success\n");
 
 	if (strcmp (data->userName, pack->md.sender) != 0){
 		fillPack (&response, failed_p, 0, 0, "Server", "USER NAME UN-CORRECT");
 		writePack (data->conUs.con.ds_sock, response);
 		return -1;
 	}
+	dprintf (fdDebug, "[login]set name Success\n");
 
 	firstFree *head = &data->info->tab->head;
 	entry *cell = data->info->tab->data;
@@ -167,7 +169,10 @@ int loginServerSide (mail *pack, thUserArg *data){
 		if ((isEmptyEntry (&cell[i]) || isLastEntry (&cell[i])) == true){
 			continue;
 		}
+		dprintf (fdDebug, "[login]cella non vuota e neanche ultima\n");
+
 		int keySearch = search_BFS_avl_S (rmAvlTree_Pipe, atoi (cell[i].name));
+		dprintf (fdDebug, "[login]key room cercata\n");
 		if (keySearch == -2){
 			//name:= keyRoom:NAME  se key non è trovata nell'avl allora la room non esiste più
 			dprintf (fdDebug, "Room %s not found in Avl-Room. Deleting from userTab\n", cell[i].name);
@@ -183,8 +188,11 @@ int loginServerSide (mail *pack, thUserArg *data){
 		else{
 			dprintf (fdOut, "room %s trovata\n", cell[i].name);
 		}
-
+		dprintf (fdDebug, "[login]key room lavorata\n");
 	}
+
+	dprintf (fdDebug, "[login]delete deleted room Success\n");
+
 
 	int len;
 	void *mex = sendTab (data->info->tab, &len);
@@ -386,8 +394,9 @@ void *thUs_ServRX (thUserArg *uData){
 	void *resTX;
 	pthread_cancel (uData->tidTx);
 	dprintf (STDERR_FILENO, "[Us-rx-(%s)]Send pthread_cancel\n", uData->idNameUs);
-	pthread_join (uData->tidTx, &resTX);
+	/*pthread_join (uData->tidTx, &resTX);
 	dprintf (STDERR_FILENO, "[Us-rx-(%s)]Finish pthread_join \n", uData->idNameUs);
+	 */
 	closeMSG (uData->fdMSGPipe);
 	freeMexPack (&packClient);
 	freeMexPack (&packRoom);
@@ -1522,8 +1531,13 @@ int closeMSG (int fd){
 }
 
 void freeUserArg (thUserArg *p){
-	freeInfoUser (p->info);
-	free (p);
+	if (p->info){
+		freeInfoUser (p->info);
+		p->info = NULL;
+	}
+	if (p){
+		free (p);
+	}
 }
 
 void freeRoomArg (thRoomArg *p){

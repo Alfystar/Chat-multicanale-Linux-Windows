@@ -38,8 +38,6 @@ void terminalShell (){
 		exit (-1);
 	}
 
-
-
 	/** Cmd terminal **/
 	char *cmdBuf[1024];
 	char *sArgv[64];  //consento lo storage fino a 64 comandi

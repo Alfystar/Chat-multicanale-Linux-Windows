@@ -262,7 +262,7 @@ int fillPack (mail *pack, int type, int dim, void *mex, char *sender, char *whoO
 
 void freePack (mail *p){
 	freeMexPack (p);
-	free (p);
+	if (p) free (p);
 }
 
 void freeMexPack (mail *p){
